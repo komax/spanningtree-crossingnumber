@@ -29,6 +29,8 @@ def generate_points_grid(n):
 class Line2D:
     def __init__(self,p,q):
         assert p != q
+        if p > q:
+            (p, q) = (q, p)
         self.p = p
         self.q = q
         (x1, y1) = p
@@ -54,6 +56,23 @@ class Line2D:
         (x,y) = p
         y_line = self(x)
         return y == y_line
+
+class LineSegment2D(Line2D):
+    def __init__(self, p, q):
+        Line2D.__init__(self, p, q)
+
+    def is_on(self, p):
+        try:
+            return Line2D.is_on(self, p)
+        except StandardError:
+            return false
+
+    def __call__(self, x):
+        y_line = Line2D.__call__(self, x)
+        if self.p[0] <= x <= self.q[0]:
+            return y_line
+        else:
+            raise StandardError("x=%s is not defined on %s" % (x, self))
 
 def create_lines(p,q, eps):
     (x1, y1) = p
