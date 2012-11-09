@@ -5,6 +5,7 @@
 
 import random
 import math
+from gurobipy import tuplelist
 
 def generate_points_uniformly(n, ub=100.0):
     points = [(random.uniform(0,ub), random.uniform(0,ub))
@@ -107,18 +108,22 @@ def generate_lines(points, eps=0.1):
     for p in points:
         for q in points:
             if points.index(p) < points.index(q):
-                #if points.index(q) > points.index(p):
-                #    (p,q) = (q,p)
                 if not lines.has_key((p,q)):
-                        # create all different lines
-                        pq_lines = create_lines(p,q, eps)
-                        lines[p,q] = pq_lines
+                    # create all different lines
+                    pq_lines = create_lines(p,q, eps)
+                    lines[p,q] = pq_lines
     for (p,q) in lines.keys():
         print "%s -> %s" % (p,q)
     line_set = []
     for pq_lines in lines.values():
         line_set = line_set + pq_lines
     return line_set
+
+def generate_edges(points):
+    edges = [(p,q) for p in points 
+             for q in points 
+             if points.index(p) < points.index(q)]
+    return tuplelist(edges)
 
 def main():
     points = generate_points_uniformly(4)
