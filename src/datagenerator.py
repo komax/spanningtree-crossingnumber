@@ -119,12 +119,6 @@ def generate_lines(points, eps=0.1):
         line_set = line_set + pq_lines
     return line_set
 
-def generate_edges(points):
-    edges = [(p,q) for p in points 
-             for q in points 
-             if points.index(p) < points.index(q)]
-    return tuplelist(edges)
-
 def main():
     points = generate_points_uniformly(4)
     print points
