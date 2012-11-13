@@ -19,8 +19,8 @@ Kinds of experiments
 3. Algortihms for finding a spanning tree:
   - exact solution: integer programming, brute-force (all combinations)
   - approxmation:
-    a) multiplicative weights on lines and edges
-    b) linear program with relaxation and rounding scheme (determinstic in the plane)
+    a. multiplicative weights on lines and edges
+    b. linear program with relaxation and rounding scheme (determinstic in the plane)
 
 Used infrastructure
 ======================
