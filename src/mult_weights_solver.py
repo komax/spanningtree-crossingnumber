@@ -10,10 +10,10 @@ def preprocess_lines(lines):
     return lines
 
 '''
-This class holds all edges between different connected components. Some boolean
+This class holds all functionality of a graph between different connected components. Some boolean
 methods for checking connectivity, adjacent of vertices
 '''
-class Edges:
+class Graph:
     def __init__(self, connected_components):
         assert connected_components
         self.vertices = []
@@ -35,7 +35,8 @@ class Edges:
                 return v in c
             elif v in c:
                 return u in c
-        return False
+        else:
+            return False
 
     def merge_connected_components(self, c, oc):
         assert c in self.connected_components
@@ -50,6 +51,16 @@ class Edges:
         new_connected_component = c + oc
         self.connected_components.append(new_connected_component)
         return
+
+    def merge_cc_with_vertics(self, u, v):
+        assert u != v
+        try:
+            c1 = self.get_connected_component(u)
+            c2 = self.get_connected_component(v)
+            self.merge_connected_components(c1, c2)
+            return
+        except:
+            raise
 
 
     def is_adjacent(self, u, v):
@@ -74,11 +85,19 @@ class Edges:
                     edges.append((u,v))
         return edges
 
-def generate_edges(points):
+    def get_connected_component(self, u):
+        for c in self.connected_components:
+            if u in c:
+                return c
+        else:
+            raise StandardError('can not find vertex=%s in this graph' % u)
+
+
+def create_graph(points):
     connected_components = []
     for p in points:
         connected_components.append([p])
-    return Edges(connected_components)
+    return Graph(connected_components)
 
 def edge_to_linesegment(edge):
     p, q = edge
@@ -146,19 +165,19 @@ def find_min_edge(selected_edges, lines, line_weights):
 
 
 def compute_spanning_tree(points, lines):
+    # TODO checkin implementation
     lines = preprocess_lines(lines)
-    edges = []
+    solution = []
     number_of_crossings = {}
     weights = {}
+    graph = create_graph(points)
     while len(points) > 1:
         for line in lines:
-            number_of_crossings[line] = calculate_crossing_with(line, edges)
+            number_of_crossings[line] = calculate_crossing_with(line, solution)
             weights[line] = 2**(number_of_crossings[line])
-        c_components = connected_components(points, edges)
-        edges_between_c_components = \
-                edges_crossing_connected_components(c_components)
-        min_edge = find_min_edge(edges_between_c_components, lines, weights)
+        min_edge = find_min_edge(graph.get_edges(), lines, weights)
         (p,q) = min_edge
+        graph.merge_cc_with_vertics(p,q)
         points.remove(p)
         edges.append(min_edge)
     return edges
