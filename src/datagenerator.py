@@ -5,7 +5,6 @@
 
 import random
 import math
-from gurobipy import tuplelist
 
 def generate_points_uniformly(n, ub=100.0):
     points = [(random.uniform(0,ub), random.uniform(0,ub))
@@ -66,7 +65,7 @@ class LineSegment2D(Line2D):
         try:
             return Line2D.is_on(self, p)
         except StandardError:
-            return false
+            return False
 
     def __call__(self, x):
         y_line = Line2D.__call__(self, x)
