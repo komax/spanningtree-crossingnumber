@@ -37,6 +37,20 @@ class EdgesTestCase(unittest.TestCase):
         adjacent_vertices.sort()
         self.assertEqual(adjacent_vertices, [0,2,3])
 
+    def test_get_edges(self):
+        edges = self.edges.get_edges()
+        edges.sort()
+        expected_edges = [(0,1),(0,2),(0,3), (1,2), (1,3), (2,3)]
+        self.assertEqual(edges, expected_edges)
+
+    def test_merge_connected_components(self):
+        self.edges.merge_connected_components([0],[1])
+        edges = self.edges.get_edges()
+        edges.sort()
+        expected_edges = [(0,1),(0,2),(0,3), (1,2), (1,3), (2,3)]
+        expected_edges.remove((0,1))
+        self.assertEqual(edges, expected_edges)
+
 
 
 if __name__ == '__main__':

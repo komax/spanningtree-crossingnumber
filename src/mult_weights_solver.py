@@ -37,6 +37,21 @@ class Edges:
                 return u in c
         return False
 
+    def merge_connected_components(self, c, oc):
+        assert c in self.connected_components
+        assert oc in self.connected_components
+        assert c != oc
+        self.connected_components.remove(c)
+        self.connected_components.remove(oc)
+        for p in c:
+            for q in oc:
+                self.adjacent_list[p].remove(q)
+                self.adjacent_list[q].remove(p)
+        new_connected_component = c + oc
+        self.connected_components.append(new_connected_component)
+        return
+
+
     def is_adjacent(self, u, v):
         if self.adjacent_list.has_key(u):
             return v in self.adjacent_list[u]
@@ -55,7 +70,8 @@ class Edges:
         edges = []
         for u in self.adjacent_list:
             for v in self.adjacent_list[u]:
-                edges.append((u,v))
+                if not (v,u) in edges:
+                    edges.append((u,v))
         return edges
 
 def generate_edges(points):
