@@ -71,7 +71,6 @@ class GraphTestCase(unittest.TestCase):
 
 class MultWeightsSolvingTestCase(unittest.TestCase):
     def setUp(self):
-        # TODO create simple graph
         self.points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
         l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
         l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
@@ -79,10 +78,15 @@ class MultWeightsSolvingTestCase(unittest.TestCase):
         self.lines = [l1, l2, l3]
 
     def test_solution(self):
-        # TODO check computed solution
         solution = mwsolv.compute_spanning_tree(self.points, self.lines)
         self.assertEqual(len(solution), 4)
-        self.assertTrue(((2., 2.), (3., 6.)) in solution)
+        self.assertTrue(((3., 6.), (5.,7.)) in solution)
+        self.assertTrue(((2., 2.), (6.,4.)) in solution)
+        self.assertTrue(((3., 6.), (4.25,5.)) in solution or\
+                ((5., 7.), (4.25,5.)) in solution)
+        # TODO why does this assert fails?
+        self.assertTrue(((4.25, 5.), (6.,4.)) in solution)
+
 
 
 if __name__ == '__main__':

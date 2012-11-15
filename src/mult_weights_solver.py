@@ -167,7 +167,10 @@ def find_min_edge(selected_edges, lines, line_weights):
     #    print "%s => %s" % (edge, weights[edge])
     min_edge = min(weights, key=weights.get)
     #print min_edge
-    return min_edge
+    (p,q) = min_edge
+    if not p < q:
+        (p,q) = (q,p)
+    return (p,q)
 
 
 def compute_spanning_tree(points, lines):
@@ -184,8 +187,11 @@ def compute_spanning_tree(points, lines):
         #print "line weights = %s" % weights
         min_edge = find_min_edge(graph.get_edges(), lines, weights)
         (p,q) = min_edge
+        #assert p < q
         graph.merge_cc_with_vertics(p,q)
-        print "points = %s, point p=%s, q=%s" % (points,p,q)
+        #format_string = "points = %s, point p=%s, q=%s, solution=%s" %\
+        #        (points, p, q, solution)
+        #print format_string
         if p in points:
             points.remove(p)
         elif q in points:
@@ -193,5 +199,6 @@ def compute_spanning_tree(points, lines):
         else:
             raise StandardError()
         solution.append(min_edge)
+    print "final solution: %s" % solution
     return solution
 
