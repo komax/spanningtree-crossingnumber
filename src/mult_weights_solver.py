@@ -121,38 +121,6 @@ def calculate_crossing_with(line, edges):
             crossings += 1
     return crossings
 
-def bfs(vertex, points, edges):
-    queue = [vertex]
-    visited = [vertex]
-    while queue:
-        u = queue.pop(0)
-        for (not_used, v) in edges.select(u, "*"):
-            if not v in visited:
-                visited.append(v)
-                queue.append(v)
-        for (v, not_used) in edges.select("*", u):
-            if not v in visited:
-                visited.append(v)
-                queue.append(v)
-    return visited
-
-
-def connected_components(points, edges):
-    # TODO compute connected components
-    pass
-
-def edges_crossing_connected_components(c_components):
-    # TODO update implementation
-    edges = []
-    for connected_component in c_components:
-        for other_c_component in c_components:
-            if (c_components.index(connected_components) <
-            c_components.index(other_c_component)):
-                for p in connected_component:
-                    edges = edges + generate_edges([p]+c_components)
-    return edges
-
-
 def find_min_edge(selected_edges, lines, line_weights):
     weights = {}
     for edge in selected_edges:
