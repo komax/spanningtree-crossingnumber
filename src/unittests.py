@@ -72,14 +72,17 @@ class GraphTestCase(unittest.TestCase):
 class MultWeightsSolvingTestCase(unittest.TestCase):
     def setUp(self):
         # TODO create simple graph
-        self.points = []
-        self.graph = []
-        self.lines = []
+        self.points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
+        l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
+        l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
+        l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
+        self.lines = [l1, l2, l3]
 
     def test_solution(self):
         # TODO check computed solution
-        mwsolv.compute_spanning_tree(self.points, self.lines)
-        self.fail()
+        solution = mwsolv.compute_spanning_tree(self.points, self.lines)
+        self.assertEqual(len(solution), 4)
+        self.assertTrue(((2., 2.), (3., 6.)) in solution)
 
 
 if __name__ == '__main__':
