@@ -25,5 +25,5 @@ Kinds of experiments
 Used infrastructure
 ======================
 * Python
-* mathlab (for plotting)
+* matlab (for plotting)
 * Gurobi (for solving LP, IP)

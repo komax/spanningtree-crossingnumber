@@ -142,7 +142,6 @@ def find_min_edge(selected_edges, lines, line_weights):
 
 
 def compute_spanning_tree(points, lines):
-    # TODO checkin implementation
     lines = preprocess_lines(lines)
     solution = []
     number_of_crossings = {}
