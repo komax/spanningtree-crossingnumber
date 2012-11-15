@@ -10,8 +10,9 @@ def preprocess_lines(lines):
     return lines
 
 '''
-This class holds all functionality of a graph between different connected components. Some boolean
-methods for checking connectivity, adjacent of vertices
+This class holds all functionality of a graph between different connected
+components. Some boolean methods for checking connectivity, adjacent of
+vertices
 '''
 class Graph:
     def __init__(self, connected_components):
@@ -155,12 +156,17 @@ def edges_crossing_connected_components(c_components):
 def find_min_edge(selected_edges, lines, line_weights):
     weights = {}
     for edge in selected_edges:
+        print edge
         line_segment = edge_to_linesegment(edge)
         weights[edge] = 0.0
         for line in lines:
             if has_crossing(line, line_segment):
-                weights[edges] += line_weights[line]
-    min_edge = min(weights, weights.get)
+                weights[edge] += line_weights[line]
+    #print weights
+    #for edge in weights:
+    #    print "%s => %s" % (edge, weights[edge])
+    min_edge = min(weights, key=weights.get)
+    #print min_edge
     return min_edge
 
 
@@ -175,10 +181,17 @@ def compute_spanning_tree(points, lines):
         for line in lines:
             number_of_crossings[line] = calculate_crossing_with(line, solution)
             weights[line] = 2**(number_of_crossings[line])
+        #print "line weights = %s" % weights
         min_edge = find_min_edge(graph.get_edges(), lines, weights)
         (p,q) = min_edge
         graph.merge_cc_with_vertics(p,q)
-        points.remove(p)
-        edges.append(min_edge)
-    return edges
+        print "points = %s, point p=%s, q=%s" % (points,p,q)
+        if p in points:
+            points.remove(p)
+        elif q in points:
+            points.remove(q)
+        else:
+            raise StandardError()
+        solution.append(min_edge)
+    return solution
 
