@@ -21,6 +21,11 @@ class CrossingTestCase(unittest.TestCase):
         line_segment = LineSegment2D((0, 4), (6, -2)) # y = -x + 4
         self.assertFalse(mwsolv.has_crossing(line, line_segment))
 
+    def test_has_also_crossing(self):
+        line = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
+        line_segment = LineSegment2D((5.,7.), (6., 4.)) # y = -3 + 22
+        self.assertTrue(mwsolv.has_crossing(line, line_segment))
+
 class GraphTestCase(unittest.TestCase):
     def setUp(self):
         self.points = range(4)

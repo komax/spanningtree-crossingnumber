@@ -110,7 +110,9 @@ def has_crossing(line, line_seg):
     else:
         x_s = (line.y_intercept - line_seg.y_intercept) / (line_seg.slope -
                 line.slope)
+        print x_s
         y_s = line(x_s)
+        print y_s
         return line_seg.is_on((x_s, y_s))
 
 def calculate_crossing_with(line, edges):
@@ -180,9 +182,7 @@ if __name__ == '__main__':
     l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
     l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
     lines = [l1, l2, l3]
-    #assert has_crossing(l2, edge_to_linesegment(((5.,7.), (6., 4.))))
-    assert has_crossing(l3, edge_to_linesegment(((5.,7.), (6., 4.))))
-    #solution = compute_spanning_tree(points, lines)
+    solution = compute_spanning_tree(points, lines)
     import plotting
     plotting.plot(points, lines, solution)
 
