@@ -2,7 +2,7 @@
 computes a spanning tree for a point set s.t. it has low crossing number to
 the line set, using the multiplicative weights method
 '''
-
+import copy
 from datagenerator import Line2D, LineSegment2D
 
 def preprocess_lines(lines):
@@ -124,7 +124,6 @@ def calculate_crossing_with(line, edges):
 def find_min_edge(selected_edges, lines, line_weights):
     weights = {}
     for edge in selected_edges:
-        print edge
         line_segment = edge_to_linesegment(edge)
         weights[edge] = 0.0
         for line in lines:
@@ -134,14 +133,18 @@ def find_min_edge(selected_edges, lines, line_weights):
     #for edge in weights:
     #    print "%s => %s" % (edge, weights[edge])
     min_edge = min(weights, key=weights.get)
-    #print min_edge
     (p,q) = min_edge
     if not p < q:
-        (p,q) = (q,p)
-    return (p,q)
+        min_edge = (q,p)
+    for edge in weights.keys():
+        print "line = %s => weight = %s" % (edge, weights[edge])
+    print "returned min_edge= %s -> %s" % min_edge
+    return min_edge
 
 
 def compute_spanning_tree(points, lines):
+    points = copy.deepcopy(points)
+    lines = copy.deepcopy(lines)
     lines = preprocess_lines(lines)
     solution = []
     number_of_crossings = {}
@@ -150,8 +153,9 @@ def compute_spanning_tree(points, lines):
     while len(points) > 1:
         for line in lines:
             number_of_crossings[line] = calculate_crossing_with(line, solution)
-            weights[line] = 2**(number_of_crossings[line])
+            weights[line] = 2.**(number_of_crossings[line])
         #print "line weights = %s" % weights
+        print weights
         min_edge = find_min_edge(graph.get_edges(), lines, weights)
         (p,q) = min_edge
         #assert p < q
@@ -168,4 +172,17 @@ def compute_spanning_tree(points, lines):
         solution.append(min_edge)
     print "final solution: %s" % solution
     return solution
+
+
+if __name__ == '__main__':
+    points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
+    l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
+    l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
+    l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
+    lines = [l1, l2, l3]
+    #assert has_crossing(l2, edge_to_linesegment(((5.,7.), (6., 4.))))
+    assert has_crossing(l3, edge_to_linesegment(((5.,7.), (6., 4.))))
+    #solution = compute_spanning_tree(points, lines)
+    import plotting
+    plotting.plot(points, lines, solution)
 
