@@ -14,15 +14,18 @@ def generate_points_uniformly(n, ub=100.0):
 
 def generate_points_grid(n):
     root_n = int(math.ceil(math.sqrt(n)))
+    eps = 0.1
     x = 0.0
     y = 0.0
     points = []
     for i in range(root_n):
         y = 0.0
         for j in range(root_n):
-            points.append((x,y))
-            y += 1.0
-        x += 1.0
+            x_eps = random.uniform(-eps,eps)
+            y_eps = random.uniform(-eps,eps)
+            points.append((x+x_eps,y+y_eps))
+            y += 5.0
+        x += 5.0
     assert len(points) == n
     return points
 
@@ -63,10 +66,7 @@ class LineSegment2D(Line2D):
         Line2D.__init__(self, p, q)
 
     def is_between(self, x):
-        if self.slope > 0.0:
-            return self.p[0] <= x <= self.q[0]
-        else:
-            return self.p[0] <= x <= self.q[0]
+        return self.p[0] <= x <= self.q[0]
 
     def is_on(self, p):
         (x,y) = p

@@ -36,10 +36,12 @@ def plot(points, lines, solution):
     print "printed"
 
 def main():
-    #points = dtgen.generate_points_grid(4)
-    points = dtgen.generate_points_uniformly(4, 100.0)
+    points = dtgen.generate_points_grid(9)
+    #points = dtgen.generate_points_uniformly(6, 100.0)
     lines = dtgen.generate_lines(points)
-    plot(points, lines, [])
+    import mult_weights_solver as mws
+    solution = mws.compute_spanning_tree(points, lines)
+    plot(points, lines, solution)
     print "main finished work"
 
 if __name__ == '__main__':
