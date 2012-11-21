@@ -110,10 +110,8 @@ def has_crossing(line, line_seg):
     else:
         x_s = (line.y_intercept - line_seg.y_intercept) / (line_seg.slope -
                 line.slope)
-        print x_s
         y_s = line(x_s)
-        print y_s
-        return line_seg.is_on((x_s, y_s))
+        return line_seg.is_between(x_s)
 
 def calculate_crossing_with(line, edges):
     crossings = 0
@@ -138,9 +136,9 @@ def find_min_edge(selected_edges, lines, line_weights):
     (p,q) = min_edge
     if not p < q:
         min_edge = (q,p)
-    for edge in weights.keys():
-        print "line = %s => weight = %s" % (edge, weights[edge])
-    print "returned min_edge= %s -> %s" % min_edge
+    #for edge in weights.keys():
+    #    print "line = %s => weight = %s" % (edge, weights[edge])
+    #print "returned min_edge= %s -> %s" % min_edge
     return min_edge
 
 
@@ -157,7 +155,7 @@ def compute_spanning_tree(points, lines):
             number_of_crossings[line] = calculate_crossing_with(line, solution)
             weights[line] = 2.**(number_of_crossings[line])
         #print "line weights = %s" % weights
-        print weights
+        #print weights
         min_edge = find_min_edge(graph.get_edges(), lines, weights)
         (p,q) = min_edge
         #assert p < q

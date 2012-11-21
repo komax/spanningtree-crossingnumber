@@ -55,14 +55,12 @@ class Line2D:
     def is_on(self, p):
         (x,y) = p
         y_line = self(x)
-        print y_line
-        print y
-        return y == y_line
+        y_diff = math.fabs(y_line - y)
+        return y_diff < 1e-13
 
 class LineSegment2D(Line2D):
     def __init__(self, p, q):
         Line2D.__init__(self, p, q)
-
 
     def is_between(self, x):
         if self.slope > 0.0:
