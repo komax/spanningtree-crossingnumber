@@ -59,8 +59,10 @@ def solve_lp_and_round(points, lines, t):
                 round_solution.append((p,q))
         return round_solution
 
-def has_proper_no_of_connected_components(round_solution):
+def has_proper_no_of_connected_components(points, connected_components):
     # TODO in planar case always true. implement it
+    #if len(connected_components) >= (19./20. * len(points)):
+    #    return False
     return True
 
 def connected_components(points, edges):
