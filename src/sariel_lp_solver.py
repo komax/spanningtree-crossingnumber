@@ -5,7 +5,8 @@ using Gurobi as standard solver
 '''
 
 import gurobipy as grb
-from lines import Line2D, LineSegment2D
+from lines import Line2D, LineSegment2D, has_crossing
+from gurobipy import quicksum
 import copy
 import math
 
