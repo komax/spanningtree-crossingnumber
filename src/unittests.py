@@ -137,6 +137,8 @@ class SarielsLPSolvingTestCase(unittest.TestCase):
 
     def test_solution(self):
         t = math.sqrt(len(self.points))
+        #t = 1
+        #t = 6
         solution = slpsolv.compute_spanning_tree(self.points, self.lines, t)
         self.assertEqual(len(solution), 4)
         self.assertTrue(((3., 6.), (5.,7.)) in solution)

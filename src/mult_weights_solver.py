@@ -164,8 +164,7 @@ def compute_spanning_tree(points, lines):
     print "final solution: %s" % solution
     return solution
 
-
-if __name__ == '__main__':
+def main():
     points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
     l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
     l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
@@ -174,4 +173,7 @@ if __name__ == '__main__':
     solution = compute_spanning_tree(points, lines)
     import plotting
     plotting.plot(points, lines, solution)
+
+if __name__ == '__main__':
+    main()
 

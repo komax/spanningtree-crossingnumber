@@ -32,6 +32,7 @@ def solve_lp_and_round(points, lines, t):
     # TODO debug lp formulation
     gamma_lp = grb.Model("sariels_lp_2d")
     edges = get_edges(points)
+    print "edges %s" % edges
     x = {}
     for (p,q) in edges:
         x[p,q] = gamma_lp.addVar(obj=euclidean_distance(p,q), name='edge|%s - %s|' % (p,q))
@@ -110,16 +111,32 @@ def compute_spanning_tree(points, lines, t):
 
     while len(points) > 1:
         round_edges = solve_lp_and_round(points, lines, t)
+        print "round edges %s" % round_edges
         ccs = connected_components(points, round_edges)
-        if not has_proper_no_of_connected_components(points,
-                connected_components):
-            continue
+        #if not has_proper_no_of_connected_components(points,
+        #        connected_components):
+        #    continue
         new_point_set = []
         for connected_component in ccs:
             assert len(connected_component) >= 1
+            print connected_component
             p = connected_component[0]
             new_point_set.append(p)
         points = new_point_set
         solution += round_edges
     return solution
 
+def main():
+    points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
+    l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
+    l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
+    l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
+    lines = [l1, l2, l3]
+    t = math.sqrt(len(points))
+    t = 2
+    solution = compute_spanning_tree(points, lines, t)
+    import plotting
+    plotting.plot(points, lines, solution)
+
+if __name__ == '__main__':
+    main()
