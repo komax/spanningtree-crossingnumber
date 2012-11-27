@@ -49,7 +49,11 @@ def solve_lp_and_round(points, lines, t):
     # connectivity constraint
     for p in points:
         gamma_lp.addConstr(
-                quicksum(x[p,q] for q in points if p != q) >= 1)
+                quicksum(x[p,q] for q in points if points.index(p) <
+                    points.index(q)) +
+                quicksum(x[q,p] for q in points if points.index(p) >
+                    points.index(q))
+                >= 1)
 
     gamma_lp.optimize()
 
