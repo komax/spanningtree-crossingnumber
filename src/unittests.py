@@ -4,6 +4,7 @@ import unittest
 import mult_weights_solver as mwsolv
 import datagenerator as dgen
 from lines import Line2D, LineSegment2D
+import sariel_lp_solver as slpsolv
 
 class CrossingTestCase(unittest.TestCase):
     def test_has_crossing(self):
@@ -92,6 +93,38 @@ class MultWeightsSolvingTestCase(unittest.TestCase):
         self.assertTrue(((4.25, 5.), (6.,4.)) in solution)
 
 
+class SarielsSolvingTestCase(unittest.TestCase):
+    def test_results_one_connected_component(self):
+        points = [ (0.,3.), (3.,4.), (9., 10.), (7.,8.), (5., 6.), (2., 1.)]
+        edges = [ ((3., 4.), (0., 3.)),
+                  ((2., 1.), (3., 4.)),
+                  ((3., 4.), (5., 6.)),
+                  ((7., 8.), (5., 6.)),
+                  ((9., 10.), (7., 8.)) ]
+        ccs = slpsolv.connected_components(points, edges)
+        self.assertEqual(len(ccs), 1)
+        cc = ccs[0]
+        self.assertItemsEqual(cc, points)
+
+    def test_results_two_connected_components(self):
+        points = [ (0.,3.), (3.,4.), (9., 10.), (7.,8.), (5., 6.), (2., 1.)]
+        edges = [ ((3., 4.), (0., 3.)),
+                  ((2., 1.), (3., 4.)),
+                  #((3., 4.), (5., 6.)), now two connected components
+                  ((7., 8.), (5., 6.)),
+                  ((9., 10.), (7., 8.)) ]
+        ccs = slpsolv.connected_components(points, edges)
+        self.assertEqual(len(ccs), 2)
+        c1 = [ (0.,3.), (3.,4.), (2., 1.)]
+        c2 = [ (9., 10.), (7.,8.), (5., 6.)]
+        if (0., 3.) in ccs[0]:
+            self.assertItemsEqual(ccs[0], c1)
+            self.assertItemsEqual(ccs[1], c2)
+        elif (0., 3.) in ccs[1]:
+            self.assertItemsEqual(ccs[1], c1)
+            self.assertItemsEqual(ccs[0], c2)
+        else:
+            self.fail()
 
 if __name__ == '__main__':
     unittest.main()

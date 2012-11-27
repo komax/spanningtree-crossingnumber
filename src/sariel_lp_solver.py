@@ -5,7 +5,7 @@ using Gurobi as standard solver
 '''
 
 import gurobipy as grb
-from datagenerator import Line2D, LineSegment2D
+from lines import Line2D, LineSegment2D
 import copy
 import math
 
@@ -66,27 +66,34 @@ def has_proper_no_of_connected_components(points, connected_components):
     return True
 
 def connected_components(points, edges):
-    # TODO implementation, unit test this implementation
+    remaining_points = copy.deepcopy(points)
     edges = grb.tuplelist(edges)
     connected_components = []
-    for p in points:
+
+    while remaining_points:
+        p = remaining_points.pop()
         p_edges = edges.select(p, "*") + edges.select("*", p)
-        for connected_component in connected_components:
-            if p in connected_component:
-                for (u,v) in p_edges:
-                    if v == p:
-                        (u,v) = (v,u)
-                    if v not in connected_component:
-                        connected_component.append(v)
-        else:
-            # this is a new connected component
-            new_connected_component = [p]
-            for (u,v) in p_edges:
-                if v == p:
+        queue = []
+
+        for (u,v) in p_edges:
+            if v == p:
+                (u,v) = (v,u)
+            if v in remaining_points:
+                remaining_points.remove(v)
+            queue.append(v)
+
+        new_connected_component = [p]
+        while queue:
+            q = queue.pop(0)
+            new_connected_component.append(q)
+            q_edges = edges.select(q, "*") + edges.select("*", q)
+            for (u,v) in q_edges:
+                if v == q:
                     (u,v) = (v,u)
-                if v not in new_connected_component:
-                    new_connected_component.append(v)
-            connected_components.append(new_connected_component)
+                if not v in new_connected_component and v in remaining_points:
+                    queue.append(v)
+                    remaining_points.remove(v)
+        connected_components.append(new_connected_component)
     return connected_components
 
 def compute_spanning_tree(points, lines, t):
