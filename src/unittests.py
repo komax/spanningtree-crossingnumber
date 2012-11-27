@@ -3,7 +3,7 @@
 import unittest
 import mult_weights_solver as mwsolv
 import datagenerator as dgen
-from datagenerator import Line2D, LineSegment2D
+from lines import Line2D, LineSegment2D
 
 class CrossingTestCase(unittest.TestCase):
     def test_has_crossing(self):
@@ -89,7 +89,6 @@ class MultWeightsSolvingTestCase(unittest.TestCase):
         self.assertTrue(((2., 2.), (6.,4.)) in solution)
         self.assertTrue(((3., 6.), (4.25,5.)) in solution or\
                 ((5., 7.), (4.25,5.)) in solution)
-        # TODO why does this assert fails?
         self.assertTrue(((4.25, 5.), (6.,4.)) in solution)
 
 

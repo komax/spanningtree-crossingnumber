@@ -3,7 +3,7 @@ computes a spanning tree for a point set s.t. it has low crossing number to
 the line set, using the multiplicative weights method
 '''
 import copy
-from datagenerator import Line2D, LineSegment2D
+from lines import Line2D, LineSegment2D, has_crossing
 
 def preprocess_lines(lines):
     # TODO remove unnecessary lines
@@ -103,15 +103,6 @@ def create_graph(points):
 def edge_to_linesegment(edge):
     p, q = edge
     return LineSegment2D(p, q)
-
-def has_crossing(line, line_seg):
-    if line.slope == line_seg.slope:
-        return False
-    else:
-        x_s = (line.y_intercept - line_seg.y_intercept) / (line_seg.slope -
-                line.slope)
-        y_s = line(x_s)
-        return line_seg.is_between(x_s)
 
 def calculate_crossing_with(line, edges):
     crossings = 0
