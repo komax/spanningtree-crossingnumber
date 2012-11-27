@@ -105,12 +105,14 @@ def compute_spanning_tree(points, lines, t):
 
     while len(points) > 1:
         round_edges = solve_lp_and_round(points, lines, t)
-        if not has_proper_no_of_connected_components(points, round_edges):
+        ccs = connected_components(points, round_edges)
+        if not has_proper_no_of_connected_components(points,
+                connected_components):
             continue
         new_point_set = []
-        for c in connected_components(points, round_edges):
-            assert len(c) >= 1
-            p = c[0]
+        for connected_component in ccs:
+            assert len(connected_component) >= 1
+            p = connected_component[0]
             new_point_set.append(p)
         points = new_point_set
         solution += round_edges
