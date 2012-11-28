@@ -36,22 +36,17 @@ def solve_lp_and_round(points, lines, t):
     print "edges %s" % edges
     x = {}
     for (p,q) in edges:
-        print p
-        print q
         x[p,q] = gamma_lp.addVar(obj=euclidean_distance(p,q), name='edge|%s - %s|' % (p,q))
 
     gamma_lp.modelSense = grb.GRB.MINIMIZE
 
     gamma_lp.update()
-    for y in x:
-        print "decision variable |%s|" % x[y]
 
     # crossing constraints
     for line in lines:
         s = quicksum(x[p,q] for (p,q) in edges if has_crossing(line,
             LineSegment2D(p,q)))
         if s != 0.0:
-                print "crossing number %s" % s
                 gamma_lp.addConstr(
                         #quicksum(x[p,q] for (p,q) in edges if has_crossing(line,
                         #LineSegment2D(p,q))) <= t)
@@ -71,7 +66,7 @@ def solve_lp_and_round(points, lines, t):
     if gamma_lp.status == grb.GRB.status.OPTIMAL:
         round_solution = []
         for (p,q) in edges:
-            print "decision var value: %s" % x[p,q].X
+            print  x[p,q]
             if x[p,q].X >= 1./12.:
                 round_solution.append((p,q))
         return round_solution
@@ -127,7 +122,7 @@ def compute_spanning_tree(points, lines):
         points.sort()
         print "round %i" % i
         t = estimate_t(points)
-        print t
+        print "estimated t=%s" % t
         round_edges = solve_lp_and_round(points, lines, t)
         print "round edges %s" % round_edges
         ccs = connected_components(points, round_edges)
@@ -148,7 +143,8 @@ def compute_spanning_tree(points, lines):
     return solution
 
 def main():
-    points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
+    points = [(2.,2.), (6.,4.), (3., 6.), #(5., 7.),
+            (4.25, 5.)]
     l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
     l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
     l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
