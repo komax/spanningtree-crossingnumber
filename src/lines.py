@@ -20,6 +20,15 @@ class Line2D:
             self.slope = (y1 - y2) / (x1 - x2)
         self.y_intercept = y1 - self.slope * x1
 
+    def __key(self):
+        return (self.slope, self.y_intercept)
+
+    def __eq__(a, b):
+        return a.__key() == b.__key()
+
+    def __hash__(self):
+        return hash(self.__key())
+
     def __call__(self,x):
        y = self.slope * x + self.y_intercept
        return y
@@ -40,6 +49,15 @@ class Line2D:
 class LineSegment2D(Line2D):
     def __init__(self, p, q):
         Line2D.__init__(self, p, q)
+    
+    def __key(self):
+        return (self.slope, self.y_intercept)
+
+    def __eq__(a, b):
+        return a.__key() == b.__key()
+
+    def __hash__(self):
+        return hash(self.__key())
 
     def is_between(self, x):
         return self.p[0] <= x <= self.q[0]

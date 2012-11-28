@@ -9,6 +9,7 @@ from lines import Line2D, LineSegment2D, has_crossing
 from gurobipy import quicksum
 import copy
 import math
+import random
 
 def preprocess_lines(lines):
     # TODO remove unnecessary lines
@@ -35,17 +36,26 @@ def solve_lp_and_round(points, lines, t):
     print "edges %s" % edges
     x = {}
     for (p,q) in edges:
+        print p
+        print q
         x[p,q] = gamma_lp.addVar(obj=euclidean_distance(p,q), name='edge|%s - %s|' % (p,q))
 
     gamma_lp.modelSense = grb.GRB.MINIMIZE
 
     gamma_lp.update()
+    for y in x:
+        print "decision variable |%s|" % x[y]
 
     # crossing constraints
     for line in lines:
-        gamma_lp.addConstr(
-                quicksum(x[p,q] for (p,q) in edges if has_crossing(line,
-                    LineSegment2D(p,q))) <= t)
+        s = quicksum(x[p,q] for (p,q) in edges if has_crossing(line,
+            LineSegment2D(p,q)))
+        if s != 0.0:
+                print "crossing number %s" % s
+                gamma_lp.addConstr(
+                        #quicksum(x[p,q] for (p,q) in edges if has_crossing(line,
+                        #LineSegment2D(p,q))) <= t)
+                        s <= t)
 
     # connectivity constraint
     for p in points:
@@ -61,6 +71,7 @@ def solve_lp_and_round(points, lines, t):
     if gamma_lp.status == grb.GRB.status.OPTIMAL:
         round_solution = []
         for (p,q) in edges:
+            print "decision var value: %s" % x[p,q].X
             if x[p,q].X >= 1./12.:
                 round_solution.append((p,q))
         return round_solution
@@ -102,14 +113,21 @@ def connected_components(points, edges):
         connected_components.append(new_connected_component)
     return connected_components
 
-def compute_spanning_tree(points, lines, t):
+def estimate_t(points):
+    return math.sqrt(len(points))
+
+def compute_spanning_tree(points, lines):
     points = copy.deepcopy(points)
     lines = copy.deepcopy(lines)
     lines = preprocess_lines(lines)
 
     solution = []
-
+    i = 1
     while len(points) > 1:
+        points.sort()
+        print "round %i" % i
+        t = estimate_t(points)
+        print t
         round_edges = solve_lp_and_round(points, lines, t)
         print "round edges %s" % round_edges
         ccs = connected_components(points, round_edges)
@@ -117,13 +135,16 @@ def compute_spanning_tree(points, lines, t):
         #        connected_components):
         #    continue
         new_point_set = []
+        print "# of connected components %i" % len(ccs)
         for connected_component in ccs:
             assert len(connected_component) >= 1
-            print connected_component
-            p = connected_component[0]
+            print "connected component |%s|" % connected_component
+            repr_index = random.randint(0, len(connected_component)-1)
+            p = connected_component[repr_index]
             new_point_set.append(p)
         points = new_point_set
         solution += round_edges
+        i += 1
     return solution
 
 def main():
@@ -132,9 +153,7 @@ def main():
     l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
     l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
     lines = [l1, l2, l3]
-    t = math.sqrt(len(points))
-    t = 2
-    solution = compute_spanning_tree(points, lines, t)
+    solution = compute_spanning_tree(points, lines)
     import plotting
     plotting.plot(points, lines, solution)
 
