@@ -71,16 +71,21 @@ def solve_lp_and_round(points, lines, t):
                 round_solution.append((p,q))
         return round_solution
 
-def has_proper_no_of_connected_components(points, connected_components):
+def has_proper_no_of_connected_components(points, ccs):
     # TODO in planar case always true. implement it
-    #if len(connected_components) >= (19./20. * len(points)):
-    #    return False
-    return True
+    no_connected_components = len(ccs)
+    ratio_points = 19./20. * len(points)
+    print "# connected components=%s <= %s, val=%s" % (no_connected_components,
+            ratio_points, no_connected_components <= ratio_points)
+    if no_connected_components <= ratio_points:
+        return True
+    else:
+        return False
 
 def connected_components(points, edges):
     remaining_points = copy.deepcopy(points)
     edges = grb.tuplelist(edges)
-    connected_components = []
+    ccs = []
 
     while remaining_points:
         p = remaining_points.pop()
@@ -105,8 +110,8 @@ def connected_components(points, edges):
                 if not v in new_connected_component and v in remaining_points:
                     queue.append(v)
                     remaining_points.remove(v)
-        connected_components.append(new_connected_component)
-    return connected_components
+        ccs.append(new_connected_component)
+    return ccs
 
 def estimate_t(points):
     return math.sqrt(len(points))
@@ -126,9 +131,9 @@ def compute_spanning_tree(points, lines):
         round_edges = solve_lp_and_round(points, lines, t)
         print "round edges %s" % round_edges
         ccs = connected_components(points, round_edges)
-        #if not has_proper_no_of_connected_components(points,
-        #        connected_components):
-        #    continue
+        if not has_proper_no_of_connected_components(points,
+                ccs):
+            continue
         new_point_set = []
         print "# of connected components %i" % len(ccs)
         for connected_component in ccs:
@@ -143,7 +148,7 @@ def compute_spanning_tree(points, lines):
     return solution
 
 def main():
-    points = [(2.,2.), (6.,4.), (3., 6.), #(5., 7.),
+    points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.),
             (4.25, 5.)]
     l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
     l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
