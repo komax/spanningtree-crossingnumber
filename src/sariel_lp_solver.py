@@ -67,7 +67,7 @@ def solve_lp_and_round(points, lines, t):
         round_solution = []
         for (p,q) in edges:
             print  x[p,q]
-            if x[p,q].X >= 1./12.:
+            if (12. * x[p,q].X) >= 1./12.:
                 round_solution.append((p,q))
         return round_solution
 

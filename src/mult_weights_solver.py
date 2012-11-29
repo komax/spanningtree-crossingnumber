@@ -92,6 +92,9 @@ class Graph:
                 return c
         else:
             raise StandardError('can not find vertex=%s in this graph' % u)
+    
+    def number_of_connected_components(self):
+        return len(self.connected_components)
 
 
 def create_graph(points):
@@ -120,16 +123,10 @@ def find_min_edge(selected_edges, lines, line_weights):
         for line in lines:
             if has_crossing(line, line_segment):
                 weights[edge] += line_weights[line]
-    #print weights
-    #for edge in weights:
-    #    print "%s => %s" % (edge, weights[edge])
     min_edge = min(weights, key=weights.get)
     (p,q) = min_edge
     if not p < q:
         min_edge = (q,p)
-    #for edge in weights.keys():
-    #    print "line = %s => weight = %s" % (edge, weights[edge])
-    #print "returned min_edge= %s -> %s" % min_edge
     return min_edge
 
 
@@ -141,36 +138,32 @@ def compute_spanning_tree(points, lines):
     number_of_crossings = {}
     weights = {}
     graph = create_graph(points)
-    while len(points) > 1:
+    
+    while graph.number_of_connected_components() > 1:
         for line in lines:
             number_of_crossings[line] = calculate_crossing_with(line, solution)
             weights[line] = 2.**(number_of_crossings[line])
-        #print "line weights = %s" % weights
-        #print weights
         min_edge = find_min_edge(graph.get_edges(), lines, weights)
         (p,q) = min_edge
-        #assert p < q
         graph.merge_cc_with_vertics(p,q)
-        #format_string = "points = %s, point p=%s, q=%s, solution=%s" %\
-        #        (points, p, q, solution)
-        #print format_string
-        if p in points:
-            points.remove(p)
-        elif q in points:
-            points.remove(q)
-        else:
-            raise StandardError()
         solution.append(min_edge)
-    print "final solution: %s" % solution
     return solution
 
+def calculate_crossing_number(lines, solution):
+    crossing_number = 0
+    for line in lines:
+        crossing_number += calculate_crossing_with(line, solution)
+    return crossing_number
+
 def main():
+    # minimal example to find optimal spanning tree
     points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
     l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
     l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
     l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
     lines = [l1, l2, l3]
     solution = compute_spanning_tree(points, lines)
+    print "crossing number = %s" % calculate_crossing_number(lines, solution)
     import plotting
     plotting.plot(points, lines, solution)
 
