@@ -7,11 +7,13 @@ import time
 import datagenerator as dgen
 import mult_weights_solver as mws
 import sariel_lp_solver as slpsolv
+from lines import calculate_crossing_number
 
 def main():
     args = parse_args()
-    procees_args(args)
-    time_measuring_of_experiment()
+    experiment = prepare_experiment(args)
+    experiment.run()
+    print "CPU time (musec) %s" % experiment.elapsed_time
 
 solver_options = ['opt', 'mult_weight', 'fekete_lp', 'sariel_lp']
 data_distribution_options = ['uniform', 'grid']
@@ -63,11 +65,12 @@ def get_solver(solver_type):
         raise StandardError('Not yet supported')
 
 class SpanningTreeExperiment:
-    def __init__(self, solver_type, d, n, distribution_type, verbose):
+    def __init__(self, solver_type, d, n, distribution_type, has_plot, verbose):
         self.points = generate_point_set(d, n, distribution_type)
         self.lines = dgen.generate_lines(self.points)
         self.solver_type = solver_type
         self.solver = get_solver(solver_type)
+        self.has_plot = has_plot
         self.verbose = verbose
 
         self.elapsed_time = None
@@ -83,21 +86,11 @@ class SpanningTreeExperiment:
         self.solution = self.solver(self.points, self.lines)
         end = time.time()
         self.elapsed_time = end - start
+        self.crossing_number = calculate_crossing_number(self.lines,
+                self.solution)
 
-
-
-def process_args(args):
+def prepare_experiment(args):
     pass
-
-def time_measuring_of_experiment(experiment):
-    start = time.time()
-    solution = experiment()
-    end = time.time()
-    print "CPU time (musec) %s" % (end-start)
-
-def run_experiment():
-    pass
-
 
 if __name__ == '__main__':
     main()
