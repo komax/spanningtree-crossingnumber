@@ -4,6 +4,7 @@ the line set, using the multiplicative weights method
 '''
 import copy
 from lines import Line2D, LineSegment2D, has_crossing
+from lines import calculate_crossing_with, calculate_crossing_number
 
 def preprocess_lines(lines):
     # TODO remove unnecessary lines
@@ -103,22 +104,11 @@ def create_graph(points):
         connected_components.append([p])
     return Graph(connected_components)
 
-def edge_to_linesegment(edge):
-    p, q = edge
-    return LineSegment2D(p, q)
-
-def calculate_crossing_with(line, edges):
-    crossings = 0
-    for edge in edges:
-        line_segment = edge_to_linesegment(edge)
-        if has_crossing(line, line_segment):
-            crossings += 1
-    return crossings
-
 def find_min_edge(selected_edges, lines, line_weights):
     weights = {}
     for edge in selected_edges:
-        line_segment = edge_to_linesegment(edge)
+        (p,q) = edge
+        line_segment = LineSegment2D(p,q)
         weights[edge] = 0.0
         for line in lines:
             if has_crossing(line, line_segment):
@@ -128,7 +118,6 @@ def find_min_edge(selected_edges, lines, line_weights):
     if not p < q:
         min_edge = (q,p)
     return min_edge
-
 
 def compute_spanning_tree(points, lines):
     points = copy.deepcopy(points)
@@ -148,12 +137,6 @@ def compute_spanning_tree(points, lines):
         graph.merge_cc_with_vertics(p,q)
         solution.append(min_edge)
     return solution
-
-def calculate_crossing_number(lines, solution):
-    crossing_number = 0
-    for line in lines:
-        crossing_number += calculate_crossing_with(line, solution)
-    return crossing_number
 
 def main():
     # minimal example to find optimal spanning tree

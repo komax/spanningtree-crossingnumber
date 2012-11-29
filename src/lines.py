@@ -80,3 +80,17 @@ def has_crossing(line, line_seg):
         y_s = line(x_s)
         return line_seg.is_between(x_s)
 
+def calculate_crossing_with(line, edges):
+    crossings = 0
+    for (p,q) in edges:
+        line_segment = LineSegment2D(p,q)
+        if has_crossing(line, line_segment):
+            crossings += 1
+    return crossings
+
+def calculate_crossing_number(lines, solution):
+    crossing_number = 0
+    for line in lines:
+        crossing_number += calculate_crossing_with(line, solution)
+    return crossing_number
+
