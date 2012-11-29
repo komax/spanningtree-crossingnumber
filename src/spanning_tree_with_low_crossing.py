@@ -8,12 +8,15 @@ import datagenerator as dgen
 import mult_weights_solver as mws
 import sariel_lp_solver as slpsolv
 from lines import calculate_crossing_number
+import plotting
 
 def main():
     args = parse_args()
     experiment = prepare_experiment(args)
     experiment.run()
     print "CPU time (musec) %s" % experiment.elapsed_time
+    print "crossing number=%s" % experiment.crossing_number
+    experiment.plot()
 
 solver_options = ['opt', 'mult_weight', 'fekete_lp', 'sariel_lp']
 data_distribution_options = ['uniform', 'grid']
@@ -24,9 +27,9 @@ def parse_args():
             run an parameterized experiment to compute
             a spanning tree with low crossing number
             """)
-    parser.add_argument("-s", "--solver", default='opt', choices=solver_options,
+    parser.add_argument("-s", "--solver", default='mult_weight', choices=solver_options,
         help="choose an algorithm computing a feasible solution")
-    parser.add_argument("-d", "--dimension", type=int, default=2,
+    parser.add_argument("-d", "--dimensions", type=int, default=2,
         help="number of dimensions of point set")
     parser.add_argument("-n", "--number", type=int, default=16,
         help="quantify how many points you want")
@@ -39,6 +42,11 @@ def parse_args():
         help="adds verbose outputs to STDOUT")
     args = parser.parse_args()
     return args
+
+def prepare_experiment(args):
+    return SpanningTreeExperiment(args.solver, args.dimensions, args.number,
+            args.generate, args.plot, args.verbose)
+
 
 def generate_point_set(d, n, distribution_type):
     # TODO currently omitting d parameter. update it
@@ -89,8 +97,10 @@ class SpanningTreeExperiment:
         self.crossing_number = calculate_crossing_number(self.lines,
                 self.solution)
 
-def prepare_experiment(args):
-    pass
+    def plot(self):
+        if self.has_plot:
+            plotting.plot(self.solution, self.lines, self.solution)
+        return
 
 if __name__ == '__main__':
     main()

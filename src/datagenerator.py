@@ -60,7 +60,7 @@ def create_lines(p,q, eps):
 
 def generate_lines(points, eps=0.1):
     lines = {}
-    print points
+    #print points
     for p in points:
         for q in points:
             if points.index(p) < points.index(q):
@@ -68,8 +68,8 @@ def generate_lines(points, eps=0.1):
                     # create all different lines
                     pq_lines = create_lines(p,q, eps)
                     lines[p,q] = pq_lines
-    for (p,q) in lines.keys():
-        print "%s -> %s" % (p,q)
+    #for (p,q) in lines.keys():
+    #    print "%s -> %s" % (p,q)
     line_set = []
     for pq_lines in lines.values():
         line_set = line_set + pq_lines
