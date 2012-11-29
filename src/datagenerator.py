@@ -8,9 +8,10 @@ import math
 from lines import Line2D, LineSegment2D
 
 def generate_points_uniformly(n, ub=100.0):
+    if ub <= n:
+        ub *= n
     points = [(random.uniform(0,ub), random.uniform(0,ub))
             for i in range(n)]
-    # TODO check for colinearity
     return points
 
 def generate_points_grid(n):
