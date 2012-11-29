@@ -47,16 +47,13 @@ def prepare_experiment(args):
     return SpanningTreeExperiment(args.solver, args.dimensions, args.number,
             args.generate, args.plot, args.verbose)
 
-
 def generate_point_set(d, n, distribution_type):
     # TODO currently omitting d parameter. update it
     assert distribution_type in data_distribution_options
-    point_set = []
     if distribution_type == 'uniform':
-        point_set = dgen.generate_points_uniformly(n)
+        return dgen.generate_points_uniformly(n)
     elif distribution_type == 'grid':
-        point_set = dgen.generate_points_grid(n)
-    return point_set
+        return dgen.generate_points_grid(n)
 
 def get_solver(solver_type):
     # TODO update if new solvers are supported
@@ -99,7 +96,7 @@ class SpanningTreeExperiment:
 
     def plot(self):
         if self.has_plot:
-            plotting.plot(self.solution, self.lines, self.solution)
+            plotting.plot(self.points, self.lines, self.solution)
         return
 
 if __name__ == '__main__':
