@@ -5,6 +5,7 @@ import mult_weights_solver as mwsolv
 import datagenerator as dgen
 from lines import Line2D, LineSegment2D
 import sariel_lp_solver as slpsolv
+import fekete_lp_solver as flpsolv
 import math
 
 class CrossingTestCase(unittest.TestCase):
@@ -145,6 +146,23 @@ class SarielsLPSolvingTestCase(unittest.TestCase):
                 ((5., 7.), (4.25,5.)) in solution)
         self.assertTrue(((4.25, 5.), (6.,4.)) in solution)
 
+class FeketeLPSolvingTestCase(unittest.TestCase):
+    def setUp(self):
+        self.points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
+        l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
+        l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
+        l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
+        self.lines = [l1, l2, l3]
+
+    def test_solution(self):
+        solution = flpsolv.compute_spanning_tree(self.points, self.lines)
+        print solution
+        self.assertEqual(len(solution), 4)
+        self.assertTrue(((3., 6.), (5.,7.)) in solution)
+        self.assertTrue(((2., 2.), (6.,4.)) in solution)
+        self.assertTrue(((3., 6.), (4.25,5.)) in solution or\
+                ((5., 7.), (4.25,5.)) in solution)
+        self.assertTrue(((4.25, 5.), (6.,4.)) in solution)
 
 if __name__ == '__main__':
     unittest.main()
