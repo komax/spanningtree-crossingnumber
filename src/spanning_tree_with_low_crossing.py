@@ -4,6 +4,7 @@
 
 import argparse
 import time
+import copy
 import datagenerator as dgen
 import mult_weights_solver as mws
 import sariel_lp_solver as slpsolv
@@ -36,7 +37,7 @@ def parse_args():
     parser.add_argument("-g", "--generate", default='uniform',
             choices=data_distribution_options,
         help="how should the point set be sampled")
-    parser.add_argument("-p", "--plot", action='store_true', default=True,
+    parser.add_argument("-p", "--plot", action='store_true', default=False,
         help="plots the computed solution into a widget")
     parser.add_argument("-v", "--verbose", action='store_true',
         help="adds verbose outputs to STDOUT")
@@ -87,8 +88,10 @@ class SpanningTreeExperiment:
         self.solver = get_solver(solver_type)
 
     def run(self):
+        points = copy.deepcopy(self.points)
+        lines = copy.deepcopy(self.lines)
         start = time.time()
-        self.solution = self.solver(self.points, self.lines)
+        self.solution = self.solver(points, lines)
         end = time.time()
         self.elapsed_time = end - start
         self.crossing_number = calculate_crossing_number(self.lines,

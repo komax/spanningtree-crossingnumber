@@ -5,10 +5,7 @@ the line set, using the multiplicative weights method
 import copy
 from lines import Line2D, LineSegment2D, has_crossing
 from lines import calculate_crossing_with, calculate_crossing_number
-
-def preprocess_lines(lines):
-    # TODO remove unnecessary lines
-    return lines
+from solver_helper import preprocess_lines
 
 '''
 This class holds all functionality of a graph between different connected
@@ -93,7 +90,7 @@ class Graph:
                 return c
         else:
             raise StandardError('can not find vertex=%s in this graph' % u)
-    
+
     def number_of_connected_components(self):
         return len(self.connected_components)
 
@@ -120,14 +117,12 @@ def find_min_edge(selected_edges, lines, line_weights):
     return min_edge
 
 def compute_spanning_tree(points, lines):
-    points = copy.deepcopy(points)
-    lines = copy.deepcopy(lines)
     lines = preprocess_lines(lines)
     solution = []
     number_of_crossings = {}
     weights = {}
     graph = create_graph(points)
-    
+
     while graph.number_of_connected_components() > 1:
         for line in lines:
             number_of_crossings[line] = calculate_crossing_with(line, solution)
@@ -145,7 +140,8 @@ def main():
     l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
     l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
     lines = [l1, l2, l3]
-    solution = compute_spanning_tree(points, lines)
+    solution = compute_spanning_tree(copy.deepcopy(points),
+            copy.deepcopy(lines))
     print "crossing number = %s" % calculate_crossing_number(lines, solution)
     import plotting
     plotting.plot(points, lines, solution)

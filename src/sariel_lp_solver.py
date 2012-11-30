@@ -6,28 +6,11 @@ using Gurobi as standard solver
 
 import gurobipy as grb
 from lines import Line2D, LineSegment2D, has_crossing
+from solver_helper import preprocess_lines, euclidean_distance, get_edges
 from gurobipy import quicksum
 import copy
 import math
 import random
-
-def preprocess_lines(lines):
-    # TODO remove unnecessary lines
-    return lines
-
-def get_edges(points):
-    edges = []
-    for p in points:
-        for q in points:
-            if points.index(p) < points.index(q):
-                edges.append((p,q))
-    return edges
-
-def euclidean_distance(p, q):
-    (xp, yp) = p
-    (xq, yq) = q
-    return math.sqrt((xp+xq)**2 + (yp+yq)**2)
-
 
 def solve_lp_and_round(points, lines, t):
     # TODO debug lp formulation
@@ -117,8 +100,6 @@ def estimate_t(points):
     return math.sqrt(len(points))
 
 def compute_spanning_tree(points, lines):
-    points = copy.deepcopy(points)
-    lines = copy.deepcopy(lines)
     lines = preprocess_lines(lines)
 
     solution = []
@@ -154,7 +135,8 @@ def main():
     l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
     l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
     lines = [l1, l2, l3]
-    solution = compute_spanning_tree(points, lines)
+    solution = compute_spanning_tree(copy.deepcopy(points),
+            copy.deepcopy(lines))
     import plotting
     plotting.plot(points, lines, solution)
 
