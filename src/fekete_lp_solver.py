@@ -6,58 +6,72 @@ using Gurobi as standard solver
 
 import gurobipy as grb
 from lines import Line2D, LineSegment2D, has_crossing
+from solver_helper import get_edges, preprocess_lines
 from gurobipy import quicksum
 import copy
 import math
-import random
 
-def solve_lp_and_round(points, lines, t):
-    # TODO debug lp formulation
-    pass
-    '''gamma_lp = grb.Model("sariels_lp_2d")
-    edges = get_edges(points)
-    print "edges %s" % edges
-    x = {}
+def nonempty_subsets(points):
+    # TODO implement this routine
+    return []
+
+def cut(subset, edges):
+    # TODO implement this function
+    return []
+
+x = {}
+t = 0
+
+def create_lp(points, edges, lines):
+    lambda_lp = grb.Model("fekete_lp_2d")
+    n = len(points)
     for (p,q) in edges:
-        x[p,q] = gamma_lp.addVar(obj=euclidean_distance(p,q), name='edge|%s - %s|' % (p,q))
+        x[p,q] = lambda_lp.addVar(# TODO maybe needed: obj=euclidean_distance(p,q),
+                name='edge|%s - %s|' % (p,q))
+    t = lambda_lp.addVar(obj=1.0, vtype=grb.GRB.INTEGER)
 
-    gamma_lp.modelSense = grb.GRB.MINIMIZE
+    lambda_lp.modelSense = grb.GRB.MINIMIZE
 
-    gamma_lp.update()
+    lambda_lp.update()
 
-    # crossing constraints
+    # correct number of edges
+    lambda_lp.addConstr(quicksum(x[i,j] for (i,j) in edges) == (n-1))
+
+    subsets = nonempty_subsets(points)
+    # connectivity constraints
+    for subset in subsets:
+        lambda_lp.addConstr(quicksum(x[i,j] for (i,j) in cut(subset, edges))
+                >= 1)
+
+    # bound crossing number
     for line in lines:
         s = quicksum(x[p,q] for (p,q) in edges if has_crossing(line,
             LineSegment2D(p,q)))
         if s != 0.0:
-                gamma_lp.addConstr(
-                        #quicksum(x[p,q] for (p,q) in edges if has_crossing(line,
-                        #LineSegment2D(p,q))) <= t)
-                        s <= t)
+            lambda_lp.addConstr(s <= t)
 
-    # connectivity constraint
-    for p in points:
-        gamma_lp.addConstr(
-                quicksum(x[p,q] for q in points if points.index(p) <
-                    points.index(q)) +
-                quicksum(x[q,p] for q in points if points.index(p) >
-                    points.index(q))
-                >= 1)
-
-    gamma_lp.optimize()
-
-    if gamma_lp.status == grb.GRB.status.OPTIMAL:
-        round_solution = []
-        for (p,q) in edges:
-            print  x[p,q]
-            if (12. * x[p,q].X) >= 1./12.:
-                round_solution.append((p,q))
-        return round_solution
-        '''
+    return lambda_lp
 
 
+def solve_lp(lambda_lp):
+    lambda_lp.update()
+    lambda_lp.optimize()
 
-def compute_spanning_tree(points, lines):
+    if lambda_lp.status == grb.GRB.status.OPTIMAL:
+        return
+
+def round_and_update_lp(edges, solution, alpha):
+    # TODO or find only the heaviest edge and bound it to 1
+    round_edges = []
+    for (i,j) in edges:
+        if (i,j) not in solution and x[i,j].X >= 1./alpha:
+            round_edges.append((i,j))
+            x[i,j].lb = 1.
+            x[i,j].ub = 1.
+    return round_edges
+
+
+def compute_spanning_tree(points, lines, alpha=2.0):
     # TODO implement this
     solution = []
     n = len(points)
@@ -66,11 +80,12 @@ def compute_spanning_tree(points, lines):
 
     i = 1
     number_of_edges = 0
+    lp_model = create_lp(points, edges, lines)
 
     while number_of_edges < n-1:
         print "round i=%s" % i
-        lp_model = solve_lp(points, edges, lines)
-        round_edges = round_and_update_lp(lp_model, edges)
+        solve_lp(lp_model)
+        round_edges = round_and_update_lp(edges, solution, alpha)
         number_of_round_edges = len(round_edges)
         if  number_of_edges + number_of_round_edges <= n-1:
             # TODO check if resulting support graph is planar or has crossings
@@ -93,6 +108,7 @@ def main():
     l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
     lines = [l1, l2, l3]
     solution = compute_spanning_tree(points, lines)
+    print solution
     import plotting
     plotting.plot(points, lines, solution)
 
