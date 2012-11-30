@@ -8,6 +8,7 @@ import copy
 import datagenerator as dgen
 import mult_weights_solver as mws
 import sariel_lp_solver as slpsolv
+import fekete_lp_solver as flpsolv
 from lines import calculate_crossing_number
 import plotting
 
@@ -67,8 +68,13 @@ def get_solver(solver_type):
         def sariel_lp(points, lines):
             return slpsolv.compute_spanning_tree(points, lines)
         return sariel_lp
+    elif solver_type == 'fekete_lp':
+        def fekete_lp(points, lines):
+            return flpsolv.compute_spanning_tree(points, lines)
+        return fekete_lp
     else:
-        raise StandardError('Not yet supported')
+        raise StandardError('Not yet supported this |%s| solver type' %
+                solver_type)
 
 class SpanningTreeExperiment:
     def __init__(self, solver_type, d, n, distribution_type, has_plot, verbose):
