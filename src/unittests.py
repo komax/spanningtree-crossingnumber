@@ -4,7 +4,7 @@
 import unittest
 import mult_weights_solver as mwsolv
 import datagenerator as dgen
-from lines import Line2D, LineSegment2D, has_crossing
+from lines import Line2D, LineSegment2D, has_crossing, preprocess_lines
 import sariel_lp_solver as slpsolv
 import fekete_lp_solver as flpsolv
 import math
@@ -49,6 +49,33 @@ class PreprocessingLinesTestCase(unittest.TestCase):
         self.assertTrue(line.is_on(p))
         self.assertFalse(line.is_below(p))
         self.assertFalse(line.is_above(p))
+
+    def test_preprocessing_lines_omits_duplicates(self):
+        points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
+        l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
+        l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
+        l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
+        # duplicates part
+        l4 = Line2D((2.5, 6.), (3.5, 2.)) # y = -4x + 16
+        l5 = Line2D((2., 2.5), (6., 4.5)) # y = 0.5x + 1.5
+        l6 = Line2D((3., 5.), (5., 6.)) # y = 0.5x + 3.5
+        # lines outside of point set
+        # above
+        l7 = Line2D((0., 7.), (1., 10.)) # y = 3 x + 7
+        # below
+        l8 = Line2D((0., -1.), (6., 1.)) # y = 1/3 x - 1
+        # line between points omit it
+        l9 = Line2D((3.,6.),(5.,7.))
+        lines = [l1, l2, l3, l4, l5, l6, l7, l8, l9]
+        result = preprocess_lines(lines, points)
+        print result
+        self.assertEqual(len(result), 3)
+        self.assertFalse(l7 in result)
+        self.assertFalse(l8 in result)
+        self.assertFalse(l9 in result)
+        self.assertTrue(l1 in result or l4 in result)
+        self.assertTrue(l2 in result or l5 in result)
+        self.assertTrue(l3 in result or l6 in result)
 
 
 class GraphTestCase(unittest.TestCase):

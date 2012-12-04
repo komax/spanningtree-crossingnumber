@@ -117,7 +117,9 @@ def partition_points(line, points):
         else:
             raise StandardError('can not find point p=%s on line=%s' %
                     (p,line))
-    return (above_points, below_points)
+    above_points.sort()
+    below_points.sort()
+    return (tuple(above_points), tuple(below_points))
 
 def preprocess_lines(lines, points):
     lines_dict = {}
@@ -125,6 +127,9 @@ def preprocess_lines(lines, points):
         partition_tuple = partition_points(line, points)
         if not partition_tuple:
             # skip this line, because one point is on this line
+            continue
+        elif not partition_tuple[0] or not partition_tuple[1]:
+            # above or below part is empty, skip line
             continue
         elif lines_dict.has_key(partition_tuple):
             # skip this line, there is one equivalent line stored
