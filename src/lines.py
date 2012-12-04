@@ -117,8 +117,6 @@ def partition_points(line, points):
         else:
             raise StandardError('can not find point p=%s on line=%s' %
                     (p,line))
-    above_points.sort()
-    below_points.sort()
     return (tuple(above_points), tuple(below_points))
 
 def preprocess_lines(lines, points):

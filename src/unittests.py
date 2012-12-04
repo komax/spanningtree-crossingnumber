@@ -68,7 +68,6 @@ class PreprocessingLinesTestCase(unittest.TestCase):
         l9 = Line2D((3.,6.),(5.,7.))
         lines = [l1, l2, l3, l4, l5, l6, l7, l8, l9]
         result = preprocess_lines(lines, points)
-        print result
         self.assertEqual(len(result), 3)
         self.assertFalse(l7 in result)
         self.assertFalse(l8 in result)
