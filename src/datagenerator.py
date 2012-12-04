@@ -60,7 +60,6 @@ def create_lines(p,q, eps):
 
 def generate_lines(points, eps=0.1):
     lines = {}
-    #print points
     for p in points:
         for q in points:
             if points.index(p) < points.index(q):
@@ -68,8 +67,6 @@ def generate_lines(points, eps=0.1):
                     # create all different lines
                     pq_lines = create_lines(p,q, eps)
                     lines[p,q] = pq_lines
-    #for (p,q) in lines.keys():
-    #    print "%s -> %s" % (p,q)
     line_set = []
     for pq_lines in lines.values():
         line_set = line_set + pq_lines
@@ -100,20 +97,12 @@ def generate_random_lines(n, points):
         lb = min_x
     p_points = generate_points_uniformly(n,lb, ub)
     q_points = generate_points_uniformly(n,lb, ub)
-    print p_points
-    print len(p_points)
-    print q_points
-    print len(q_points)
     i = 0
     line_set = []
     for p in p_points:
-        print i
-        print "p =", p
         q = q_points[i]
-        print "q =", q
         line_set.append(Line2D(p,q))
         i += 1
-    print line_set
     return line_set
 
 def main():

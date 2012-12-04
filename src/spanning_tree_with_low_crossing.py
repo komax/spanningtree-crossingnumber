@@ -89,9 +89,7 @@ class SpanningTreeExperiment:
             lines = dgen.generate_lines(self.points)
         else:
             lines = dgen.generate_random_lines(linessize, self.points)
-        print lines
         self.lines = preprocess_lines(lines, self.points)
-        print self.lines
         self.solver_type = solver_type
         self.solver = get_solver(solver_type)
         self.has_plot = has_plot
