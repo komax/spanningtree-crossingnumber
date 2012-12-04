@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 ''' main module to read files, start, evaluate and output different experiments
   See -h for further information
 '''
@@ -9,7 +10,7 @@ import datagenerator as dgen
 import mult_weights_solver as mws
 import sariel_lp_solver as slpsolv
 import fekete_lp_solver as flpsolv
-from lines import calculate_crossing_number
+from lines import calculate_crossing_number, preprocess_lines
 import plotting
 
 def main():
@@ -79,7 +80,7 @@ def get_solver(solver_type):
 class SpanningTreeExperiment:
     def __init__(self, solver_type, d, n, distribution_type, has_plot, verbose):
         self.points = generate_point_set(d, n, distribution_type)
-        self.lines = dgen.generate_lines(self.points)
+        self.lines = preprocess_lines(dgen.generate_lines(self.points))
         self.solver_type = solver_type
         self.solver = get_solver(solver_type)
         self.has_plot = has_plot

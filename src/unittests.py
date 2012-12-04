@@ -1,9 +1,10 @@
+#! /usr/bin/env python
 ''' unit test (suite) module checks functionality of all other programmed modules '''
 
 import unittest
 import mult_weights_solver as mwsolv
 import datagenerator as dgen
-from lines import Line2D, LineSegment2D
+from lines import Line2D, LineSegment2D, has_crossing
 import sariel_lp_solver as slpsolv
 import fekete_lp_solver as flpsolv
 import math
@@ -12,22 +13,43 @@ class CrossingTestCase(unittest.TestCase):
     def test_has_crossing(self):
         line = Line2D((3,2), (5,0)) # y = -x + 5
         line_segment = LineSegment2D((3,0.5), (5,1.5)) # y = 0.5 x - 1
-        self.assertTrue(mwsolv.has_crossing(line, line_segment))
+        self.assertTrue(has_crossing(line, line_segment))
 
     def test_has_no_crossing_linesegment_too_short(self):
         line = Line2D((3,2), (5,0)) # y = -x + 5
         line_segment = LineSegment2D((0,-1), (3,0.5)) # y = 0.5 x - 1
-        self.assertFalse(mwsolv.has_crossing(line, line_segment))
+        self.assertFalse(has_crossing(line, line_segment))
 
     def test_has_no_crossing_line_and_segment_parallel(self):
         line = Line2D((3,2), (5,0)) # y = -x + 5
         line_segment = LineSegment2D((0, 4), (6, -2)) # y = -x + 4
-        self.assertFalse(mwsolv.has_crossing(line, line_segment))
+        self.assertFalse(has_crossing(line, line_segment))
 
     def test_has_also_crossing(self):
         line = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
         line_segment = LineSegment2D((5.,7.), (6., 4.)) # y = -3 + 22
-        self.assertTrue(mwsolv.has_crossing(line, line_segment))
+        self.assertTrue(has_crossing(line, line_segment))
+
+class PreprocessingLinesTestCase(unittest.TestCase):
+    def test_is_above_works(self):
+        line = Line2D((3,2), (5,0)) # y = -x + 5
+        p = (1,4.5)
+        self.assertTrue(line.is_above(p))
+        self.assertFalse(line.is_below(p))
+
+    def test_is_below_works(self):
+        line = Line2D((3,0.5), (5,1.5)) # y = 0.5 x - 1
+        p = (4, -1)
+        self.assertTrue(line.is_below(p))
+        self.assertFalse(line.is_above(p))
+
+    def test_is_on_works(self):
+        line = Line2D((3,0.5), (5,1.5)) # y = 0.5 x - 1
+        p = (4, 1)
+        self.assertTrue(line.is_on(p))
+        self.assertFalse(line.is_below(p))
+        self.assertFalse(line.is_above(p))
+
 
 class GraphTestCase(unittest.TestCase):
     def setUp(self):

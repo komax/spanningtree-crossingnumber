@@ -46,10 +46,20 @@ class Line2D:
         y_diff = math.fabs(y_line - y)
         return y_diff < 1e-13
 
+    def is_above(self, p):
+        (x,y) = p
+        y_line = self(x)
+        return y > y_line and not self.is_on(p)
+
+    def is_below(self, p):
+        (x,y) = p
+        y_line = self(x)
+        return y < y_line and not self.is_on(p)
+
 class LineSegment2D(Line2D):
     def __init__(self, p, q):
         Line2D.__init__(self, p, q)
-    
+
     def __key(self):
         return (self.slope, self.y_intercept)
 
@@ -93,4 +103,34 @@ def calculate_crossing_number(lines, solution):
     for line in lines:
         crossing_number += calculate_crossing_with(line, solution)
     return crossing_number
+
+def partition_points(line, points):
+    above_points = []
+    below_points = []
+    for p in points:
+        if line.is_on(p):
+            return ()
+        elif line.is_above(p):
+            above_points.append(p)
+        elif line.is_below(p):
+            below_points.append(p)
+        else:
+            raise StandardError('can not find point p=%s on line=%s' %
+                    (p,line))
+    return (above_points, below_points)
+
+def preprocess_lines(lines, points):
+    lines_dict = {}
+    for line in lines:
+        partition_tuple = partition_points(line, points)
+        if not partition_tuple:
+            # skip this line, because one point is on this line
+            continue
+        elif lines_dict.has_key(partition_tuple):
+            # skip this line, there is one equivalent line stored
+            continue
+        else:
+            # new equivalent class, store this line
+            lines_dict[partition_tuple] = line
+    return lines_dict.values()
 

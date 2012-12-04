@@ -6,7 +6,7 @@ using Gurobi as standard solver
 
 import gurobipy as grb
 from lines import Line2D, LineSegment2D, has_crossing
-from solver_helper import preprocess_lines, euclidean_distance, get_edges
+from solver_helper import euclidean_distance, get_edges
 from gurobipy import quicksum
 import copy
 import math
@@ -100,8 +100,6 @@ def estimate_t(points):
     return math.sqrt(len(points))
 
 def compute_spanning_tree(points, lines):
-    lines = preprocess_lines(lines)
-
     solution = []
     i = 1
     while len(points) > 1:

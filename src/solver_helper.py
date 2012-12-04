@@ -2,10 +2,6 @@
 
 import math
 
-def preprocess_lines(lines):
-    # TODO remove unnecessary lines
-    return lines
-
 def get_edges(points):
     edges = []
     for p in points:

@@ -6,7 +6,7 @@ using Gurobi as standard solver
 
 import gurobipy as grb
 from lines import Line2D, LineSegment2D, has_crossing
-from solver_helper import get_edges, preprocess_lines
+from solver_helper import get_edges
 from gurobipy import quicksum
 import copy
 import math
@@ -76,7 +76,6 @@ def compute_spanning_tree(points, lines, alpha=2.0):
     solution = []
     n = len(points)
     edges = get_edges(points)
-    lines = preprocess_lines(lines)
 
     i = 1
     number_of_edges = 0

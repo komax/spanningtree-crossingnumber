@@ -5,7 +5,6 @@ the line set, using the multiplicative weights method
 import copy
 from lines import Line2D, LineSegment2D, has_crossing
 from lines import calculate_crossing_with, calculate_crossing_number
-from solver_helper import preprocess_lines
 
 '''
 This class holds all functionality of a graph between different connected
@@ -117,7 +116,6 @@ def find_min_edge(selected_edges, lines, line_weights):
     return min_edge
 
 def compute_spanning_tree(points, lines):
-    lines = preprocess_lines(lines)
     solution = []
     number_of_crossings = {}
     weights = {}
