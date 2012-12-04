@@ -7,10 +7,10 @@ import random
 import math
 from lines import Line2D, LineSegment2D
 
-def generate_points_uniformly(n, ub=100.0):
+def generate_points_uniformly(n, lb=0.0, ub=100.0):
     if ub <= n:
         ub *= n
-    points = [(random.uniform(0,ub), random.uniform(0,ub))
+    points = [(random.uniform(lb,ub), random.uniform(lb,ub))
             for i in range(n)]
     return points
 
@@ -73,6 +73,47 @@ def generate_lines(points, eps=0.1):
     line_set = []
     for pq_lines in lines.values():
         line_set = line_set + pq_lines
+    return line_set
+
+def generate_random_lines(n, points):
+    assert n > 0
+    min_x = +100000.
+    max_x = -100000.
+    min_y = min_x
+    max_y = max_x
+    for (x,y) in points:
+        if x < min_x:
+            min_x = x
+        if x > max_x:
+            max_x = x
+        if y < min_y:
+            min_y = y
+        if y > min_y:
+            max_y = y
+    if max_x > max_y:
+        ub = max_x
+    else:
+        ub = max_y
+    if min_x > min_y:
+        lb = min_y
+    else:
+        lb = min_x
+    p_points = generate_points_uniformly(n,lb, ub)
+    q_points = generate_points_uniformly(n,lb, ub)
+    print p_points
+    print len(p_points)
+    print q_points
+    print len(q_points)
+    i = 0
+    line_set = []
+    for p in p_points:
+        print i
+        print "p =", p
+        q = q_points[i]
+        print "q =", q
+        line_set.append(Line2D(p,q))
+        i += 1
+    print line_set
     return line_set
 
 def main():
