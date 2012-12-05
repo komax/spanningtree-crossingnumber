@@ -10,6 +10,7 @@ import datagenerator as dgen
 import mult_weights_solver as mws
 import sariel_lp_solver as slpsolv
 import fekete_lp_solver as flpsolv
+import opt_solver
 from lines import calculate_crossing_number, preprocess_lines
 import plotting
 
@@ -78,6 +79,10 @@ def get_solver(solver_type):
         def fekete_lp(points, lines):
             return flpsolv.compute_spanning_tree(points, lines)
         return fekete_lp
+    elif solver_type == 'opt':
+        def fekete_opt_ip(points, lines):
+            return opt_solver.compute_spanning_tree(points, lines)
+        return fekete_opt_ip
     else:
         raise StandardError('Not yet supported this |%s| solver type' %
                 solver_type)

@@ -10,14 +10,24 @@ from solver_helper import get_edges
 from gurobipy import quicksum
 import copy
 import math
+import itertools
 
 def nonempty_subsets(points):
-    # TODO implement this routine
-    return []
+    for i in range(1,len(points)):
+        for subset in itertools.combinations(points, i):
+            yield list(subset)
 
 def cut(subset, edges):
+    cut_edges = []
     # TODO implement this function
-    return []
+    for i in subset:
+        for (i,j) in edges.select(i, '*'):
+            if j not in subset and (i,j) not in cut_edges:
+                cut_edges.append((i,j))
+        for (j,i) in edges.select('*', i):
+            if j not in subset and (j,i) not in cut_edges:
+                cut_edges.append((j,i))
+    return cut_edges
 
 x = {}
 t = 0
@@ -62,27 +72,41 @@ def solve_lp(lambda_lp):
 
 def round_and_update_lp(edges, solution, alpha):
     # TODO or find only the heaviest edge and bound it to 1
-    round_edges = []
+    (max_i, max_j) = (None, None)
+    max_val = None
     for (i,j) in edges:
-        if (i,j) not in solution and x[i,j].X >= 1./alpha:
-            round_edges.append((i,j))
-            x[i,j].lb = 1.
-            x[i,j].ub = 1.
-    return round_edges
+        if x[i,j].X > max_val:
+            (max_i, max_j) = (i,j)
+            max_val = x[i,j].X
+
+    x[max_i,max_j].lb = 1.
+    x[max_i,max_j].ub = 1.
+    edges.remove((max_i,max_j))
+    if max_i > max_j:
+        (max_i, max_j) = (max_j, max_i)
+    return [(max_i, max_j)]
+    #round_edges = []
+    #for (i,j) in edges:
+    #    if (i,j) not in solution and x[i,j].X >= 1./alpha:
+    #        x[i,j].lb = 1.
+    #        x[i,j].ub = 1.
+    #        if i > j:
+    #            (i,j) = (j,i)
+    #        round_edges.append((i,j))
+    #return round_edges'''
 
 
 def compute_spanning_tree(points, lines, alpha=2.0):
-    # TODO implement this
     solution = []
     n = len(points)
-    edges = get_edges(points)
+    edges = grb.tuplelist(get_edges(points))
 
-    i = 1
+    #i = 1
     number_of_edges = 0
     lp_model = create_lp(points, edges, lines)
 
     while number_of_edges < n-1:
-        print "round i=%s" % i
+        #print "round i=%s" % i
         solve_lp(lp_model)
         round_edges = round_and_update_lp(edges, solution, alpha)
         number_of_round_edges = len(round_edges)
@@ -96,7 +120,7 @@ def compute_spanning_tree(points, lines, alpha=2.0):
             solution += round_edges[:l]
             number_of_edges = n-1
             break
-        i += 1
+        #i += 1
     return solution
 
 def main():
