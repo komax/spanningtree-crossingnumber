@@ -18,16 +18,18 @@ def nonempty_subsets(points):
             yield list(subset)
 
 def cut(subset, edges):
-    cut_edges = []
+    #cut_edges = []
     # TODO implement this function
     for i in subset:
         for (i,j) in edges.select(i, '*'):
-            if j not in subset and (i,j) not in cut_edges:
-                cut_edges.append((i,j))
+            if j not in subset:
+                yield (i,j)
+                #cut_edges.append((i,j))
         for (j,i) in edges.select('*', i):
-            if j not in subset and (j,i) not in cut_edges:
-                cut_edges.append((j,i))
-    return cut_edges
+            if j not in subset:
+                yield (j,i)
+                #cut_edges.append((j,i))
+    #return cut_edges
 
 x = {}
 t = 0
