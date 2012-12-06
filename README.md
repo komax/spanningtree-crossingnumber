@@ -5,6 +5,8 @@ Repository for various experiments for finding a Spanning Tree with Low Crossing
 input: set of points P (n=|P|) [and optional a set of lines L]
 output: set of edges F spans a tree for P with crossing number t = max crossings of F with one line in L
 
+For further information see [Wiki](https://github.com/komax/spanningtree-crossingnumber/wiki)
+
 
 Kinds of experiments
 ======================
