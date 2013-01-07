@@ -76,12 +76,17 @@ class LineSegment2D(Line2D):
         (x,y) = p
         if self.is_between(x):
             return Line2D.is_on(self, p)
+        else:
+            return False
 
     def __call__(self, x):
         if self.is_between(x):
             return Line2D.__call__(self, x)
 
 def has_crossing(line, line_seg):
+    '''
+    Has line a crossing with the line segment
+    '''
     if line.slope == line_seg.slope:
         return False
     else:
@@ -91,6 +96,9 @@ def has_crossing(line, line_seg):
         return line_seg.is_between(x_s)
 
 def calculate_crossing_with(line, edges):
+    '''
+    for a given line calculate the crossing number (int) over all edges
+    '''
     crossings = 0
     for (p,q) in edges:
         line_segment = LineSegment2D(p,q)
@@ -99,12 +107,31 @@ def calculate_crossing_with(line, edges):
     return crossings
 
 def calculate_crossing_number(lines, solution):
+    '''
+    for all lines and edges in the solution compute the overall summed
+    crossing number
+    '''
     crossing_number = 0
     for line in lines:
         crossing_number += calculate_crossing_with(line, solution)
     return crossing_number
 
+def calculate_maximimum_crossing_number(lines, solution):
+    '''
+    for all lines and edges in the solution compute the maximum crossing number
+    '''
+    max_crossing_number = 0
+    for line in lines:
+        crossing_number = calculate_crossing_with(line, solution)
+        if crossing_number > max_crossing_number:
+            max_crossing_number = crossing_number
+    return max_crossing_number
+
 def partition_points(line, points):
+    ''' partitioning of point set with discriminative function line
+        (points above the line as tuples , points below the line as tuples)
+        both parts can be empty
+    '''
     above_points = []
     below_points = []
     for p in points:
@@ -120,6 +147,10 @@ def partition_points(line, points):
     return (tuple(above_points), tuple(below_points))
 
 def preprocess_lines(lines, points):
+    ''' removes lines that have same partitioning of the point set as
+        equivalent ones
+        lines above or below the point set are also removed
+    '''
     lines_dict = {}
     for line in lines:
         partition_tuple = partition_points(line, points)
