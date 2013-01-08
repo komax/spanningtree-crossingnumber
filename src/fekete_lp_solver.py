@@ -13,13 +13,19 @@ import math
 import itertools
 
 def nonempty_subsets(points):
+    '''
+    returns all non empty subsets from the points set as generator
+    '''
     for i in range(1,len(points)):
         for subset in itertools.combinations(points, i):
             yield list(subset)
 
 def cut(subset, edges):
+    '''
+    returns as generator all edges ij containing i in subset and j not in
+    subset (or the other way round)
+    '''
     #cut_edges = []
-    # TODO implement this function
     for i in subset:
         for (i,j) in edges.select(i, '*'):
             if j not in subset:
@@ -31,10 +37,15 @@ def cut(subset, edges):
                 #cut_edges.append((j,i))
     #return cut_edges
 
+# global variables for decision variables
 x = {}
 t = 0
 
 def create_lp(points, edges, lines):
+    '''
+    create a gurobi model containing LP formulation like that in the Fekete
+    paper
+    '''
     lambda_lp = grb.Model("fekete_lp_2d")
     n = len(points)
     for (p,q) in edges:
@@ -66,6 +77,9 @@ def create_lp(points, edges, lines):
 
 
 def solve_lp(lambda_lp):
+    '''
+    update (if needed) and solve the LP
+    '''
     lambda_lp.update()
     lambda_lp.optimize()
 
@@ -73,11 +87,17 @@ def solve_lp(lambda_lp):
         return
 
 def round_and_update_lp(edges, solution, alpha):
+    '''
+    find edges that are in the fractional solution, round them up and update the
+    LP model
+
+    returns the selected edges in the fractional solution (of this iteration)
+    '''
     # TODO or find only the heaviest edge and bound it to 1
     (max_i, max_j) = (None, None)
     max_val = None
     for (i,j) in edges:
-        if x[i,j].X > max_val:
+        if x[i,j].X > 1./3. and x[i,j].X > max_val:
             (max_i, max_j) = (i,j)
             max_val = x[i,j].X
 
@@ -110,6 +130,8 @@ def compute_spanning_tree(points, lines, alpha=2.0):
     while number_of_edges < n-1:
         #print "round i=%s" % i
         solve_lp(lp_model)
+        for var in lp_model.getVars():
+            print var
         round_edges = round_and_update_lp(edges, solution, alpha)
         number_of_round_edges = len(round_edges)
         if  number_of_edges + number_of_round_edges <= n-1:

@@ -8,6 +8,10 @@ from pylab import frange
 import datagenerator as dtgen
 
 def plot(points, lines, solution):
+    '''
+    plots points as blue circles, lines as red ones and the edges from the
+    spanning tree as green line segments
+    '''
     xs = []
     ys = []
     for (x,y) in points:

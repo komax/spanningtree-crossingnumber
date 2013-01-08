@@ -13,11 +13,17 @@ import math
 import itertools
 
 def nonempty_subsets(points):
+    '''
+    same as in fekete
+    '''
     for i in range(1,len(points)):
         for subset in itertools.combinations(points, i):
             yield list(subset)
 
 def cut(subset, edges):
+    '''
+    same as in fekete
+    '''
     for i in subset:
         for (i,j) in edges.select(i, '*'):
             if j not in subset:
@@ -30,6 +36,9 @@ x = {}
 t = 0
 
 def create_ip(points, edges, lines):
+    '''
+    creates a gurobi model containing Fekete IP formulation
+    '''
     lambda_ip = grb.Model("fekete_ip_2d")
     n = len(points)
     for (p,q) in edges:
@@ -61,6 +70,10 @@ def create_ip(points, edges, lines):
 
 
 def solve_ip(lambda_ip):
+    '''
+    computes solution in the IP
+    '''
+    # TODO is this update call necessary
     lambda_ip.update()
     lambda_ip.optimize()
 
@@ -68,6 +81,9 @@ def solve_ip(lambda_ip):
         return
 
 def create_solution(edges):
+    '''
+    select from decision variable all edges in the solution
+    '''
     solution = []
     for (i,j) in edges:
         if x[i,j].X == 1.:

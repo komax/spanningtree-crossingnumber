@@ -6,13 +6,16 @@ import copy
 from lines import Line2D, LineSegment2D, has_crossing
 from lines import calculate_crossing_with, calculate_crossing_number
 
-'''
-This class holds all functionality of a graph between different connected
-components. Some boolean methods for checking connectivity, adjacent of
-vertices
-'''
 class Graph:
+    '''
+    This class holds all functionality of a graph between different connected
+    components. Some boolean methods for checking connectivity, adjacent of
+    vertices
+    '''
     def __init__(self, connected_components):
+        ''' connected components as iterable. checks that each one is non
+            empty
+        '''
         assert connected_components
         self.vertices = []
         self.connected_components = connected_components
@@ -28,6 +31,8 @@ class Graph:
                         self.adjacent_list[p] += other_c
 
     def in_same_connected_component(self, u, v):
+        ''' are point u and v in the same connected component
+        '''
         for c in self.connected_components:
             if u in c:
                 return v in c
@@ -37,6 +42,8 @@ class Graph:
             return False
 
     def merge_connected_components(self, c, oc):
+        ''' merge of two different connected components to a new one
+        '''
         assert c in self.connected_components
         assert oc in self.connected_components
         assert c != oc
@@ -51,6 +58,9 @@ class Graph:
         return
 
     def merge_cc_with_vertics(self, u, v):
+        ''' merge of two connected components but parameters are two points
+            from the corresponding connected components
+        '''
         assert u != v
         try:
             c1 = self.get_connected_component(u)
@@ -62,6 +72,9 @@ class Graph:
 
 
     def is_adjacent(self, u, v):
+        '''
+        is there an edge between point u and v
+        '''
         if self.adjacent_list.has_key(u):
             return v in self.adjacent_list[u]
         elif self.adjacent_list.has_key(v):
@@ -70,12 +83,18 @@ class Graph:
             return False
 
     def get_adjacent_vertices(self, u):
+        '''
+        retrieve all adajecent points reached from u
+        '''
         if self.adjacent_list.has_key(u):
             return self.adjacent_list[u]
         else:
             return []
 
     def get_edges(self):
+        '''
+        all possible edges in the given graph
+        '''
         edges = []
         for u in self.adjacent_list:
             for v in self.adjacent_list[u]:
@@ -84,6 +103,9 @@ class Graph:
         return edges
 
     def get_connected_component(self, u):
+        '''
+        search the connected component for point u
+        '''
         for c in self.connected_components:
             if u in c:
                 return c
@@ -91,16 +113,26 @@ class Graph:
             raise StandardError('can not find vertex=%s in this graph' % u)
 
     def number_of_connected_components(self):
+        '''
+        how many connected components are in the graph
+        '''
         return len(self.connected_components)
 
 
 def create_graph(points):
+    '''
+    factory method for creating a Graph object from a point set
+    '''
     connected_components = []
     for p in points:
         connected_components.append([p])
     return Graph(connected_components)
 
 def find_min_edge(selected_edges, lines, line_weights):
+    '''
+    search for the minimum weight edge between two connected components with
+    lowest crossing weight
+    '''
     weights = {}
     for edge in selected_edges:
         (p,q) = edge

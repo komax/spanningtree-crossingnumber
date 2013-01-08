@@ -8,6 +8,9 @@ import math
 from lines import Line2D, LineSegment2D
 
 def generate_points_uniformly(n, lb=0.0, ub=100.0):
+    '''
+    sample n 2-D points in range lb..ub
+    '''
     if ub <= n:
         ub *= n
     points = [(random.uniform(lb,ub), random.uniform(lb,ub))
@@ -15,6 +18,10 @@ def generate_points_uniformly(n, lb=0.0, ub=100.0):
     return points
 
 def generate_points_grid(n):
+    '''
+    sample a grid with n points. All points are slightly pertubated to permit
+    vertical and horizontal lines
+    '''
     root_n = int(math.ceil(math.sqrt(n)))
     eps = 0.1
     x = 0.0
@@ -32,6 +39,9 @@ def generate_points_grid(n):
     return points
 
 def create_lines(p,q, eps):
+    '''
+    for two points p,q compute all four possible separation lines
+    '''
     (x1, y1) = p
     (x2, y2) = q
     lines = []
@@ -59,6 +69,9 @@ def create_lines(p,q, eps):
     return lines
 
 def generate_lines(points, eps=0.1):
+    ''' compute all possible seperators (lines) on the point set. There maybe
+        duplicates within this set
+    '''
     lines = {}
     for p in points:
         for q in points:
@@ -73,6 +86,9 @@ def generate_lines(points, eps=0.1):
     return line_set
 
 def generate_random_lines(n, points):
+    '''
+    generate n random lines within the value range of the point set
+    '''
     assert n > 0
     min_x = +100000.
     max_x = -100000.
@@ -106,6 +122,9 @@ def generate_random_lines(n, points):
     return line_set
 
 def main():
+    '''
+    for minor testing
+    '''
     points = generate_points_uniformly(4)
     print points
     lines = generate_lines(points)

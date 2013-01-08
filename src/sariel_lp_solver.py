@@ -12,18 +12,29 @@ import copy
 import math
 import random
 
-def solve_lp_and_round(points, lines, t):
+def solve_lp_and_round(points, lines):
+    '''
+    creates a Gurobi model for Sariel LP formulation and round it
+    deterministically
+
+    return the selection of edges that are in the fractional solution
+    '''
     # TODO debug lp formulation
     gamma_lp = grb.Model("sariels_lp_2d")
+    n = len(points)
     edges = get_edges(points)
     print "edges %s" % edges
     x = {}
     for (p,q) in edges:
         x[p,q] = gamma_lp.addVar(obj=euclidean_distance(p,q), name='edge|%s - %s|' % (p,q))
 
+    t = gamma_lp.addVar(obj=1.0)
     gamma_lp.modelSense = grb.GRB.MINIMIZE
 
     gamma_lp.update()
+
+    # crossing number range:
+    gamma_lp.addConstr(0 <= t <= math.sqrt(n))
 
     # crossing constraints
     for line in lines:
@@ -48,6 +59,7 @@ def solve_lp_and_round(points, lines, t):
 
     if gamma_lp.status == grb.GRB.status.OPTIMAL:
         round_solution = []
+        print t
         for (p,q) in edges:
             print  x[p,q]
             if (12. * x[p,q].X) >= 1./12.:
@@ -55,9 +67,13 @@ def solve_lp_and_round(points, lines, t):
         return round_solution
 
 def has_proper_no_of_connected_components(points, ccs):
-    # TODO in planar case always true. implement it
+    '''
+    boolean function that checks if the number of connected components is below
+    19/20 * number of points
+    '''
     no_connected_components = len(ccs)
     ratio_points = 19./20. * len(points)
+    # TODO remove print statement
     print "# connected components=%s <= %s, val=%s" % (no_connected_components,
             ratio_points, no_connected_components <= ratio_points)
     if no_connected_components <= ratio_points:
@@ -66,6 +82,10 @@ def has_proper_no_of_connected_components(points, ccs):
         return False
 
 def connected_components(points, edges):
+    '''
+    compute for a graph (points, edges) the connected components as a list of
+    connected components (list of vertices)
+    '''
     remaining_points = copy.deepcopy(points)
     edges = grb.tuplelist(edges)
     ccs = []
@@ -107,7 +127,7 @@ def compute_spanning_tree(points, lines):
         print "round %i" % i
         t = estimate_t(points)
         print "estimated t=%s" % t
-        round_edges = solve_lp_and_round(points, lines, t)
+        round_edges = solve_lp_and_round(points, lines)
         print "round edges %s" % round_edges
         ccs = connected_components(points, round_edges)
         if not has_proper_no_of_connected_components(points,

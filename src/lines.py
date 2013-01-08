@@ -116,7 +116,7 @@ def calculate_crossing_number(lines, solution):
         crossing_number += calculate_crossing_with(line, solution)
     return crossing_number
 
-def calculate_maximimum_crossing_number(lines, solution):
+def maximum_crossing_number(lines, solution):
     '''
     for all lines and edges in the solution compute the maximum crossing number
     '''
