@@ -142,6 +142,7 @@ def compute_spanning_tree(points, lines):
             p = connected_component[repr_index]
             new_point_set.append(p)
         points = new_point_set
+        # TODO update line set and remove not necessary lines
         solution += round_edges
         i += 1
     return solution
