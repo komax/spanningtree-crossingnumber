@@ -85,6 +85,8 @@ def solve_lp(lambda_lp):
 
     if lambda_lp.status == grb.GRB.status.OPTIMAL:
         return
+    else:
+        raise StandardError('lp has no optimum')
 
 def round_and_update_lp(edges, solution, alpha):
     '''

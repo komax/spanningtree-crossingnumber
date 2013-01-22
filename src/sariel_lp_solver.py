@@ -5,7 +5,7 @@ using Gurobi as standard solver
 '''
 
 import gurobipy as grb
-from lines import Line2D, LineSegment2D, has_crossing
+from lines import Line2D, LineSegment2D, has_crossing, preprocess_lines
 from solver_helper import euclidean_distance, get_edges
 from gurobipy import quicksum
 import copy
@@ -62,8 +62,14 @@ def solve_lp_and_round(points, lines):
         print t
         for (p,q) in edges:
             print  x[p,q]
-            if (12. * x[p,q].X) >= 1./12.:
+            probability = x[p,q].X
+            ub = 1000
+            sample = random.randint(0,ub)
+            if sample <= ub * probability:
                 round_solution.append((p,q))
+            # TODO add later deterministic rounding scheme
+            #if (12. * x[p,q].X) >= 1./12.:
+            #    round_solution.append((p,q))
         return round_solution
 
 def has_proper_no_of_connected_components(points, ccs):
@@ -84,11 +90,13 @@ def has_proper_no_of_connected_components(points, ccs):
 def connected_components(points, edges):
     '''
     compute for a graph (points, edges) the connected components as a list of
-    connected components (list of vertices)
+    connected components (dict keys is a list of vertices and value is a list
+    of edges)
     '''
     remaining_points = copy.deepcopy(points)
     edges = grb.tuplelist(edges)
     ccs = []
+    ccs_edges = []
 
     while remaining_points:
         p = remaining_points.pop()
@@ -103,18 +111,35 @@ def connected_components(points, edges):
             queue.append(v)
 
         new_connected_component = [p]
+        edges_connected_component = []
         while queue:
-            q = queue.pop(0)
+            q = queue.pop()
+            print (p,q)
             new_connected_component.append(q)
             q_edges = edges.select(q, "*") + edges.select("*", q)
+            if (p,q) in q_edges:
+                if p < q:
+                    edges_connected_component.append((p,q))
+                else:
+                    edges_connected_component.append((q,p))
+            elif (q,p) in q_edges:
+                if p < q:
+                    edges_connected_component.append((p,q))
+                else:
+                    edges_connected_component.append((q,p))
             for (u,v) in q_edges:
                 if v == q:
                     (u,v) = (v,u)
                 if not v in new_connected_component and v in remaining_points:
                     queue.append(v)
                     remaining_points.remove(v)
+            p = q
+        edges_connected_component.sort()
+        print edges_connected_component
         ccs.append(new_connected_component)
-    return ccs
+        ccs_edges.append(edges_connected_component)
+    print ccs_edges
+    return (ccs,ccs_edges)
 
 def estimate_t(points):
     return math.sqrt(len(points))
@@ -129,7 +154,7 @@ def compute_spanning_tree(points, lines):
         print "estimated t=%s" % t
         round_edges = solve_lp_and_round(points, lines)
         print "round edges %s" % round_edges
-        ccs = connected_components(points, round_edges)
+        (ccs,ccs_edges) = connected_components(points, round_edges)
         if not has_proper_no_of_connected_components(points,
                 ccs):
             continue
@@ -143,6 +168,7 @@ def compute_spanning_tree(points, lines):
             new_point_set.append(p)
         points = new_point_set
         # TODO update line set and remove not necessary lines
+        lines = preprocess_lines(lines, points)
         solution += round_edges
         i += 1
     return solution
