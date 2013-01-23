@@ -4,7 +4,7 @@ the line set, using the multiplicative weights method
 '''
 import copy
 from lines import Line2D, LineSegment2D, has_crossing
-from lines import calculate_crossing_with, calculate_crossing_number
+from lines import calculate_crossing_with, crossing_number
 
 class Graph:
     '''
@@ -172,7 +172,7 @@ def main():
     lines = [l1, l2, l3]
     solution = compute_spanning_tree(copy.deepcopy(points),
             copy.deepcopy(lines))
-    print "crossing number = %s" % calculate_crossing_number(lines, solution)
+    print "crossing number = %s" % crossing_number(lines, solution)
     import plotting
     plotting.plot(points, lines, solution)
 

@@ -106,10 +106,9 @@ def calculate_crossing_with(line, edges):
             crossings += 1
     return crossings
 
-def calculate_crossing_number(lines, solution):
+def calculate_crossings(lines, solution):
     '''
-    for all lines and edges in the solution compute the overall summed
-    crossing number
+    for all lines and edges in the solution compute the overall crossings
     '''
     crossing_number = 0
     for line in lines:
@@ -126,6 +125,19 @@ def maximum_crossing_number(lines, solution):
         if crossing_number > max_crossing_number:
             max_crossing_number = crossing_number
     return max_crossing_number
+
+crossing_number = maximum_crossing_number
+
+def minimum_crossing_number(lines, solution):
+    '''
+    for all lines and edges in the solution compute the minimum crossing number
+    '''
+    min_crossing_number = len(solution)
+    for line in lines:
+        crossing_number = calculate_crossing_with(line, solution)
+        if crossing_number < min_crossing_number:
+            min_crossing_number = crossing_number
+    return min_crossing_number
 
 def partition_points(line, points):
     ''' partitioning of point set with discriminative function line

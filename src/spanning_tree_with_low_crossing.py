@@ -11,15 +11,15 @@ import mult_weights_solver as mws
 import sariel_lp_solver as slpsolv
 import fekete_lp_solver as flpsolv
 import opt_solver
-from lines import maximum_crossing_number, preprocess_lines
+from lines import maximum_crossing_number, minimum_crossing_number
+from lines import calculate_crossings, preprocess_lines
 import plotting
 
 def main():
     args = parse_args()
     experiment = prepare_experiment(args)
     experiment.run()
-    print "CPU time (musec) %s" % experiment.elapsed_time
-    print "crossing number=%s" % experiment.crossing_number
+    experiment.print_results()
     experiment.plot()
 
 # constants for options
@@ -135,6 +135,30 @@ class SpanningTreeExperiment:
         self.elapsed_time = end - start
         self.crossing_number = maximum_crossing_number(self.lines,
                 self.solution)
+
+    def print_results(self):
+        '''
+        print all important statistics to STDOUT: crossing number, elapsed
+        CPU time. If verbose flag is set:
+         - number of points
+         - number of lines,
+         - minimum crossing number,
+         - sum of all crossings and
+         - average crossing number
+        '''
+        print "CPU time (musec) %s" % self.elapsed_time
+        print "crossing number=%s" % self.crossing_number
+        if self.verbose:
+            print "number of points=%s" % len(self.points)
+            no_lines = len(self.lines)
+            print "number of lines=%s" % no_lines
+            min_crossing_number = minimum_crossing_number(self.lines,
+                    self.solution)
+            print "minimum crossing number=%s" % min_crossing_number
+            sum_of_crossings = calculate_crossings(self.lines, self.solution)
+            print "all crossings=%s" % sum_of_crossings
+            average_crossing_number = float(sum_of_crossings) / no_lines
+            print "average crossing number=%s" % average_crossing_number
 
     def plot(self):
         '''
