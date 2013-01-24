@@ -47,6 +47,8 @@ def create_ip(points, edges, lines):
     t = lambda_ip.addVar(obj=1.0, vtype=grb.GRB.INTEGER)
 
     lambda_ip.modelSense = grb.GRB.MINIMIZE
+    lambda_ip.setParam('Cuts', 3)
+    lambda_ip.setParam('Threads', 4)
 
     lambda_ip.update()
 

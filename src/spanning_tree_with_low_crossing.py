@@ -11,8 +11,7 @@ import mult_weights_solver as mws
 import sariel_lp_solver as slpsolv
 import fekete_lp_solver as flpsolv
 import opt_solver
-from lines import maximum_crossing_number, minimum_crossing_number
-from lines import calculate_crossings, preprocess_lines
+from lines import crossing_tuple, preprocess_lines
 import plotting
 
 def main():
@@ -133,8 +132,11 @@ class SpanningTreeExperiment:
         self.solution = self.solver(points, lines)
         end = time.time()
         self.elapsed_time = end - start
-        self.crossing_number = maximum_crossing_number(self.lines,
-                self.solution)
+        (min_crossing_number, crossing_number, crossings) = \
+            crossing_tuple(self.lines, self.solution)
+        self.min_crossing_number = min_crossing_number
+        self.crossing_number = crossing_number
+        self.crossings = crossings
 
     def print_results(self):
         '''
@@ -146,18 +148,15 @@ class SpanningTreeExperiment:
          - sum of all crossings and
          - average crossing number
         '''
-        print "CPU time (musec) %s" % self.elapsed_time
+        print "CPU time (in sec) %s" % self.elapsed_time
         print "crossing number=%s" % self.crossing_number
         if self.verbose:
             print "number of points=%s" % len(self.points)
             no_lines = len(self.lines)
             print "number of lines=%s" % no_lines
-            min_crossing_number = minimum_crossing_number(self.lines,
-                    self.solution)
-            print "minimum crossing number=%s" % min_crossing_number
-            sum_of_crossings = calculate_crossings(self.lines, self.solution)
-            print "all crossings=%s" % sum_of_crossings
-            average_crossing_number = float(sum_of_crossings) / no_lines
+            print "minimum crossing number=%s" % self.min_crossing_number
+            print "all crossings=%s" % self.crossings
+            average_crossing_number = float(self.crossings) / no_lines
             print "average crossing number=%s" % average_crossing_number
 
     def plot(self):

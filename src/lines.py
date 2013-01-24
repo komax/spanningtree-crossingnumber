@@ -106,6 +106,23 @@ def calculate_crossing_with(line, edges):
             crossings += 1
     return crossings
 
+def crossing_tuple(lines, solution):
+    '''
+    returns (minimum crossing number, crossing number, overall crossings)
+    on all lines with edges
+    '''
+    crossings = 0
+    max_crossing_number = 0
+    min_crossing_number = len(solution)
+    for line in lines:
+        crossing_number = calculate_crossing_with(line, solution)
+        crossings += crossing_number
+        if crossing_number > max_crossing_number:
+            max_crossing_number = crossing_number
+        if crossing_number < min_crossing_number:
+            min_crossing_number = crossing_number
+    return (min_crossing_number, max_crossing_number, crossings)
+
 def calculate_crossings(lines, solution):
     '''
     for all lines and edges in the solution compute the overall crossings
