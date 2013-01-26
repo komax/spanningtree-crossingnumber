@@ -111,7 +111,24 @@ class SpanningTreeExperiment:
 
         self.elapsed_time = None
         self.solution = None
+        self.min_crossing_number = None
         self.crossing_number = None
+        self.crossings = None
+
+    def clean_up(self):
+        '''
+        cleaning up old results
+        '''
+        self.elapsed_time = self.solution = self.min_crossing_number = None
+        self.crossing_number = self.crossings = None
+
+
+    def update_point_set(self, d, n, distribution_type):
+        '''
+        set a new point set like specified and update also the line set
+        '''
+        self.points = generate_point_set(d, n, distribution_type)
+        self.lines = preprocess_lines(lines, self.points)
 
     def update_solver(self, solver_type):
         '''
@@ -166,6 +183,38 @@ class SpanningTreeExperiment:
         if self.has_plot:
             plotting.plot(self.points, self.lines, self.solution)
         return
+
+    def results(self):
+        '''
+        returns all statistics about the experiment and its results as list:
+        [
+        # of points,
+        # of lines,
+        CPU time in seconds,
+        crossing number,
+        minimum crossing number,
+        average crossing number,
+        crossings (overall)
+        ]
+        '''
+        no_lines = len(self.lines)
+        results = [ str(len(self.points)), str(no_lines),
+                str(self.elapsed_time), str(self.crossing_number),
+                str(self.min_crossing_number)]
+        average_crossing_number = float(self.crossings) / no_lines
+        results.append(str(average_crossing_number))
+        results.append(str(self.crossings))
+        return results
+
+    def results_csv(self):
+        '''
+        returns all statistics about the experiment and its results as string:
+        # of points;# of lines;CPU time in seconds; crossing number;
+        minimum crossing number; average crossing number; crossings (overall)
+        '''
+        res = self.results()
+        return ";".join(res)
+
 
 if __name__ == '__main__':
     main()
