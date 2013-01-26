@@ -5,7 +5,7 @@ using Gurobi as standard solver
 '''
 
 import gurobipy as grb
-from lines import Line2D, LineSegment2D, has_crossing
+from lines import get_line, get_line_segment, has_crossing
 from solver_helper import get_edges
 from gurobipy import quicksum
 import copy
@@ -64,7 +64,7 @@ def create_ip(points, edges, lines):
     # bound crossing number
     for line in lines:
         s = quicksum(x[p,q] for (p,q) in edges if has_crossing(line,
-            LineSegment2D(p,q)))
+            get_line_segment(p,q)))
         if s != 0.0:
             lambda_ip.addConstr(s <= t)
 
@@ -108,9 +108,9 @@ def compute_spanning_tree(points, lines):
 def main():
     points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.),
             (4.25, 5.)]
-    l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
-    l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
-    l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
+    l1 = get_line((2., 6.), (3., 2.)) # y = -4x + 14
+    l2 = get_line((2., 3.), (6., 5.)) # y = 0.5x + 2
+    l3 = get_line((3., 5.5), (5., 6.5)) # y = 0.5x + 4
     lines = [l1, l2, l3]
     solution = compute_spanning_tree(points, lines)
     print solution

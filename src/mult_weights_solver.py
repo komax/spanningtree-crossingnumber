@@ -3,7 +3,7 @@ computes a spanning tree for a point set s.t. it has low crossing number to
 the line set, using the multiplicative weights method
 '''
 import copy
-from lines import Line2D, LineSegment2D, has_crossing
+from lines import get_line, get_line_segment, has_crossing
 from lines import calculate_crossing_with, crossing_number
 
 class Graph:
@@ -136,7 +136,7 @@ def find_min_edge(selected_edges, lines, line_weights):
     weights = {}
     for edge in selected_edges:
         (p,q) = edge
-        line_segment = LineSegment2D(p,q)
+        line_segment = get_line_segment(p,q)
         weights[edge] = 0.0
         for line in lines:
             if has_crossing(line, line_segment):
@@ -166,9 +166,9 @@ def compute_spanning_tree(points, lines):
 def main():
     # minimal example to find optimal spanning tree
     points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
-    l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
-    l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
-    l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
+    l1 = get_line((2., 6.), (3., 2.)) # y = -4x + 14
+    l2 = get_line((2., 3.), (6., 5.)) # y = 0.5x + 2
+    l3 = get_line((3., 5.5), (5., 6.5)) # y = 0.5x + 4
     lines = [l1, l2, l3]
     solution = compute_spanning_tree(copy.deepcopy(points),
             copy.deepcopy(lines))

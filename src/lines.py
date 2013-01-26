@@ -5,6 +5,22 @@ to check if a line and segment crosses
 
 import math
 
+_lines_registry = {}
+
+def get_line(p,q):
+    if not (p,q) in _lines_registry:
+        line = Line2D(p,q)
+        _lines_registry[(p,q)] = line
+    return _lines_registry[(p,q)]
+
+_line_segments_registry = {}
+
+def get_line_segment(p,q):
+    if not (p,q) in _line_segments_registry:
+        line_seg = LineSegment2D(p,q)
+        _line_segments_registry[(p,q)] = line_seg
+    return _line_segments_registry[(p,q)]
+
 class Line2D:
     def __init__(self,p,q):
         assert p != q
@@ -101,7 +117,7 @@ def calculate_crossing_with(line, edges):
     '''
     crossings = 0
     for (p,q) in edges:
-        line_segment = LineSegment2D(p,q)
+        line_segment = get_line_segment(p,q)
         if has_crossing(line, line_segment):
             crossings += 1
     return crossings
