@@ -9,10 +9,10 @@ See -h for further information
 import argparse
 import csv
 import math
-from spanning_tree_with_low_crossing_number import SpanningTreeExperiment
-from spanning_tree_with_low_crossing_number import SOLVER_OPTIONS
-from spanning_tree_with_low_crossing_number import DATA_DISTRIBUTION_OPTIONS
-from spanning_tree_with_low_crossing_number import NO_LINES_SAMPLING
+from spanning_tree_with_low_crossing import SpanningTreeExperiment
+from spanning_tree_with_low_crossing import SOLVER_OPTIONS
+from spanning_tree_with_low_crossing import DATA_DISTRIBUTION_OPTIONS
+from spanning_tree_with_low_crossing import NO_LINES_SAMPLING
 
 def main():
     args = parse_args()
@@ -29,8 +29,10 @@ def parse_args():
             a spanning tree with low crossing number and write all results
             in csv file
             """)
-    parser.add_argument('-o', '--out', metavar='file',
-            default='experiments.csv', type=argparse.FileType('wb'))
+    parser.add_argument('-o', '--out',
+            default='experiments.csv', type=str)
+    parser.add_argument("-c", "--csvheader", action='store_true', default=False,
+        help="prepends a human readable header to csv file")
     parser.add_argument("-s", "--solver", default='mult_weight',
             choices=SOLVER_OPTIONS,
             help="choose an algorithm computing a feasible solution")
@@ -52,11 +54,21 @@ def prepare_experiment(args):
     arguments
     '''
     return CompoundExperiment(args.out, args.solver, args.generate, args.begin,
-            args.to, args.increment)
+            args.to, args.increment, args.csvheader)
+
+csv_header = [
+        'size of point set',
+        'size of line set',
+        'CPU time in seconds',
+        'crossing number',
+        'minimum crossing number',
+        'average crossing number',
+        'crossing overall']
+
 
 class CompoundExperiment:
     def __init__(self, file_name, solver_type, distribution_type, lb, ub,
-            step):
+            step, has_header):
         self.file_name = file_name
         dimension = 2
         has_plot = False
@@ -64,30 +76,35 @@ class CompoundExperiment:
         self.distribution_type = distribution_type
         self.lb = lb
         self.ub = ub
-        stelf.step = step
+        self.step = step
+        self.has_header = has_header
         self.experiment = SpanningTreeExperiment(solver_type, dimension, lb,
                 distribution_type, NO_LINES_SAMPLING, has_plot, verbose)
 
-   def write_csv(self):
-       with open(self.file_name, 'wb') as csvfile:
-           csv_writer = csv.writer(csvfile)
-           if self.distribution_type == 'grid':
-               lb = int(math.sqrt(self.lb))
-               ub = int(math.sqrt(self.ub))
-           else:
-               lb = self.lb
-               ub = self.ub
-           dimension = 2
-           for i in range(lb, ub, step):
-               self.experiment.clean_up()
-               if self.distribution_type == 'grid':
-                   i = i**2
+    def write_csv(self):
+        with open(self.file_name, 'wb') as csvfile:
+            csv_writer = csv.writer(csvfile)
+            if self.has_header:
+                csv_writer.writerow(csv_header)
 
-               self.experiment.update_point_set(dimension, i,
+            if self.distribution_type == 'grid':
+                lb = int(math.sqrt(self.lb))
+                ub = int(math.sqrt(self.ub))
+            else:
+                lb = self.lb
+                ub = self.ub
+            dimension = 2
+            for i in range(lb, ub+1, self.step):
+                self.experiment.clean_up()
+                if self.distribution_type == 'grid':
+                    i = i**2
+
+                self.experiment.update_point_set(dimension, i,
                        self.distribution_type)
-               self.experiment.run()
-               results = self.experiment.results()
-               csv_writer.writerow(results)
+                self.experiment.run()
+                results = self.experiment.results()
+                csv_writer.writerow(results)
+        return
 
 
 if __name__ == '__main__':

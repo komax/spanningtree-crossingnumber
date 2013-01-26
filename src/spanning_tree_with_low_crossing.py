@@ -128,6 +128,7 @@ class SpanningTreeExperiment:
         set a new point set like specified and update also the line set
         '''
         self.points = generate_point_set(d, n, distribution_type)
+        lines = dgen.generate_lines(self.points)
         self.lines = preprocess_lines(lines, self.points)
 
     def update_solver(self, solver_type):
