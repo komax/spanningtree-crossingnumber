@@ -5,7 +5,7 @@
 
 import random
 import math
-from lines import Line2D, LineSegment2D
+from lines import clean_lines, get_line
 
 def generate_points_uniformly(n, lb=0.0, ub=100.0):
     '''
@@ -53,25 +53,26 @@ def create_lines(p,q, eps):
         x1r = x1 + delta
         x2l = x2 - delta
         x2r = x2 + delta
-        lines.append(Line2D((x1l,y1),(x2l,y2)))
-        lines.append(Line2D((x1r,y1),(x2r,y2)))
-        lines.append(Line2D((x1l,y1),(x2r,y2)))
-        lines.append(Line2D((x1r,y1),(x2l,y2)))
+        lines.append(get_line((x1l,y1),(x2l,y2)))
+        lines.append(get_line((x1r,y1),(x2r,y2)))
+        lines.append(get_line((x1l,y1),(x2r,y2)))
+        lines.append(get_line((x1r,y1),(x2l,y2)))
     else:
         y1u = y1 + delta
         y1b = y1 - delta
         y2u = y2 + delta
         y2b = y2 - delta
-        lines.append(Line2D((x1,y1u),(x2,y2u)))
-        lines.append(Line2D((x1,y1b),(x2,y2b)))
-        lines.append(Line2D((x1,y1u),(x2,y2b)))
-        lines.append(Line2D((x1,y1b),(x2,y2u)))
+        lines.append(get_line((x1,y1u),(x2,y2u)))
+        lines.append(get_line((x1,y1b),(x2,y2b)))
+        lines.append(get_line((x1,y1u),(x2,y2b)))
+        lines.append(get_line((x1,y1b),(x2,y2u)))
     return lines
 
 def generate_lines(points, eps=0.1):
     ''' compute all possible seperators (lines) on the point set. There maybe
         duplicates within this set
     '''
+    clean_lines()
     lines = {}
     for p in points:
         for q in points:
@@ -90,6 +91,7 @@ def generate_random_lines(n, points):
     generate n random lines within the value range of the point set
     '''
     assert n > 0
+    clean_lines()
     min_x = +100000.
     max_x = -100000.
     min_y = min_x
@@ -117,7 +119,7 @@ def generate_random_lines(n, points):
     line_set = []
     for p in p_points:
         q = q_points[i]
-        line_set.append(Line2D(p,q))
+        line_set.append(get_line(p,q))
         i += 1
     return line_set
 

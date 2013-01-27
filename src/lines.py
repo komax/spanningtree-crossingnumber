@@ -5,6 +5,12 @@ to check if a line and segment crosses
 
 import math
 
+
+def clean_lines():
+    global _lines_registry, _line_segments_registry
+    _lines_registry = {}
+    _line_segments_registry = {}
+
 _lines_registry = {}
 
 def get_line(p,q):
