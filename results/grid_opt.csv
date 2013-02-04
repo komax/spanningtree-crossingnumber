@@ -1,0 +1,4 @@
+size of point set,size of line set,CPU time in seconds,crossing number,minimum crossing number,average crossing number,crossing overall
+4,9,0.00803399085999,2,1,1.33333333333,12
+9,42,0.170579910278,3,1,2.2619047619,95
+16,123,51.8899869919,4,1,2.91056910569,358

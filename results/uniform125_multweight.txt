@@ -1,0 +1,7 @@
+CPU time (in sec) 21647.174304
+crossing number=11
+number of points=125
+number of lines=5240
+minimum crossing number=1
+all crossings=30818
+average crossing number=5.88129770992
