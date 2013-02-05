@@ -4,6 +4,8 @@ Created on Feb 5, 2013
 @author: max
 '''
 import numpy as np
+import math
+import random
 
 class PointSet:
     def __init__(self, n, dimension):
@@ -56,7 +58,7 @@ class Edges:
 def create_uniform_graph(n,d):
     return HighDimGraph(n,d)
 
-def create_grid_point_graph(n,d):
+def create_grid_graph(n,d):
     assert d == 2
     point_set = PointSet(n, d)
     root_n = int(math.ceil(math.sqrt(n)))
@@ -85,6 +87,15 @@ class HighDimGraph:
         self.lines = {}
         self.line_segments = {}
         
+    def get_lines(self):
+        return self.lines.values()
+    
+    def get_points(self):
+        return self.point_set.points[..., :-1]
+    
+    def get_y(self):
+        return self.point_set.points[..., -1:]
+    
     def create_stabbing_lines(self):
         pass
         
