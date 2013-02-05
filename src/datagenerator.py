@@ -7,36 +7,36 @@ import random
 import math
 from lines import clean_lines, get_line
 
-def generate_points_uniformly(n, lb=0.0, ub=100.0):
-    '''
-    sample n 2-D points in range lb..ub
-    '''
-    if ub <= n:
-        ub *= n
-    points = [(random.uniform(lb,ub), random.uniform(lb,ub))
-            for i in range(n)]
-    return points
-
-def generate_points_grid(n):
-    '''
-    sample a grid with n points. All points are slightly pertubated to permit
-    vertical and horizontal lines
-    '''
-    root_n = int(math.ceil(math.sqrt(n)))
-    eps = 0.1
-    x = 0.0
-    y = 0.0
-    points = []
-    for i in range(root_n):
-        y = 0.0
-        for j in range(root_n):
-            x_eps = random.uniform(-eps,eps)
-            y_eps = random.uniform(-eps,eps)
-            points.append((x+x_eps,y+y_eps))
-            y += 5.0
-        x += 5.0
-    assert len(points) == n
-    return points
+#def generate_points_uniformly(n, lb=0.0, ub=100.0):
+#    '''
+#    sample n 2-D points in range lb..ub
+#    '''
+#    if ub <= n:
+#        ub *= n
+#    points = [(random.uniform(lb,ub), random.uniform(lb,ub))
+#            for i in range(n)]
+#    return points
+#
+#def generate_points_grid(n):
+#    '''
+#    sample a grid with n points. All points are slightly pertubated to permit
+#    vertical and horizontal lines
+#    '''
+#    root_n = int(math.ceil(math.sqrt(n)))
+#    eps = 0.1
+#    x = 0.0
+#    y = 0.0
+#    points = []
+#    for i in range(root_n):
+#        y = 0.0
+#        for j in range(root_n):
+#            x_eps = random.uniform(-eps,eps)
+#            y_eps = random.uniform(-eps,eps)
+#            points.append((x+x_eps,y+y_eps))
+#            y += 5.0
+#        x += 5.0
+#    assert len(points) == n
+#    return points
 
 def create_lines(p,q, eps):
     '''

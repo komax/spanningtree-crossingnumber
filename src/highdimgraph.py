@@ -24,6 +24,9 @@ class PointSet:
             if (self.points[row] == p).all():
                 return row
             
+    def get(self, index):
+        return self.points[index]
+            
     def subset(self, subset_points):
         indices_subset = set()
         for point in subset_points:
@@ -76,7 +79,77 @@ class HighDimGraph:
     def __init__(self, n, d):
         self.point_set = PointSet(n, d)
         self.edges = Edges(n)
+        self.lines = {}
+        self.line_segments = {}
         
+    def create_stabbing_lines(self):
+        pass
+        
+    def create_all_lines(self):
+        pass
+    
+    def __get_line(self, p,q):
+        if not (p,q) in self.lines:
+            X = np.array([self.point_set.get(p), self.point_set.get(q)])
+            line = HighDimLine(X)
+            self.lines[(p,q)] = line
+        return self.lines[(p,q)]
+    
+    def __get_line_segment(self, p,q):
+        if not (p,q) in self.line_segments:
+            X = np.array([self.point_set.get(p), self.point_set.get(q)])
+            line_segment = HighDimLineSegment(X)
+            self.line_segments[(p,q)] = line_segment
+        return self.lines[(p,q)]
+
+    def calculate_crossing_with(self, line):
+        '''
+        for a given line calculate the crossing number (int) over all edges
+        '''
+        crossings = 0
+        for (p,q) in self.edges:
+            line_segment = self.__get_line_segment(p,q)
+            if has_crossing(line, line_segment):
+                crossings += 1
+        return crossings
+    
+    def crossing_tuple(self, solution):
+        '''
+        returns (crossing number, overall crossings)
+        on all lines with edges
+        '''
+        crossings = 0
+        max_crossing_number = 0
+        for line in self.lines.values():
+            crossing_number = calculate_crossing_with(line, solution)
+            crossings += crossing_number
+            if crossing_number > max_crossing_number:
+                max_crossing_number = crossing_number
+        return (max_crossing_number, crossings)
+
+    def calculate_crossings(self, solution):
+        '''
+        for all lines and edges in the solution compute the overall crossings
+        '''
+        crossing_number = 0
+        for line in self.lines.values():
+            crossing_number += calculate_crossing_with(line, solution)
+        return crossing_number
+
+    def maximum_crossing_number(lines, solution):
+        '''
+        for all lines and edges in the solution compute the maximum crossing number
+        '''
+        max_crossing_number = 0
+        for line in lines:
+            crossing_number = calculate_crossing_with(line, solution)
+        if crossing_number > max_crossing_number:
+            max_crossing_number = crossing_number
+        return max_crossing_number
+
+    def crossing_number(self):
+        ''' alias for maximum crossing number '''
+        return self.maximum_crossing_number()
         
 class HighDimLine:
     def __init__(self, X):
@@ -157,4 +230,3 @@ def has_crossing(line, line_seg):
         intersection_point = np.linalg.solve(A, b)
         x = intersection_point[..., :-1]
         return line_seg.is_between(x)
-    
