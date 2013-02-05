@@ -26,6 +26,9 @@ class PointSet:
             
     def get(self, index):
         return self.points[index]
+    
+    def __iter__(self):
+        return self.points.__iter__()
             
     def subset(self, subset_points):
         indices_subset = set()
@@ -87,6 +90,49 @@ class HighDimGraph:
         
     def create_all_lines(self):
         pass
+    
+    def __partition_points_by_line(self, line):
+        ''' partitioning of point set with discriminative function line
+            (points above the line as tuples , points below the line as sets)
+            both parts can be empty
+        '''
+        above_points = set()
+        below_points = set()
+        for p in self.points:
+            if line.is_on(p):
+                return ()
+            elif line.is_above(p):
+                above_points.add(p)
+            elif line.is_below(p):
+                below_points.add(p)
+            else:
+                raise StandardError('can not find point p=%s on line=%s' %
+                        (p,line))
+        return (above_points, below_points)
+    
+    def preprocess_lines(self):
+        ''' removes lines that have same partitioning of the point set as
+            equivalent ones
+            lines above or below the point set are also removed
+        '''
+        lines_dict = {}
+        lines = self.lines.values()
+        for line in lines:
+            # FIXME update this implementation 
+            partition_tuple = self.__partition_points_by_line(line)
+            if not partition_tuple:
+                # skip this line, because one point is on this line
+                continue
+            elif not partition_tuple[0] or not partition_tuple[1]:
+                # above or below part is empty, skip lineis_above
+                continue
+            elif lines_dict.has_key(partition_tuple):
+                # skip this line, there is one equivalent line stored
+                continue
+            else:
+                # new equivalent class, store this line
+                lines_dict[partition_tuple] = line
+        self.lines = lines_dict
     
     def __get_line(self, p,q):
         if not (p,q) in self.lines:
