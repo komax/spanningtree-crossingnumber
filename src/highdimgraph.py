@@ -287,15 +287,13 @@ class HighDimLine:
         return hash(self.__key())
         
     def __call__(self,x):
-        print x.shape
         paddedX = np.hstack([x, np.ones((x.shape[0], 1), dtype=x.dtype)])
-        #paddedX = np.hstack(x, np.ones(len(x)))
         print paddedX
-        print paddedX.shape
-        print self.theta.shape
         y = np.dot(paddedX, self.theta)
-        print "y=%s" % y
-        return y
+        #print y.shape
+        #print np.allclose(y[0], np.array([1.]))
+        #print "y=%s" % y
+        return y.flatten()
 
     def __str__(self):
        return 'HighDimLine(theta=\n%s, points=\n%s)' % (self.theta,self.X)
@@ -311,7 +309,7 @@ class HighDimLine:
     def is_on(self, p):
         (x,y) = self.__partition(p)
         y_line = self(x)
-        return np.allclose(yline, y)
+        return np.allclose(y_line, y)
 
     def is_above(self, p):
         (x,y) = self.__partition(p)
