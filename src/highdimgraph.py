@@ -287,8 +287,13 @@ class HighDimLine:
         return hash(self.__key())
         
     def __call__(self,x):
-        paddedX = np.vstack([x, np.ones(len(x))])
-        y = np.dot(theta, paddedX.T)
+        print x.shape
+        paddedX = np.hstack([x, np.ones((x.shape[0], 1), dtype=x.dtype)])
+        #paddedX = np.hstack(x, np.ones(len(x)))
+        print paddedX
+        print paddedX.shape
+        print self.theta.shape
+        y = np.dot(paddedX, self.theta)
         print "y=%s" % y
         return y
 

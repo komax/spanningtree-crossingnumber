@@ -13,10 +13,13 @@ import numpy as np
 
 class CrossingTestCase(unittest.TestCase):
     def test_has_crossing(self):
-        line = HighDimLine(np.array([(3.,2), (5,0)])) # y = -x + 5
+        line = HighDimLine(np.array([(3.,2), (5.,0)])) # y = -x + 5
         print line
         line_segment = HighDimLineSegment(np.array([(3,0.5), (5,1.5)])) # y = 0.5 x - 1
         print line_segment
+        points = np.array([(4., 1.), (5., 0.)])
+        np.testing.assert_almost_equal(points[..., -1], line(points[..., :-1]))
+        np.testing.assert_almost_equal(points[..., -1], line_segment(points[..., :-1]))
         self.assertTrue(has_crossing(line, line_segment))
 
     def test_has_no_crossing_linesegment_too_short(self):
