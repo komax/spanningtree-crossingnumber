@@ -15,8 +15,8 @@ class PointSet:
         self.points = np.random.uniform(0,n, shape)
         
     def has_point(self, p):
-        for row in range(0,self.n):
-            if (self.points[row] == p).all():
+        for point in self.points:
+            if (point == p).all():
                 return True
         else:
             return False
@@ -53,7 +53,13 @@ class Edges:
                     yield (i,j)
             
     def __iter__(self):
-        self.as_tuple()
+        return self.as_tuple()
+        
+    def has_edge(self, i, j):
+        return self.adj_matrix[i,j] or self.adj_matrix[j,i]
+    
+    def update(self, i, j, new_val):
+        self.adj_matrix[i,j] = self.adj_matrix[j,i] = new_val
         
 def create_uniform_graph(n,d):
     return HighDimGraph(n,d)
@@ -97,10 +103,65 @@ class HighDimGraph:
         return self.point_set.points[..., -1:]
     
     def create_stabbing_lines(self):
-        pass
+        for (i,j) in self.edges:
+            self.__get_line(i, j)
+        return
         
     def create_all_lines(self):
+        # TODO update implementation for 3D
         pass
+    
+    def __create_line(self, p, q):
+        return HighDimLine(np.array([p,q]))
+    
+    def __create_lines(self, p,q, eps):
+        '''
+        for two points p,q compute all four possible separation lines
+        '''
+        # TODO update it for high dimensions
+        (x1, y1) = p
+        (x2, y2) = q
+        y_delta = math.fabs(y1 - y2)
+        eps = 0.1
+        delta = y_delta * eps
+        pq_line_set = set()
+        if x1 == x2:
+            # special case if point are in a grid
+            x1l = x1 - delta
+            x1r = x1 + delta
+            x2l = x2 - delta
+            x2r = x2 + delta
+            pq_line_set.add(self.__create_line((x1l,y1),(x2l,y2)))
+            pq_line_set.add(self.__create_line((x1r,y1),(x2r,y2)))
+            pq_line_set.add(self.__create_line((x1l,y1),(x2r,y2)))
+            pq_line_set.add(self.__create_line((x1r,y1),(x2l,y2)))
+        else:
+            y1u = y1 + delta
+            y1b = y1 - delta
+            y2u = y2 + delta
+            y2b = y2 - delta
+            pq_line_set.add(self.__create_line((x1,y1u),(x2,y2u)))
+            pq_line_set.add(self.__create_line((x1,y1b),(x2,y2b)))
+            pq_line_set.add(self.__create_line((x1,y1u),(x2,y2b)))
+            pq_line_set.add(self.__create_line((x1,y1b),(x2,y2u)))
+        return pq_line_set
+    
+    def generate_lines(self, points):
+        ''' compute all possible seperators (lines) on the point set. There maybe
+            duplicates within this set
+        '''
+        lines = {}
+        for p in points:
+            for q in points:
+                if points.index(p) < points.index(q):
+                    if not lines.has_key((p,q)):
+                        # create all different lines
+                        pq_lines = create_lines(p,q, eps)
+                        lines[p,q] = pq_lines
+        line_set = []
+        for pq_lines in lines.values():
+            line_set = line_set + pq_lines
+        return line_set
     
     def __partition_points_by_line(self, line):
         ''' partitioning of point set with discriminative function line
@@ -211,8 +272,9 @@ class HighDimGraph:
 class HighDimLine:
     def __init__(self, X):
         self.X = X
+        #print X
         y = X[..., -1:]
-        A = np.vstack([X[..., :-1], np.ones(len(X))]).T
+        A = np.hstack([X[..., :-1], np.ones((X.shape[0], 1), dtype=X.dtype)])
         self.theta = np.linalg.lstsq(A, y)[0]
         
     def __key(self):
@@ -227,10 +289,11 @@ class HighDimLine:
     def __call__(self,x):
         paddedX = np.vstack([x, np.ones(len(x))])
         y = np.dot(theta, paddedX.T)
+        print "y=%s" % y
         return y
 
     def __str__(self):
-       return 'HighDimLine(theta=%s, points=%s)' % (self.theta,self.X)
+       return 'HighDimLine(theta=\n%s, points=\n%s)' % (self.theta,self.X)
 
     def __repr__(self):
         return self.__str__()
@@ -254,10 +317,14 @@ class HighDimLine:
         (x,y) = self.__partition(p)
         y_line = self(x)
         return (y < y_line).all() and not self.is_on(p)
+        
     
 class HighDimLineSegment(HighDimLine):
     def __init__(self, X):
         HighDimLine.__init__(self, X)
+        
+    def __str__(self):
+       return 'HighDimLineSegment(theta=\n%s, points=\n%s)' % (self.theta,self.X)
 
     def is_between(self, x):
         res = np.cross(X[0]-x, X[1]-x)
@@ -278,12 +345,14 @@ def has_crossing(line, line_seg):
     '''
     Has line a crossing with the line segment
     '''
-    if np.allclose(line.theta,line_seg.theta):
+    if np.allclose(line.theta[..., :-1],line_seg.theta[..., :-1]):
+        print "no crossing found"
         return False
     else:
-        A = np.array([line.theta, line.seg.theta])
+        A = np.vstack(line.theta, line.seg.theta)
         b = - A[..., -1:]
         A[..., -1] = -np.ones(len(A))
         intersection_point = np.linalg.solve(A, b)
+        print intersection_point
         x = intersection_point[..., :-1]
         return line_seg.is_between(x)

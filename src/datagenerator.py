@@ -38,53 +38,53 @@ from lines import clean_lines, get_line
 #    assert len(points) == n
 #    return points
 
-def create_lines(p,q, eps):
-    '''
-    for two points p,q compute all four possible separation lines
-    '''
-    (x1, y1) = p
-    (x2, y2) = q
-    lines = []
-    y_delta = math.fabs(y1 - y2)
-    delta = y_delta * eps
-    if x1 == x2:
-        # special case if point are in a grid
-        x1l = x1 - delta
-        x1r = x1 + delta
-        x2l = x2 - delta
-        x2r = x2 + delta
-        lines.append(get_line((x1l,y1),(x2l,y2)))
-        lines.append(get_line((x1r,y1),(x2r,y2)))
-        lines.append(get_line((x1l,y1),(x2r,y2)))
-        lines.append(get_line((x1r,y1),(x2l,y2)))
-    else:
-        y1u = y1 + delta
-        y1b = y1 - delta
-        y2u = y2 + delta
-        y2b = y2 - delta
-        lines.append(get_line((x1,y1u),(x2,y2u)))
-        lines.append(get_line((x1,y1b),(x2,y2b)))
-        lines.append(get_line((x1,y1u),(x2,y2b)))
-        lines.append(get_line((x1,y1b),(x2,y2u)))
-    return lines
-
-def generate_lines(points, eps=0.1):
-    ''' compute all possible seperators (lines) on the point set. There maybe
-        duplicates within this set
-    '''
-    clean_lines()
-    lines = {}
-    for p in points:
-        for q in points:
-            if points.index(p) < points.index(q):
-                if not lines.has_key((p,q)):
-                    # create all different lines
-                    pq_lines = create_lines(p,q, eps)
-                    lines[p,q] = pq_lines
-    line_set = []
-    for pq_lines in lines.values():
-        line_set = line_set + pq_lines
-    return line_set
+#def create_lines(p,q, eps):
+#    '''
+#    for two points p,q compute all four possible separation lines
+#    '''
+#    (x1, y1) = p
+#    (x2, y2) = q
+#    lines = []
+#    y_delta = math.fabs(y1 - y2)
+#    delta = y_delta * eps
+#    if x1 == x2:
+#        # special case if point are in a grid
+#        x1l = x1 - delta
+#        x1r = x1 + delta
+#        x2l = x2 - delta
+#        x2r = x2 + delta
+#        lines.append(get_line((x1l,y1),(x2l,y2)))
+#        lines.append(get_line((x1r,y1),(x2r,y2)))
+#        lines.append(get_line((x1l,y1),(x2r,y2)))
+#        lines.append(get_line((x1r,y1),(x2l,y2)))
+#    else:
+#        y1u = y1 + delta
+#        y1b = y1 - delta
+#        y2u = y2 + delta
+#        y2b = y2 - delta
+#        lines.append(get_line((x1,y1u),(x2,y2u)))
+#        lines.append(get_line((x1,y1b),(x2,y2b)))
+#        lines.append(get_line((x1,y1u),(x2,y2b)))
+#        lines.append(get_line((x1,y1b),(x2,y2u)))
+#    return lines
+#
+#def generate_lines(points, eps=0.1):
+#    ''' compute all possible seperators (lines) on the point set. There maybe
+#        duplicates within this set
+#    '''
+#    clean_lines()
+#    lines = {}
+#    for p in points:
+#        for q in points:
+#            if points.index(p) < points.index(q):
+#                if not lines.has_key((p,q)):
+#                    # create all different lines
+#                    pq_lines = create_lines(p,q, eps)
+#                    lines[p,q] = pq_lines
+#    line_set = []
+#    for pq_lines in lines.values():
+#        line_set = line_set + pq_lines
+#    return line_set
 
 def generate_random_lines(n, points):
     '''

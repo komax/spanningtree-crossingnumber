@@ -43,6 +43,7 @@ def plot(graph, solution):
 def main():
     graph = create_grid_graph(5**2, 2)
     graph.create_all_lines()
+    graph.create_stabbing_lines()
     #points = dtgen.generate_points_uniformly(6, 100.0)
     #lines = dtgen.generate_lines(points)
     #import mult_weights_solver as mws
