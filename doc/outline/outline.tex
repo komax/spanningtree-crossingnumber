@@ -9,4 +9,97 @@ with Low Crossing Number''}
 \date{\today}
 \begin{document}
 	\maketitle
+    \begin{enumerate}
+        \item Introduction
+            \begin{enumerate}
+                \item Definiton of the problem
+                    \begin{itemize}
+                        \item Example graph in the plane
+                        \item Crossing distance
+                        \item Equivalence relation on line set
+                        \item Worst case crossing number
+                    \end{itemize}
+                \item Generalization to $d$ dimensions
+                \item Variations of crossing numbers
+                    \begin{itemize}
+                        \item Spanning crossing number (minimum crossing
+                            number)
+                        \item Stabbing number
+                    \end{itemize}
+                \item Similiar problems
+                    \begin{itemize}
+                        \item Perfect matching
+                        \item Triangulations of minimum total lenght
+                            (\emph{non} Steiner ones)
+                    \end{itemize}
+            \end{enumerate}
+
+        \item Complexity of the problem
+            \begin{itemize}
+                \item Overview of NP-Hardness
+                \item Finding optimum
+                \item Integer Program with exponential constraints
+            \end{itemize}
+
+        \item Approximation approaches
+            \begin{enumerate}
+                \item LP relaxation by Fekete
+                    \begin{itemize}
+                        \item Planarity heuristics
+                        \item Iterative rounding scheme
+                    \end{itemize}
+                \item Multiplicative weights update scheme
+                    \begin{itemize}
+                        \item Approximation algorithm
+                        \item Used facts: crossing distance, crossing disk
+                    \end{itemize}
+                \item General iterative, LP-based approximation scheme by Sariel
+                    \begin{itemize}
+                        \item LP formulation with bounded VC dimensions
+                        \item Listing of generic approximation algorithm
+                        \item Randomized rounding scheme
+                        \item Tailoring to $d$ dimensions and planar case
+                        \item Deterministic rounding in the plane
+                    \end{itemize}
+                \item Challenges
+                    \begin{itemize}
+                        \item Self crossing edges in approximation
+                        \item Computing spanning tree within connected
+                            components
+                        \item \dots
+                    \end{itemize}
+            \end{enumerate}
+
+        \item New iterative, LP-based Approximation scheme
+            \begin{itemize}
+                \item Sariel's approach revisited
+                \item LP formulation with connected components
+                \item Rounding scheme
+                \item Listing of the algorithm
+            \end{itemize}
+
+        \item Results
+            \begin{enumerate}
+                \item Computational studies
+                    \begin{itemize}
+                        \item Problem sets (Grid, Uniform distribution, high
+                            dimensional data sets, \dots)
+                        \item Implementation details
+                        \item Hardware
+                    \end{itemize}
+                \item Observations on experiments
+                    \begin{itemize}
+                        \item Pros and Cons of different approximation schemes
+                        \item Comparison with Fekete's technical report
+                    \end{itemize}
+                \item Proofed facts
+            \end{enumerate}
+
+        \item Related Work
+            \begin{itemize}
+                \item Relative crossing number
+                \item Overall small crossing number
+            \end{itemize}
+        \item Conclusion
+    \end{enumerate}
 \end{document}
