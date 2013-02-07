@@ -14,9 +14,7 @@ import numpy as np
 class CrossingTestCase(unittest.TestCase):
     def test_has_crossing(self):
         line = HighDimLine(np.array([(3.,2), (5.,0)])) # y = -x + 5
-        #print line
         line_segment = HighDimLineSegment(np.array([(3,0.5), (5,1.5)])) # y = 0.5 x - 1
-        #print line_segment
         # line_points[0] = segpoints[0] = intersection point
         line_points = np.array([(4., 1.), (5., 0.)])
         self.assertTrue(line.is_on(line_points[0]))

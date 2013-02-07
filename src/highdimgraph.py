@@ -282,7 +282,6 @@ class HighDimGraph:
 class HighDimLine:
     def __init__(self, X):
         self.X = X
-        #print X
         y = X[..., -1:]
         A = np.hstack([X[..., :-1], np.ones((X.shape[0], 1), dtype=X.dtype)])
         self.theta = np.linalg.lstsq(A, y)[0]
@@ -304,7 +303,6 @@ class HighDimLine:
         
     def __call__(self,X):
         paddedX = np.hstack([X, np.ones((X.shape[0], 1), dtype=X.dtype)])
-        print paddedX
         y = np.dot(paddedX, self.theta)
         return y.flatten()
 
@@ -314,23 +312,24 @@ class HighDimLine:
     def __repr__(self):
         return self.__str__()
     
-    def __partition(self, p):
+    @staticmethod
+    def partition(p):
         x = p[..., :-1]
         y = p[..., -1:]
         return (x,y)
 
     def is_on(self, p):
-        (x,y) = self.__partition(p)
+        (x,y) = HighDimLine.partition(p)
         y_line = self.call(x)
         return np_allclose(y_line, y)
 
     def is_above(self, p):
-        (x,y) = self.__partition(p)
+        (x,y) = HighDimLine.partition(p)
         y_line = self.call(x)
         return (y > y_line).all() and not self.is_on(p)
 
     def is_below(self, p):
-        (x,y) = self.__partition(p)
+        (x,y) = HighDimLine.partition(p)
         y_line = self.call(x)
         return (y < y_line).all() and not self.is_on(p)
         
@@ -344,18 +343,23 @@ class HighDimLineSegment(HighDimLine):
 
     def is_between(self, x):
         res = np.cross(self.X[0]-x, self.X[1]-x)
+        print "in is_between: res=%s, allclose=%s" % (res, np_allclose(res, 0.0))
         return np_allclose(res, 0.0)
 
     def is_on(self, p):
-        (x,y) = self.__partition(p)
+        (x,y) = HighDimLine.partition(p)
         if self.is_between(x):
             return HighDimLine.is_on(self, p)
         else:
             return False
 
-    def __call__(self, x):
-        if self.is_between(x):
-            return HighDimLine.__call__(self, x)
+    def __call__(self, X):
+        if self.is_between(X):
+            return HighDimLine.__call__(self, X)
+        
+    def call(self, p):
+        if self.is_between(p):
+            return HighDimLine.call(self, p)
         
 def has_crossing(line, line_seg):
     '''
@@ -369,6 +373,6 @@ def has_crossing(line, line_seg):
         b = - A[..., -1:]
         A[..., -1] = -np.ones(len(A))
         intersection_point = np.linalg.solve(A, b)
-        print intersection_point
+        print "intersection point= %s" % intersection_point
         x = intersection_point[..., :-1]
         return line_seg.is_between(x)
