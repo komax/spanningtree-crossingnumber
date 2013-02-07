@@ -55,9 +55,8 @@ def create_ip(points, edges, lines):
     # correct number of edges
     lambda_ip.addConstr(quicksum(x[i,j] for (i,j) in edges) == (n-1))
 
-    subsets = nonempty_subsets(points)
     # connectivity constraints
-    for subset in subsets:
+    for subset in nonempty_subsets(points):
         lambda_ip.addConstr(quicksum(x[i,j] for (i,j) in cut(subset, edges))
                 >= 1)
 
