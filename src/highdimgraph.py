@@ -7,6 +7,16 @@ import numpy as np
 import math
 import random
 
+# numpy defaults for numpy.allclose()
+RTOL = 1e-05
+ATOL = 1e-08
+
+def np_allclose(a, b):
+    return np.allclose(a, b, RTOL, ATOL)
+
+def np_assert_allclose(a, b):
+    return np.testing.assert_allclose(a, b, RTOL, ATOL)
+
 class PointSet:
     def __init__(self, n, dimension):
         self.n = n
@@ -16,14 +26,14 @@ class PointSet:
         
     def has_point(self, p):
         for point in self.points:
-            if (point == p).all():
+            if np_allclose(point, p):
                 return True
         else:
             return False
         
     def get_index(self, p):
         for row in range(0,self.n):
-            if (self.points[row] == p).all():
+            if np_allclose(self.points[row], p):
                 return row
             
     def get(self, index):
@@ -206,14 +216,14 @@ class HighDimGraph:
                 lines_dict[partition_tuple] = line
         self.lines = lines_dict
     
-    def __get_line(self, p,q):
+    def __get_line(self, p, q):
         if not (p,q) in self.lines:
             X = np.array([self.point_set.get(p), self.point_set.get(q)])
             line = HighDimLine(X)
             self.lines[(p,q)] = line
         return self.lines[(p,q)]
     
-    def __get_line_segment(self, p,q):
+    def __get_line_segment(self, p, q):
         if not (p,q) in self.line_segments:
             X = np.array([self.point_set.get(p), self.point_set.get(q)])
             line_segment = HighDimLineSegment(X)
@@ -309,7 +319,7 @@ class HighDimLine:
     def is_on(self, p):
         (x,y) = self.__partition(p)
         y_line = self(x)
-        return np.allclose(y_line, y)
+        return np_allclose(y_line, y)
 
     def is_above(self, p):
         (x,y) = self.__partition(p)
@@ -330,8 +340,8 @@ class HighDimLineSegment(HighDimLine):
        return 'HighDimLineSegment(theta=\n%s, points=\n%s)' % (self.theta,self.X)
 
     def is_between(self, x):
-        res = np.cross(X[0]-x, X[1]-x)
-        return np.allclose(res, 0.0)
+        res = np.cross(self.X[0]-x, self.X[1]-x)
+        return np_allclose(res, 0.0)
 
     def is_on(self, p):
         (x,y) = self.__partition(p)
@@ -348,7 +358,7 @@ def has_crossing(line, line_seg):
     '''
     Has line a crossing with the line segment
     '''
-    if np.allclose(line.theta[..., :-1],line_seg.theta[..., :-1]):
+    if np_allclose(line.theta[..., :-1],line_seg.theta[..., :-1]):
         print "no crossing found"
         return False
     else:

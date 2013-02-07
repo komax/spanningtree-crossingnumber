@@ -3,7 +3,7 @@
 
 import unittest
 import mult_weights_solver as mwsolv
-from highdimgraph import HighDimLine, HighDimLineSegment, has_crossing
+from highdimgraph import HighDimLine, HighDimLineSegment, has_crossing, np_assert_allclose
 import highdimgraph
 import sariel_lp_solver as slpsolv
 import fekete_lp_solver as flpsolv
@@ -20,11 +20,14 @@ class CrossingTestCase(unittest.TestCase):
         # line_points[0] = segpoints[0] = intersection point
         line_points = np.array([(4., 1.), (5., 0.)])
         self.assertTrue(line.is_on(np.array([line_points[0]])))
-        seg_points = line_points
+        seg_points = np.copy(line_points)
         seg_points[1,1] = 1.5
-        print line(np.array([[5.]]))
-        np.testing.assert_allclose(line_points[..., -1], line(line_points[..., :-1]))
-        np.testing.assert_allclose(seg_points[..., -1], line_segment(seg_points[..., :-1]))
+        line_val = line(np.array([[5.]]))
+        print line_val
+        np_assert_allclose(np.array([0.0]), line_val)#, atol=1e-08)
+        #assert np.allclose(line_points[..., -1], line(line_points[..., :-1]), rtol=1.0000000000000001e-02, atol=1e-01)
+        np_assert_allclose(line_points[..., -1], line(line_points[..., :-1]))
+        #np_assert_allclose(seg_points[..., -1], line_segment(seg_points[..., :-1]))
         self.assertTrue(has_crossing(line, line_segment))
 
     def test_has_no_crossing_linesegment_too_short(self):
