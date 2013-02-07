@@ -290,9 +290,9 @@ class HighDimLine:
             self.X = np.array([q,p])
         y = X[..., -1:]
         A = np.hstack([X[..., :-1], np.ones((X.shape[0], 1), dtype=X.dtype)])
-        self.theta = np.linalg.lstsq(A, y)[0]
-        self.theta = self.theta.flatten()
-        print "theta=%s, shape of it %s" %(self.theta, self.theta.shape)
+        self.theta = (np.linalg.lstsq(A, y)[0]).flatten()
+        #self.theta = self.theta.flatten()
+        #print "theta=%s, shape of it %s" %(self.theta, self.theta.shape)
         
     def __key(self):
         return tuple(self.theta)
@@ -355,8 +355,11 @@ class HighDimLineSegment(HighDimLine):
         # TODO update this implementation for higher dimension. Is this still correct?
         p = self.X[0, ..., :-1]
         q = self.X[1, ..., :-1]
+        # FIXME: why this is not working
         print p, q, x
         print (p <= x <= q).all()
+        print q >= x
+        print x >= p
         return (p <= x <= q).all()
         #if True:   
         #    print "in is_between: %s <= %s <= %s == %s" % (p, x, q, res) 
@@ -392,7 +395,8 @@ def has_crossing(line, line_seg):
         A = np.vstack([line.theta, line_seg.theta])
         b = - A[..., -1:]
         A[..., -1] = -np.ones(len(A))
-        intersection_point = np.linalg.solve(A, b)
+        intersection_point = (np.linalg.solve(A, b)).flatten() 
         print "intersection point= %s" % intersection_point
         x = intersection_point[..., :-1]
+        print x
         return line_seg.is_between(x)

@@ -21,15 +21,13 @@ class CrossingTestCase(unittest.TestCase):
         self.assertTrue(line.is_on(line_points[1]))
         
         seg_points = np.copy(line_points)
-        seg_points[1,1] = 1.5 
+        seg_points[1,1] = 1.5
         self.assertTrue(line_segment.is_on(seg_points[0]))
         self.assertTrue(line_segment.is_on(seg_points[1]))
         
         
         line_val = line.call(np.array([5.]))
-        print line_val
-        np_assert_allclose(0.0, line_val)#, atol=1e-08)
-        #assert np.allclose(line_points[..., -1], line(line_points[..., :-1]), rtol=1.0000000000000001e-02, atol=1e-01)
+        np_assert_allclose(0.0, line_val)
         np_assert_allclose(line_points[..., -1], line(line_points[..., :-1]))
         #np_assert_allclose(seg_points[..., -1], line_segment(seg_points[..., :-1]))
         self.assertTrue(has_crossing(line, line_segment))
@@ -46,7 +44,9 @@ class CrossingTestCase(unittest.TestCase):
 
     def test_has_also_crossing(self):
         line = HighDimLine(np.array([(3., 5.5), (5., 6.5)])) # y = 0.5x + 4
-        line_segment = HighDimLineSegment(np.array([(5.,7.), (6., 4.)])) # y = -3 + 22
+        line_segment = HighDimLineSegment(np.array([(5.,7.), (6., 4.)])) # y = -3x + 22
+        print line
+        print line_segment
         self.assertTrue(has_crossing(line, line_segment))
 
 #class PreprocessingLinesTestCase(unittest.TestCase):
