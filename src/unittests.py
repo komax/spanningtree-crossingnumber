@@ -19,12 +19,18 @@ class CrossingTestCase(unittest.TestCase):
         #print line_segment
         # line_points[0] = segpoints[0] = intersection point
         line_points = np.array([(4., 1.), (5., 0.)])
-        self.assertTrue(line.is_on(np.array([line_points[0]])))
+        self.assertTrue(line.is_on(line_points[0]))
+        self.assertTrue(line.is_on(line_points[1]))
+        
         seg_points = np.copy(line_points)
-        seg_points[1,1] = 1.5
-        line_val = line(np.array([[5.]]))
+        seg_points[1,1] = 1.5 
+        self.assertTrue(line_segment.is_on(seg_points[0]))
+        self.assertTrue(line_segment.is_on(seg_points[1]))
+        
+        
+        line_val = line.call(np.array([5.]))
         print line_val
-        np_assert_allclose(np.array([0.0]), line_val)#, atol=1e-08)
+        np_assert_allclose(0.0, line_val)#, atol=1e-08)
         #assert np.allclose(line_points[..., -1], line(line_points[..., :-1]), rtol=1.0000000000000001e-02, atol=1e-01)
         np_assert_allclose(line_points[..., -1], line(line_points[..., :-1]))
         #np_assert_allclose(seg_points[..., -1], line_segment(seg_points[..., :-1]))

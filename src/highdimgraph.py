@@ -295,14 +295,17 @@ class HighDimLine:
 
     def __hash__(self):
         return hash(self.__key())
+    
+    def call(self, p):
+        assert len(p.shape) == 1
+        X = np.array([p])
+        y = self(X)
+        return y[0]
         
-    def __call__(self,x):
-        paddedX = np.hstack([x, np.ones((x.shape[0], 1), dtype=x.dtype)])
+    def __call__(self,X):
+        paddedX = np.hstack([X, np.ones((X.shape[0], 1), dtype=X.dtype)])
         print paddedX
         y = np.dot(paddedX, self.theta)
-        #print y.shape
-        #print np.allclose(y[0], np.array([1.]))
-        #print "y=%s" % y
         return y.flatten()
 
     def __str__(self):
@@ -318,17 +321,17 @@ class HighDimLine:
 
     def is_on(self, p):
         (x,y) = self.__partition(p)
-        y_line = self(x)
+        y_line = self.call(x)
         return np_allclose(y_line, y)
 
     def is_above(self, p):
         (x,y) = self.__partition(p)
-        y_line = self(x)
+        y_line = self.call(x)
         return (y > y_line).all() and not self.is_on(p)
 
     def is_below(self, p):
         (x,y) = self.__partition(p)
-        y_line = self(x)
+        y_line = self.call(x)
         return (y < y_line).all() and not self.is_on(p)
         
     
