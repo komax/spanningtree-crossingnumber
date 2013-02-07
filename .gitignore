@@ -25,6 +25,22 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+# my prefs
 gurobi.log
 *.bak
 *.old
+
+# ignore latex files
+*.bbl
+*.blg
+*.log
+*.aux
+*.ind
+*.idx
+*.ilg
+*.toc
+*.lof
+*.lot 
+*.lol
+*.out
