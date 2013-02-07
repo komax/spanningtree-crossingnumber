@@ -281,10 +281,18 @@ class HighDimGraph:
         
 class HighDimLine:
     def __init__(self, X):
-        self.X = X
+        assert X.shape[0] == 2
+        p = X[0]
+        q = X[1]
+        if p[..., -1] < q[..., -1]:
+            self.X = X
+        else:
+            self.X = np.array([q,p])
         y = X[..., -1:]
         A = np.hstack([X[..., :-1], np.ones((X.shape[0], 1), dtype=X.dtype)])
         self.theta = np.linalg.lstsq(A, y)[0]
+        self.theta = self.theta.flatten()
+        print "theta=%s, shape of it %s" %(self.theta, self.theta.shape)
         
     def __key(self):
         return tuple(self.theta)
@@ -296,6 +304,8 @@ class HighDimLine:
         return hash(self.__key())
     
     def call(self, p):
+        print p
+        print p.shape, len(p.shape)
         assert len(p.shape) == 1
         X = np.array([p])
         y = self(X)
@@ -342,9 +352,20 @@ class HighDimLineSegment(HighDimLine):
        return 'HighDimLineSegment(theta=\n%s, points=\n%s)' % (self.theta,self.X)
 
     def is_between(self, x):
-        res = np.cross(self.X[0]-x, self.X[1]-x)
-        print "in is_between: res=%s, allclose=%s" % (res, np_allclose(res, 0.0))
-        return np_allclose(res, 0.0)
+        # TODO update this implementation for higher dimension. Is this still correct?
+        p = self.X[0, ..., :-1]
+        q = self.X[1, ..., :-1]
+        print p, q, x
+        print (p <= x <= q).all()
+        return (p <= x <= q).all()
+        #if True:   
+        #    print "in is_between: %s <= %s <= %s == %s" % (p, x, q, res) 
+        #    return res
+        #else:
+        #    return False
+        #res = np.abs(np.cross(p-x, q-x))/np.abs(p-x)
+        #print "in is_between: res=%s, allclose=%s" % (res, np_allclose(res, 0.0))
+        #return np_allclose(res, 0.0)
 
     def is_on(self, p):
         (x,y) = HighDimLine.partition(p)
@@ -357,19 +378,18 @@ class HighDimLineSegment(HighDimLine):
         if self.is_between(X):
             return HighDimLine.__call__(self, X)
         
-    def call(self, p):
-        if self.is_between(p):
-            return HighDimLine.call(self, p)
-        
 def has_crossing(line, line_seg):
     '''
     Has line a crossing with the line segment
     '''
+    
+    print line.theta,line_seg.theta
+    print line.theta[..., :-1],line_seg.theta[..., :]
     if np_allclose(line.theta[..., :-1],line_seg.theta[..., :-1]):
         print "no crossing found"
         return False
     else:
-        A = np.vstack(line.theta, line.seg.theta)
+        A = np.vstack([line.theta, line_seg.theta])
         b = - A[..., -1:]
         A[..., -1] = -np.ones(len(A))
         intersection_point = np.linalg.solve(A, b)
