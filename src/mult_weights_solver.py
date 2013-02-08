@@ -147,7 +147,9 @@ def find_min_edge(selected_edges, lines, line_weights):
         min_edge = (q,p)
     return min_edge
 
-def compute_spanning_tree(points, lines):
+def compute_spanning_tree(graph):
+    points = graph.points
+    lines = graph.lines
     solution = []
     number_of_crossings = {}
     weights = {}
@@ -165,14 +167,17 @@ def compute_spanning_tree(points, lines):
 
 def main():
     # minimal example to find optimal spanning tree
-    points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
-    l1 = get_line((2., 6.), (3., 2.)) # y = -4x + 14
-    l2 = get_line((2., 3.), (6., 5.)) # y = 0.5x + 2
-    l3 = get_line((3., 5.5), (5., 6.5)) # y = 0.5x + 4
+    points = np.array([(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)])
+    graph = create_graph(points, 5, 2)
+    l1 = create_line(np.array((2., 6.)), np.array((3., 2.))) # y = -4x + 14
+    l2 = create_line(np.array((2., 3.)), np.array((6., 5.))) # y = 0.5x + 2
+    l3 = create_line(np.array((3., 5.5)), np.array((5., 6.5))) # y = 0.5x + 4
     lines = [l1, l2, l3]
+    graph.lines = lines
+    graph.preprocess_lines()
     solution = compute_spanning_tree(copy.deepcopy(points),
             copy.deepcopy(lines))
-    print "crossing number = %s" % crossing_number(lines, solution)
+    print "crossing number = %s" % graph.crossing_number(solution)
     import plotting
     plotting.plot(points, lines, solution)
 
