@@ -87,7 +87,7 @@ class PreprocessingLinesTestCase(unittest.TestCase):
         # line between points omit it
         l9 = create_line(np.array((3., 6.)), np.array((5., 7.)))
         lines = set([l1, l2, l3, l4, l5, l6, l7, l8, l9])
-        graph.set_lines(lines)
+        graph.lines = lines
         graph.preprocess_lines()
         result = graph.get_lines()
         self.assertEqual(len(result), 3)
