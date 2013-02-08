@@ -48,6 +48,44 @@ class PointSet:
             if self.has_point(point):
                 indices_subset.add(self.get_index(point))
         return indices_subset
+    
+def create_uniform_points(n, d):
+    return PointSet(n, d)
+
+def create_grid_points(n, d):
+    assert d == 2
+    point_set = PointSet(n, d)
+    root_n = int(math.ceil(math.sqrt(n)))
+    eps = 0.1
+    x = 0.0
+    y = 0.0
+    row = 0
+    for i in range(root_n):
+        y = 0.0
+        for j in range(root_n):assert d == 2
+    point_set = PointSet(n, d)
+    root_n = int(math.ceil(math.sqrt(n)))
+    eps = 0.1
+    x = 0.0
+    y = 0.0
+    row = 0
+    for i in range(root_n):
+        y = 0.0
+        for j in range(root_n):
+            x_eps = random.uniform(-eps, eps)
+            y_eps = random.uniform(-eps, eps)
+            point_set.points[row] = np.array((x + x_eps, y + y_eps))
+            row += 1
+            y += 5.0
+        x += 5.0
+    assert row == n
+    return point_set
+
+def create_pointset(np_array, n, d):
+    assert np_array.shape == (n, d)
+    point_set = PointSet(n, d)
+    point_set.points = np_array
+    return point_set
             
 class Edges:
     def __init__(self, n):
@@ -72,34 +110,26 @@ class Edges:
         self.adj_matrix[i, j] = self.adj_matrix[j, i] = new_val
         
 def create_uniform_graph(n, d):
-    return HighDimGraph(n, d)
+    points = create_uniform_points(n, d)
+    edges = Edges(n)
+    return HighDimGraph(points, edges, n, d)
 
 def create_grid_graph(n, d):
-    assert d == 2
-    point_set = PointSet(n, d)
-    root_n = int(math.ceil(math.sqrt(n)))
-    eps = 0.1
-    x = 0.0
-    y = 0.0
-    row = 0
-    for i in range(root_n):
-        y = 0.0
-        for j in range(root_n):
-            x_eps = random.uniform(-eps, eps)
-            y_eps = random.uniform(-eps, eps)
-            point_set.points[row] = (x + x_eps, y + y_eps)
-            row += 1
-            y += 5.0
-        x += 5.0
-    assert row == n
-    graph = HighDimGraph(n, d)
-    graph.point_set = point_set
-    return graph
+    points = create_grid_points(n, d)
+    edges = Edges(n)
+    return HighDimGraph(points, edges, n, d)
+
+def create_graph(points, n, d):
+    edges = Edges(n)
+    return HighDimGraph(points, edges, n, d)
         
 class HighDimGraph:
-    def __init__(self, n, d):
-        self.point_set = PointSet(n, d)
-        self.edges = Edges(n)
+    def __init__(self, points, edges, n, d):
+        assert points.shape == (n, d)
+        self.point_set = points
+        self.edges = edges
+        self.n = n
+        self.d = d
         self.lines = {}
         self.line_segments = {}
         
@@ -120,9 +150,6 @@ class HighDimGraph:
     def create_all_lines(self):
         # TODO update implementation for 3D
         pass
-    
-    def __create_line(self, p, q):
-        return HighDimLine(np.array([p, q]))
     
     def __create_lines(self, p, q, eps):
         '''
@@ -216,10 +243,10 @@ class HighDimGraph:
                 lines_dict[partition_tuple] = line
         self.lines = lines_dict
     
-    def __get_line(self, p, q):
-        if not (p, q) in self.lines:
-            X = np.array([self.point_set.get(p), self.point_set.get(q)])
-            line = HighDimLine(X)
+    def __get_line(self, i, j):
+        if not (i, j) in self.lines:
+            (p, q) = self.point_set.get(i), self.point_set.get(j)
+            line = create_line(p, q)
             self.lines[(p, q)] = line
         return self.lines[(p, q)]
     
@@ -278,6 +305,12 @@ class HighDimGraph:
     def crossing_number(self):
         ''' alias for maximum crossing number '''
         return self.maximum_crossing_number()
+    
+def create_line(p, q):
+    assert len(p.shape) == 1
+    assert len(q.shape) == 1
+    X = np.array([p, q])
+    return HighDimLine(X)
         
 class HighDimLine:
     def __init__(self, X):
@@ -304,8 +337,8 @@ class HighDimLine:
         return hash(self.__key())
     
     def call(self, p):
-        #print p
-        #print p.shape, len(p.shape)
+        # print p
+        # print p.shape, len(p.shape)
         assert len(p.shape) == 1
         X = np.array([p])
         y = self(X)
@@ -342,7 +375,13 @@ class HighDimLine:
         (x, y) = HighDimLine.partition(p)
         y_line = self.call(x)
         return (y < y_line).all() and not self.is_on(p)
-        
+    
+    
+def create_linesegment(p, q):
+    assert len(p.shape) == 1
+    assert len(q.shape) == 1
+    X = np.array([p, q])
+    return HighDimLineSegment(X)        
     
 class HighDimLineSegment(HighDimLine):
     def __init__(self, X):
@@ -390,17 +429,17 @@ def has_crossing(line, line_seg):
     Has line a crossing with the line segment
     '''
     
-    #print line.theta, line_seg.theta
-    #print line.theta[..., :-1], line_seg.theta[..., :]
+    # print line.theta, line_seg.theta
+    # print line.theta[..., :-1], line_seg.theta[..., :]
     if np_allclose(line.theta[..., :-1], line_seg.theta[..., :-1]):
-        #print "no crossing found"
+        # print "no crossing found"
         return False
     else:
         A = np.vstack([line.theta, line_seg.theta])
         b = -A[..., -1:]
         A[..., -1] = -np.ones(len(A))
         intersection_point = (np.linalg.solve(A, b)).flatten() 
-        #print "intersection point= %s" % intersection_point
+        # print "intersection point= %s" % intersection_point
         x = intersection_point[..., :-1]
-        #print x
+        # print x
         return line_seg.is_between(x)
