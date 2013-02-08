@@ -45,8 +45,6 @@ class CrossingTestCase(unittest.TestCase):
     def test_has_also_crossing(self):
         line = HighDimLine(np.array([(3., 5.5), (5., 6.5)])) # y = 0.5x + 4
         line_segment = HighDimLineSegment(np.array([(5.,7.), (6., 4.)])) # y = -3x + 22
-        print line
-        print line_segment
         self.assertTrue(has_crossing(line, line_segment))
 
 #class PreprocessingLinesTestCase(unittest.TestCase):
