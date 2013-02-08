@@ -3,7 +3,9 @@
 
 import unittest
 import mult_weights_solver as mwsolv
-from highdimgraph import HighDimLine, HighDimLineSegment, has_crossing, np_assert_allclose
+from highdimgraph import HighDimLine, HighDimLineSegment, has_crossing 
+from highdimgraph import np_assert_allclose, create_line, create_linesegment
+from highdimgraph import create_graph
 import highdimgraph
 import sariel_lp_solver as slpsolv
 import fekete_lp_solver as flpsolv
@@ -13,15 +15,15 @@ import numpy as np
 
 class CrossingTestCase(unittest.TestCase):
     def test_has_crossing(self):
-        line = HighDimLine(np.array([(3.,2), (5.,0)])) # y = -x + 5
-        line_segment = HighDimLineSegment(np.array([(3,0.5), (5,1.5)])) # y = 0.5 x - 1
+        line = HighDimLine(np.array([(3., 2), (5., 0)]))  # y = -x + 5
+        line_segment = HighDimLineSegment(np.array([(3, 0.5), (5, 1.5)]))  # y = 0.5 x - 1
         # line_points[0] = segpoints[0] = intersection point
         line_points = np.array([(4., 1.), (5., 0.)])
         self.assertTrue(line.is_on(line_points[0]))
         self.assertTrue(line.is_on(line_points[1]))
         
         seg_points = np.copy(line_points)
-        seg_points[1,1] = 1.5
+        seg_points[1, 1] = 1.5
         self.assertTrue(line_segment.is_on(seg_points[0]))
         self.assertTrue(line_segment.is_on(seg_points[1]))
         
@@ -29,72 +31,75 @@ class CrossingTestCase(unittest.TestCase):
         line_val = line.call(np.array([5.]))
         np_assert_allclose(0.0, line_val)
         np_assert_allclose(line_points[..., -1], line(line_points[..., :-1]))
-        #np_assert_allclose(seg_points[..., -1], line_segment(seg_points[..., :-1]))
+        # np_assert_allclose(seg_points[..., -1], line_segment(seg_points[..., :-1]))
         self.assertTrue(has_crossing(line, line_segment))
 
     def test_has_no_crossing_linesegment_too_short(self):
-        line = HighDimLine(np.array([[3.,2], [5,0]])) # y = -x + 5
-        line_segment = HighDimLineSegment(np.array([[0.,-1], [3,0.5]])) # y = 0.5 x - 1
+        line = HighDimLine(np.array([[3., 2], [5, 0]]))  # y = -x + 5
+        line_segment = HighDimLineSegment(np.array([[0., -1], [3, 0.5]]))  # y = 0.5 x - 1
         self.assertFalse(has_crossing(line, line_segment))
 
     def test_has_no_crossing_line_and_segment_parallel(self):
-        line = HighDimLine(np.array([(3,2), (5,0)])) # y = -x + 5
-        line_segment = HighDimLineSegment(np.array([(0, 4), (6, -2)])) # y = -x + 4
+        line = HighDimLine(np.array([(3, 2), (5, 0)]))  # y = -x + 5
+        line_segment = HighDimLineSegment(np.array([(0, 4), (6, -2)]))  # y = -x + 4
         self.assertFalse(has_crossing(line, line_segment))
 
     def test_has_also_crossing(self):
-        line = HighDimLine(np.array([(3., 5.5), (5., 6.5)])) # y = 0.5x + 4
-        line_segment = HighDimLineSegment(np.array([(5.,7.), (6., 4.)])) # y = -3x + 22
+        line = HighDimLine(np.array([(3., 5.5), (5., 6.5)]))  # y = 0.5x + 4
+        line_segment = HighDimLineSegment(np.array([(5., 7.), (6., 4.)]))  # y = -3x + 22
         self.assertTrue(has_crossing(line, line_segment))
 
-#class PreprocessingLinesTestCase(unittest.TestCase):
-#    def test_is_above_works(self):
-#        line = Line2D((3,2), (5,0)) # y = -x + 5
-#        p = (1,4.5)
-#        self.assertTrue(line.is_above(p))
-#        self.assertFalse(line.is_below(p))
+class PreprocessingLinesTestCase(unittest.TestCase):
+    def test_is_above_works(self):
+        line = HighDimLine(np.array(((3, 2), (5, 0))))  # y = -x + 5
+        p = np.array((1, 4.5))
+        self.assertTrue(line.is_above(p))
+        self.assertFalse(line.is_below(p))
+
+    def test_is_below_works(self):
+        line = HighDimLine(np.array(((3, 0.5), (5, 1.5))))  # y = 0.5 x - 1
+        p = np.array((4., -1))
+        self.assertTrue(line.is_below(p))
+        self.assertFalse(line.is_above(p))
+
+    def test_is_on_works(self):
+        line = HighDimLine(np.array(((3, 0.5), (5, 1.5))))  # y = 0.5 x - 1
+        p = np.array((4, 1))
+        self.assertTrue(line.is_on(p))
+        self.assertFalse(line.is_below(p))
+        self.assertFalse(line.is_above(p))
+
+    def test_preprocessing_lines_omits_duplicates(self):
+        points = np.array([(2., 2.), (6., 4.), (3., 6.), (5., 7.), (4.25, 5.)])
+        graph = create_graph(points, 5, 2)
+        l1 = create_line(np.array((2., 6.)), np.array((3., 2.)))  # y = -4x + 14
+        l2 = create_line(np.array((2., 3.)), np.array((6., 5.)))  # y = 0.5x + 2
+        l3 = create_line(np.array((3., 5.5)), np.array((5., 6.5)))  # y = 0.5x + 4
+        # duplicates part
+        l4 = HighDimLine(np.array(((2.5, 6.), (3.5, 2.))))  # y = -4x + 16
+        l5 = HighDimLine(np.array(((2., 2.5), (6., 4.5))))  # y = 0.5x + 1.5
+        l6 = HighDimLine(np.array(((3., 5.), (5., 6.))))  # y = 0.5x + 3.5
+        # lines outside of point set
+        # above
+        l7 = create_line(np.array((0., 7.)), np.array((1., 10.)))  # y = 3 x + 7
+        # below
+        l8 = create_line(np.array((0., -1.)), np.array((6., 1.)))  # y = 1/3 x - 1
+        # line between points omit it
+        l9 = create_line(np.array((3., 6.)), np.array((5., 7.)))
+        lines = set([l1, l2, l3, l4, l5, l6, l7, l8, l9])
+        graph.set_lines(lines)
+        graph.preprocess_lines()
+        result = graph.get_lines()
+        self.assertEqual(len(result), 3)
+        self.assertFalse(l7 in result)
+        self.assertFalse(l8 in result)
+        self.assertFalse(l9 in result)
+        self.assertTrue(l1 in result or l4 in result)
+        self.assertTrue(l2 in result or l5 in result)
+        self.assertTrue(l3 in result or l6 in result)
 #
-#    def test_is_below_works(self):
-#        line = Line2D((3,0.5), (5,1.5)) # y = 0.5 x - 1
-#        p = (4, -1)
-#        self.assertTrue(line.is_below(p))
-#        self.assertFalse(line.is_above(p))
 #
-#    def test_is_on_works(self):
-#        line = Line2D((3,0.5), (5,1.5)) # y = 0.5 x - 1
-#        p = (4, 1)
-#        self.assertTrue(line.is_on(p))
-#        self.assertFalse(line.is_below(p))
-#        self.assertFalse(line.is_above(p))
-#
-#    def test_preprocessing_lines_omits_duplicates(self):
-#        points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
-#        l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
-#        l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
-#        l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
-#        # duplicates part
-#        l4 = Line2D((2.5, 6.), (3.5, 2.)) # y = -4x + 16
-#        l5 = Line2D((2., 2.5), (6., 4.5)) # y = 0.5x + 1.5
-#        l6 = Line2D((3., 5.), (5., 6.)) # y = 0.5x + 3.5
-#        # lines outside of point set
-#        # above
-#        l7 = Line2D((0., 7.), (1., 10.)) # y = 3 x + 7
-#        # below
-#        l8 = Line2D((0., -1.), (6., 1.)) # y = 1/3 x - 1
-#        # line between points omit it
-#        l9 = Line2D((3.,6.),(5.,7.))
-#        lines = [l1, l2, l3, l4, l5, l6, l7, l8, l9]
-#        result = preprocess_lines(lines, points)
-#        self.assertEqual(len(result), 3)
-#        self.assertFalse(l7 in result)
-#        self.assertFalse(l8 in result)
-#        self.assertFalse(l9 in result)
-#        self.assertTrue(l1 in result or l4 in result)
-#        self.assertTrue(l2 in result or l5 in result)
-#        self.assertTrue(l3 in result or l6 in result)
-#
-#
-#class GraphTestCase(unittest.TestCase):
+# class GraphTestCase(unittest.TestCase):
 #    def setUp(self):
 #        self.points = range(4)
 #        self.graph = mwsolv.create_graph(self.points)
@@ -142,7 +147,7 @@ class CrossingTestCase(unittest.TestCase):
 #    def test_cannot_find_connected_component(self):
 #        connected_component = self.graph.get_connected_component(5)
 #
-#class MultWeightsSolvingTestCase(unittest.TestCase):
+# class MultWeightsSolvingTestCase(unittest.TestCase):
 #    def setUp(self):
 #        self.points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
 #        l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
@@ -160,7 +165,7 @@ class CrossingTestCase(unittest.TestCase):
 #        self.assertTrue(((4.25, 5.), (6.,4.)) in solution)
 #
 #
-#class ConnectedComponentsTestCase(unittest.TestCase):
+# class ConnectedComponentsTestCase(unittest.TestCase):
 #    def test_results_one_connected_component(self):
 #        points = [ (0.,3.), (3.,4.), (9., 10.), (7.,8.), (5., 6.), (2., 1.)]
 #        edges = [ ((3., 4.), (0., 3.)),
@@ -209,8 +214,8 @@ class CrossingTestCase(unittest.TestCase):
 #            self.assertItemsEqual(ccs_edges[0], c2_edges)
 #        else:
 #            self.fail()
-#"""
-#class SarielsLPSolvingTestCase(unittest.TestCase):
+# """
+# class SarielsLPSolvingTestCase(unittest.TestCase):
 #    def setUp(self):
 #        self.points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
 #        l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
@@ -228,7 +233,7 @@ class CrossingTestCase(unittest.TestCase):
 #                ((4.25,5.), (5., 7.)) in solution)
 #        self.assertTrue(((4.25, 5.), (6.,4.)) in solution)
 #
-#class FeketeLPSolvingTestCase(unittest.TestCase):
+# class FeketeLPSolvingTestCase(unittest.TestCase):
 #    def setUp(self):
 #        self.points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
 #        l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
@@ -253,7 +258,7 @@ class CrossingTestCase(unittest.TestCase):
 #        print subsets
 #        self.assertEqual(len(subsets), 2**(len(self.points)) - 1 -1)
 #
-#class OptSolverTestCase(unittest.TestCase):
+# class OptSolverTestCase(unittest.TestCase):
 #    def setUp(self):
 #        self.points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
 #        l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14

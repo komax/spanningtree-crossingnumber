@@ -250,12 +250,12 @@ class HighDimGraph:
             self.lines[(p, q)] = line
         return self.lines[(p, q)]
     
-    def __get_line_segment(self, p, q):
-        if not (p, q) in self.line_segments:
-            X = np.array([self.point_set.get(p), self.point_set.get(q)])
-            line_segment = HighDimLineSegment(X)
+    def __get_line_segment(self, i, j):
+        if not (i, j) in self.line_segments:
+            (p, q) = self.point_set.get(i), self.point_set.get(j)
+            line = create_linesegment(p, q)
             self.line_segments[(p, q)] = line_segment
-        return self.lines[(p, q)]
+        return self.line_segments[(p, q)]
 
     def calculate_crossing_with(self, line):
         '''
@@ -331,7 +331,7 @@ class HighDimLine:
         return tuple(self.theta)
 
     def __eq__(a, b):
-        return a.theta == b.theta
+        return np_allclose(a.theta, b.theta)
 
     def __hash__(self):
         return hash(self.__key())
