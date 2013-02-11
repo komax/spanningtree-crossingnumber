@@ -88,11 +88,11 @@ def create_pointset(np_array, n, d):
     return point_set
             
 class Edges:
-    def __init__(self, n):
+    def __init__(self, n, matrix):
         self.n = n
-        self.adj_matrix = np.ones((n, n), dtype=bool)
-        for i in range(0, n):
-            self.adj_matrix[i, i] = False
+        assert matrix.shape == (n, n)
+        assert matrix.dtype == bool
+        self.adj_matrix = matrix
             
     def as_tuple(self):
         for i in range(0, self.n):
@@ -109,19 +109,70 @@ class Edges:
     def update(self, i, j, new_val):
         self.adj_matrix[i, j] = self.adj_matrix[j, i] = new_val
         
+def create_all_edges(n):
+    adj_matrix = np.ones((n, n), dtype=bool)
+    for i in range(0, n):
+        adj_matrix[i, i] = False
+    edges = Edges(n, adj_matrix)
+    return edges
+        
+def create_solution_edges(n):
+    sol_matrix = np.zeros((n, n), dtype=bool)
+    solution = Edges(n, sol_matrix)
+    return solution
+        
 def create_uniform_graph(n, d):
     points = create_uniform_points(n, d)
-    edges = Edges(n)
+    edges = create_all_edges(n)
     return HighDimGraph(points, edges, n, d)
 
 def create_grid_graph(n, d):
     points = create_grid_points(n, d)
-    edges = Edges(n)
+    edges = create_all_edges(n)
     return HighDimGraph(points, edges, n, d)
 
 def create_graph(points, n, d):
-    edges = Edges(n)
+    edges = create_all_edges(n)
     return HighDimGraph(points, edges, n, d)
+
+class ConnectedComponents:
+    def __init__(self, n):
+        self.ccs = list(set([i]) for i in range(n))
+        
+    def get_connected_component(self, i):
+        for cc in self.ccs:
+            if i in cc:
+                return cc
+        else:
+            raise StandardError('can not find vertex=%s in this connected components=%s' % (i, self.ccs))
+    
+    def merge(self, cc1, cc2):
+        ''' 
+        merge of two different connected components to a new one
+        '''
+        assert cc1 in self.ccs
+        assert cc2 in self.ccs
+        assert cc1 != cc2
+        i = self.ccs.index(cc1)
+        self.ccs.remove(ccs)
+        new_cc = cc1.union(cc2)
+        self.ccs[i] = new_cc
+        return
+    
+    def merge_by_vertices(self, i, j):
+        ''' 
+        merge of two connected components but parameters are two points
+        from the corresponding connected components
+        '''
+        try:
+            cc1 = self.get_connected_component(i)
+            cc2 = self.get_connected_component(j)
+            return self.merge(cc1, cc2)
+        except:
+            raise
+        
+    def __len__(self):
+        return len(self.ccs)
         
 class HighDimGraph:
     def __init__(self, points, edges, n, d):
