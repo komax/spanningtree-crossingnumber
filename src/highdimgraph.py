@@ -181,6 +181,10 @@ class HighDimGraph:
         self.edges = edges
         self.n = n
         self.d = d
+        
+        self.solution = create_solution_edges(n)
+        self.connected_components = ConnectedComponents(n) 
+        
         self.lines = {}
         self.line_segments = {}
         
@@ -192,6 +196,10 @@ class HighDimGraph:
     
     def get_y(self):
         return self.point_set.points[..., -1:]
+    
+    def get_solution(self):
+        for (i,j) in self.solution:
+            yield (self.point_set.get(i), self.point_set.get(j))
     
     def create_stabbing_lines(self):
         for (i, j) in self.edges:
