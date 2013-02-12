@@ -6,6 +6,8 @@ Created on Feb 5, 2013
 import numpy as np
 import math
 import random
+from collections import deque
+from pydoc import deque
 
 # numpy defaults for numpy.allclose()
 RTOL = 1e-05
@@ -106,6 +108,17 @@ class Edges:
     def has_edge(self, i, j):
         return self.adj_matrix[i, j] or self.adj_matrix[j, i]
     
+    def adj_nodes(self, i):
+        neighbors = set()
+        for j in range(self.n):
+            if i != j and self.adj_matrix[i,j]:
+                neighbors.add(j)
+        return neighbors
+    
+    def adj_edges(self, i):
+        for j in self.adj_nodes(i):
+            yield (i,j)
+    
     def update(self, i, j, new_val):
         self.adj_matrix[i, j] = self.adj_matrix[j, i] = new_val
         
@@ -152,11 +165,11 @@ class ConnectedComponents:
         '''
         assert cc1 in self.ccs
         assert cc2 in self.ccs
-        assert cc1 != cc2
-        i = self.ccs.index(cc1)
-        self.ccs.remove(ccs)
-        new_cc = cc1.union(cc2)
-        self.ccs[i] = new_cc
+        if cc1 != c2:
+            i = self.ccs.index(cc1)
+            self.ccs.remove(ccs)
+            new_cc = cc1.union(cc2)
+            self.ccs[i] = new_cc
         return
     
     def merge_by_vertices(self, i, j):
@@ -205,6 +218,36 @@ class HighDimGraph:
         for (i, j) in self.edges:
             self.__get_line(i, j)
         return
+    
+    def bfs(self, root):
+        visited = set([root])
+        queue = deque([root])
+        
+        while queue:
+            i = queue.popleft()
+            visited.add(i)
+            yield i
+            for neighbor in self.solution_adj_nodes(i):
+                if neighbor not in visited:
+                    queue.append(neighbor)
+                    
+    def compute_connected_component(self, root):
+        connected_component = set([root])
+        for bfs_node in self.bfs(root):
+            connected_component.add(bfs_node)
+        return connected_component
+    
+    def compute_connected_components(self):
+        remaining_points = range(self.n)
+        while remaining_points:
+            p = remaining_points.pop()
+            connected_component = self.compute_connected_component(p)
+            for cc_p in connected_component:
+                self.connected_components.merge_by_vertices(p, cc_p)
+                if cc_p in remaining_points:
+                    remaining_points.remove(cc_p)
+        
+        
         
     def create_all_lines(self):
         # TODO update implementation for 3D
