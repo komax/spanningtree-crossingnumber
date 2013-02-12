@@ -154,22 +154,27 @@ class GraphTestCase(unittest.TestCase):
     def test_cannot_find_connected_component(self):
         self.assertRaises(StandardError, self.graph.connected_components.get_connected_component, 5)    
 
-# class MultWeightsSolvingTestCase(unittest.TestCase):
-#    def setUp(self):
-#        self.points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
-#        l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
-#        l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
-#        l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
-#        self.lines = [l1, l2, l3]
-#
-#    def test_solution(self):
-#        solution = mwsolv.compute_spanning_tree(self.points, self.lines)
-#        self.assertEqual(len(solution), 4)
-#        self.assertTrue(((3., 6.), (5.,7.)) in solution)
-#        self.assertTrue(((2., 2.), (6.,4.)) in solution)
-#        self.assertTrue(((3., 6.), (4.25,5.)) in solution or\
-#                ((4.25,5.), (5., 7.)) in solution)
-#        self.assertTrue(((4.25, 5.), (6.,4.)) in solution)
+class MultWeightsSolvingTestCase(unittest.TestCase):
+    def setUp(self):
+        points = np.array([(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)])
+        self.graph = create_graph(points, 5, 2)
+        
+        l1 = HighDimLine(np.array([(2., 6.), (3., 2.)])) # y = -4x + 14
+        l2 = HighDimLine(np.array([(2., 3.), (6., 5.)])) # y = 0.5x + 2
+        l3 = HighDimLine(np.array([(3., 5.5), (5., 6.5)])) # y = 0.5x + 4
+        self.graph.lines = set([l1, l2, l3])
+
+    def test_solution(self):
+        mwsolv.compute_spanning_tree(self.graph)
+        solution = []
+        for (i,j) in self.graph.solution:
+            solution.append((i,j))
+        self.assertEqual(len(solution), 4)
+        self.assertTrue((2, 3) in solution)
+        self.assertTrue((0, 1) in solution)
+        self.assertTrue((2, 4) in solution or\
+                (3, 4) in solution)
+        self.assertTrue((1, 4) in solution)
 #
 #
 # class ConnectedComponentsTestCase(unittest.TestCase):
