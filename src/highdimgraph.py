@@ -111,13 +111,13 @@ class Edges:
     def adj_nodes(self, i):
         neighbors = set()
         for j in range(self.n):
-            if i != j and self.adj_matrix[i,j]:
+            if i != j and self.adj_matrix[i, j]:
                 neighbors.add(j)
         return neighbors
     
     def adj_edges(self, i):
         for j in self.adj_nodes(i):
-            yield (i,j)
+            yield (i, j)
     
     def update(self, i, j, new_val):
         self.adj_matrix[i, j] = self.adj_matrix[j, i] = new_val
@@ -211,7 +211,7 @@ class HighDimGraph:
         return self.point_set.points[..., -1:]
     
     def get_solution(self):
-        for (i,j) in self.solution:
+        for (i, j) in self.solution:
             yield (self.point_set.get(i), self.point_set.get(j))
     
     def create_stabbing_lines(self):
@@ -245,9 +245,42 @@ class HighDimGraph:
             for cc_p in connected_component:
                 self.connected_components.merge_by_vertices(p, cc_p)
                 if cc_p in remaining_points:
-                    remaining_points.remove(cc_p)
-        
-        
+                    remaining_points.remove(cc_p)      
+        return
+                    
+    def spanning_tree(self, root):
+        spanning_tree_edges = set()
+        bfs_generator = self.bfs(root)
+        # save because root is always within bfs as first element
+        i = bfs_generator.next()  
+        j = None
+        for bfs_node in bfs_generator:
+            j = bfs_node
+            if j < i:
+                spanning_tree_edges.add((j, i))
+            else:
+                spanning_tree_edges.add((i, j))
+            i = j
+        return spanning_tree_edges
+    
+    def compute_spanning_tree_on_ccs(self):
+        new_solution_edges = set()
+        remaining_points = range(self.n)
+        while remaining_points:
+            p = remaining_points.pop()
+            spanning_tree_edges = self.spanning_tree(p)
+            new_solution_edges.update(spanning_tree_edges)
+            # TODO maybe use bfs with ccs instead to delete from remain.points
+            for (i, j) in spanning_tree_edges:
+                if i in remaining_points:
+                    remaining_points.remove(i)
+                if j in remaining_points:
+                    remaining_points.remove(j)
+                    
+        self.solution = create_solution_edges(self.n)
+        for (i, j) in new_solution_edges:
+            self.solution.update(i, j, True)
+        return 
         
     def create_all_lines(self):
         # TODO update implementation for 3D
