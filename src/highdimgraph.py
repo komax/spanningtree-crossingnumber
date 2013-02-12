@@ -342,20 +342,23 @@ class HighDimGraph:
             (points above the line as tuples , points below the line as sets)
             both parts can be empty
         '''
-        above_points = set()
-        below_points = set()
+        above_points = list()
+        below_points = list()
         for i in range(self.n):
-            p = self.point_set.get(i)
+            #print self.point_set[i]
+            p = self.point_set[i]
             if line.is_on(p):
                 return ()
             elif line.is_above(p):
-                above_points.add(i)
+                above_points.append(i)
             elif line.is_below(p):
-                below_points.add(i)
+                below_points.append(i)
             else:
                 raise StandardError('can not find point i=%s:p=%s on line=%s' % 
                         (i,p, line))
-        return (above_points, below_points)
+        above_points.sort()
+        below_points.sort()
+        return (tuple(above_points), tuple(below_points))
     
     def preprocess_lines(self):
         ''' removes lines_registry that have same partitioning of the point set as
