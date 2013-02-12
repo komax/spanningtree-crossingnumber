@@ -196,13 +196,15 @@ class HighDimGraph:
         self.d = d
         
         self.solution = create_solution_edges(n)
-        self.connected_components = ConnectedComponents(n) 
+        self.connected_components = ConnectedComponents(n)
         
-        self.lines = {}
+        self.lines = set()
+        
+        self.lines_registry = {}
         self.line_segments = {}
         
     def get_lines(self):
-        return self.lines.values()
+        return self.lines
     
     def get_points(self):
         return self.point_set.points[..., :-1]
@@ -288,7 +290,7 @@ class HighDimGraph:
     
     def __create_lines(self, p, q, eps):
         '''
-        for two points p,q compute all four possible separation lines
+        for two points p,q compute all four possible separation lines_registry
         '''
         # TODO update it for high dimensions
         (x1, y1) = p
@@ -319,7 +321,7 @@ class HighDimGraph:
         return pq_line_set
     
     def generate_lines(self, points):
-        ''' compute all possible seperators (lines) on the point set. There maybe
+        ''' compute all possible seperators (lines_registry) on the point set. There maybe
             duplicates within this set
         '''
         lines = {}
@@ -327,7 +329,7 @@ class HighDimGraph:
             for q in points:
                 if points.index(p) < points.index(q):
                     if not lines.has_key((p, q)):
-                        # create all different lines
+                        # create all different lines_registry
                         pq_lines = create_lines(p, q, eps)
                         lines[p, q] = pq_lines
         line_set = []
@@ -342,26 +344,26 @@ class HighDimGraph:
         '''
         above_points = set()
         below_points = set()
-        for p in self.points:
+        for i in range(self.n):
+            p = self.point_set.get(i)
             if line.is_on(p):
                 return ()
             elif line.is_above(p):
-                above_points.add(p)
+                above_points.add(i)
             elif line.is_below(p):
-                below_points.add(p)
+                below_points.add(i)
             else:
-                raise StandardError('can not find point p=%s on line=%s' % 
-                        (p, line))
+                raise StandardError('can not find point i=%s:p=%s on line=%s' % 
+                        (i,p, line))
         return (above_points, below_points)
     
     def preprocess_lines(self):
-        ''' removes lines that have same partitioning of the point set as
+        ''' removes lines_registry that have same partitioning of the point set as
             equivalent ones
-            lines above or below the point set are also removed
+            lines_registry above or below the point set are also removed
         '''
         lines_dict = {}
-        lines = self.lines.values()
-        for line in lines:
+        for line in self.lines:
             # FIXME update this implementation 
             partition_tuple = self.__partition_points_by_line(line)
             if not partition_tuple:
@@ -376,14 +378,14 @@ class HighDimGraph:
             else:
                 # new equivalent class, store this line
                 lines_dict[partition_tuple] = line
-        self.lines = lines_dict
+        self.lines = set(lines_dict.values())
     
     def __get_line(self, i, j):
-        if not (i, j) in self.lines:
+        if not (i, j) in self.lines_registry:
             (p, q) = self.point_set.get(i), self.point_set.get(j)
             line = create_line(p, q)
-            self.lines[(p, q)] = line
-        return self.lines[(p, q)]
+            self.lines_registry[(p, q)] = line
+        return self.lines_registry[(p, q)]
     
     def __get_line_segment(self, i, j):
         if not (i, j) in self.line_segments:
@@ -406,11 +408,11 @@ class HighDimGraph:
     def crossing_tuple(self, solution):
         '''
         returns (crossing number, overall crossings)
-        on all lines with edges
+        on all lines_registry with edges
         '''
         crossings = 0
         max_crossing_number = 0
-        for line in self.lines.values():
+        for line in self.lines_registry.values():
             crossing_number = calculate_crossing_with(line, solution)
             crossings += crossing_number
             if crossing_number > max_crossing_number:
@@ -419,16 +421,16 @@ class HighDimGraph:
 
     def calculate_crossings(self, solution):
         '''
-        for all lines and edges in the solution compute the overall crossings
+        for all lines_registry and edges in the solution compute the overall crossings
         '''
         crossing_number = 0
-        for line in self.lines.values():
+        for line in self.lines_registry.values():
             crossing_number += calculate_crossing_with(line, solution)
         return crossing_number
 
     def maximum_crossing_number(lines, solution):
         '''
-        for all lines and edges in the solution compute the maximum crossing number
+        for all lines_registry and edges in the solution compute the maximum crossing number
         '''
         max_crossing_number = 0
         for line in lines:
