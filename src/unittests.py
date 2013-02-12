@@ -97,56 +97,63 @@ class PreprocessingLinesTestCase(unittest.TestCase):
         self.assertTrue(l1 in result or l4 in result)
         self.assertTrue(l2 in result or l5 in result)
         self.assertTrue(l3 in result or l6 in result)
-#
-#
-# class GraphTestCase(unittest.TestCase):
-#    def setUp(self):
-#        self.points = range(4)
-#        self.graph = mwsolv.create_graph(self.points)
-#
-#    def test_connected_components(self):
-#        self.assertFalse(self.graph.in_same_connected_component(1,2))
-#        self.assertTrue(self.graph.in_same_connected_component(1,1))
-#
-#    def test_adjacent(self):
-#        self.assertTrue(self.graph.is_adjacent(1,2))
-#        self.assertFalse(self.graph.is_adjacent(1,5))
-#        adjacent_vertices = self.graph.get_adjacent_vertices(1)
-#        adjacent_vertices.sort()
-#        self.assertEqual(adjacent_vertices, [0,2,3])
-#
-#    def test_get_edges(self):
-#        edges = self.graph.get_edges()
-#        edges.sort()
-#        expected_edges = [(0,1),(0,2),(0,3), (1,2), (1,3), (2,3)]
-#        self.assertEqual(edges, expected_edges)
-#
-#    def test_merge_connected_components(self):
-#        self.graph.merge_connected_components([0],[1])
-#        edges = self.graph.get_edges()
-#        edges.sort()
-#        expected_edges = [(0,1),(0,2),(0,3), (1,2), (1,3), (2,3)]
-#        expected_edges.remove((0,1))
-#        self.assertEqual(edges, expected_edges)
-#
-#    def test_merge_cc_with_vertices(self):
-#        self.graph.merge_cc_with_vertics(0,1)
-#        self.graph.merge_cc_with_vertics(0,2)
-#        self.graph.merge_cc_with_vertics(3,1)
-#        edges = self.graph.get_edges()
-#        edges.sort()
-#        self.assertEqual(edges, [])
-#
-#    def test_get_connected_component(self):
-#        self.graph.merge_connected_components([0],[1])
-#        connected_component = self.graph.get_connected_component(1)
-#        connected_component.sort()
-#        self.assertEqual(connected_component, [0,1])
-#
-#    @unittest.expectedFailure
-#    def test_cannot_find_connected_component(self):
-#        connected_component = self.graph.get_connected_component(5)
-#
+
+
+class GraphTestCase(unittest.TestCase):
+    def setUp(self):
+        point_set = np.array([[0], [1], [2], [3]])
+        self.graph = create_graph(point_set, 4, 1)
+
+    def test_connected_components(self):
+        cc1 = self.graph.connected_components.get_connected_component(1)
+        cc2 = self.graph.connected_components.get_connected_component(2)
+        self.assertFalse(cc1 == cc2)
+        cc3 = self.graph.connected_components.get_connected_component(1)
+        self.assertTrue(cc1 == cc3)
+
+    def test_adjacent(self):
+        self.assertTrue(self.graph.edges.has_edge(1,2))
+        self.assertFalse(self.graph.edges.has_edge(1,5))
+        adjacent_vertices = list(self.graph.edges.get_adj_nodes(1))
+        adjacent_vertices.sort()
+        self.assertEqual(adjacent_vertices, [0,2,3])
+
+    def test_get_edges(self):
+        edges = []
+        for (i,j) in self.graph.edges:
+            edges.append((i,j))
+        expected_edges = [(0,1),(0,2),(0,3), (1,2), (1,3), (2,3)]
+        self.assertEqual(edges, expected_edges)
+
+    def test_merge_connected_components(self):
+        # TODO fix this testcase
+        self.graph.connected_components.merge_by_vertices(0,1)
+        edges = []
+        for (i,j) in self.graph.edges:
+            edges.append((i,j))
+        expected_edges = [(0,1),(0,2),(0,3), (1,2), (1,3), (2,3)]
+        expected_edges.remove((0,1))
+        self.assertEqual(edges, expected_edges)
+
+    def test_merge_cc_with_vertices(self):
+        # TODO fix this testcase
+        self.graph.connected_components.merge_by_vertices(0,1)
+        self.graph.connected_components.merge_by_vertices(0,2)
+        self.graph.connected_components.merge_by_vertices(3,1)
+        edges = []
+        for (i,j) in self.graph.edges:
+            edges.append((i,j))
+        self.assertEqual(edges, [])
+
+    def test_get_connected_component(self):
+        self.graph.connected_components.merge_by_vertices(0,1)
+        connected_component = list(self.graph.connected_components.get_connected_component(1))
+        connected_component.sort()
+        self.assertEqual(connected_component, [0,1])
+
+    def test_cannot_find_connected_component(self):
+        self.assertRaises(StandardError, self.graph.connected_components.get_connected_component, 5)    
+
 # class MultWeightsSolvingTestCase(unittest.TestCase):
 #    def setUp(self):
 #        self.points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]

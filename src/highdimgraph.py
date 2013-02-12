@@ -165,11 +165,9 @@ class ConnectedComponents:
         '''
         assert cc1 in self.ccs
         assert cc2 in self.ccs
-        if cc1 != c2:
-            i = self.ccs.index(cc1)
-            self.ccs.remove(ccs)
-            new_cc = cc1.union(cc2)
-            self.ccs[i] = new_cc
+        if cc1 != cc2:
+            self.ccs.remove(cc2)
+            cc1.update(cc2)
         return
     
     def merge_by_vertices(self, i, j):
