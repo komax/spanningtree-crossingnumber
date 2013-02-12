@@ -113,8 +113,8 @@ class GraphTestCase(unittest.TestCase):
 
     def test_adjacent(self):
         self.assertTrue(self.graph.edges.has_edge(1,2))
-        self.assertFalse(self.graph.edges.has_edge(1,5))
-        adjacent_vertices = list(self.graph.edges.get_adj_nodes(1))
+        self.assertFalse(self.graph.edges.has_edge(1,1))
+        adjacent_vertices = list(self.graph.edges.adj_nodes(1))
         adjacent_vertices.sort()
         self.assertEqual(adjacent_vertices, [0,2,3])
 
