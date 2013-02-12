@@ -7,7 +7,8 @@ import math
 from pylab import frange
 from highdimgraph import create_uniform_graph, create_grid_graph
 
-def plot(graph, solution):
+def plot(graph):
+    assert graph.d == 2
     # FIXME update this implementation to numpy graphs
     '''
     plots points as blue circles, lines as red ones and the edges from the
@@ -22,12 +23,20 @@ def plot(graph, solution):
 #    x_frange = frange(max(xs))
 
     # first plot lines
-    for line in graph.get_lines():
+    for line in graph.lines:
         plt.plot(points, line(points), 'r', zorder=1)
     # then plot solution
     xlines = []
     ylines = []
-    for ((x1, y1), (x2, y2)) in solution:
+    
+    def parition(p):
+        x = p[..., :-1]
+        y = p[..., -1:]
+        return (x, y)
+    
+    for (p, q) in graph.get_solution():
+        (x1, y1) = parition(p)
+        (x2, y2) = parition(p)
         xlines.append(x1)
         xlines.append(x2)
         xlines.append(None)

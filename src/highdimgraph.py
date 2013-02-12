@@ -37,12 +37,15 @@ class PointSet:
         for row in range(0, self.n):
             if np_allclose(self.points[row], p):
                 return row
-            
-    def get(self, index):
-        return self.points[index]
     
     def __iter__(self):
         return self.points.__iter__()
+    
+    def __str__(self):
+        return 'PointSet(n=%s,d=%s,points=%s' % (self.n, self.dimension, self.points)
+    
+    def __repr__(self):
+        return self.__str__()
             
     def subset(self, subset_points):
         indices_subset = set()
@@ -104,6 +107,12 @@ class Edges:
             
     def __iter__(self):
         return self.as_tuple()
+    
+    def __str__(self):
+        return 'Edges(n=%s, adj_matrix=%s)' % (self.n,self.adj_matrix)
+    
+    def __repr__(self):
+        return self.__str__()
         
     def has_edge(self, i, j):
         return self.adj_matrix[i, j] or self.adj_matrix[j, i]
@@ -200,19 +209,16 @@ class HighDimGraph:
         
         self.lines_registry = {}
         self.line_segments = {}
-        
-    def get_lines(self):
-        return self.lines
     
     def get_points(self):
-        return self.point_set.points[..., :-1]
+        return self.point_set[..., :-1]
     
     def get_y(self):
-        return self.point_set.points[..., -1:]
+        return self.point_set[..., -1:]
     
     def get_solution(self):
         for (i, j) in self.solution:
-            yield (self.point_set.get(i), self.point_set.get(j))
+            yield (self.point_set[i], self.point_set[j])
     
     def create_stabbing_lines(self):
         for (i, j) in self.edges:
@@ -383,59 +389,59 @@ class HighDimGraph:
     
     def __get_line(self, i, j):
         if not (i, j) in self.lines_registry:
-            (p, q) = self.point_set.get(i), self.point_set.get(j)
+            (p, q) = self.point_set[i], self.point_set[j]
             line = create_line(p, q)
-            self.lines_registry[(p, q)] = line
-        return self.lines_registry[(p, q)]
+            self.lines_registry[(i, j)] = line
+        return self.lines_registry[(i, j)]
     
-    def __get_line_segment(self, i, j):
+    def get_line_segment(self, i, j):
         if not (i, j) in self.line_segments:
-            (p, q) = self.point_set.get(i), self.point_set.get(j)
-            line = create_linesegment(p, q)
-            self.line_segments[(p, q)] = line_segment
-        return self.line_segments[(p, q)]
+            (p, q) = self.point_set[i], self.point_set[j]
+            line_segment = create_linesegment(p, q)
+            self.line_segments[(i, j)] = line_segment
+        return self.line_segments[(i, j)]
 
     def calculate_crossing_with(self, line):
         '''
         for a given line calculate the crossing number (int) over all edges
         '''
         crossings = 0
-        for (p, q) in self.edges:
-            line_segment = self.__get_line_segment(p, q)
+        for (p, q) in self.solution:
+            line_segment = self.get_line_segment(p, q)
             if has_crossing(line, line_segment):
                 crossings += 1
         return crossings
     
-    def crossing_tuple(self, solution):
+    def crossing_tuple(self):
         '''
         returns (crossing number, overall crossings)
         on all lines_registry with edges
         '''
         crossings = 0
         max_crossing_number = 0
-        for line in self.lines_registry.values():
-            crossing_number = calculate_crossing_with(line, solution)
+        for line in self.lines:
+            crossing_number = calculate_crossing_with(line)
             crossings += crossing_number
             if crossing_number > max_crossing_number:
                 max_crossing_number = crossing_number
         return (max_crossing_number, crossings)
 
-    def calculate_crossings(self, solution):
+    def calculate_crossings(self):
         '''
         for all lines_registry and edges in the solution compute the overall crossings
         '''
         crossing_number = 0
-        for line in self.lines_registry.values():
-            crossing_number += calculate_crossing_with(line, solution)
+        for line in self.lines:
+            crossing_number += calculate_crossing_with(line)
         return crossing_number
 
-    def maximum_crossing_number(lines, solution):
+    def maximum_crossing_number(self):
         '''
         for all lines_registry and edges in the solution compute the maximum crossing number
         '''
         max_crossing_number = 0
-        for line in lines:
-            crossing_number = calculate_crossing_with(line, solution)
+        for line in self.lines:
+            crossing_number = self.calculate_crossing_with(line)
         if crossing_number > max_crossing_number:
             max_crossing_number = crossing_number
         return max_crossing_number
