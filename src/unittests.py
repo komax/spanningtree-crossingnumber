@@ -89,7 +89,7 @@ class PreprocessingLinesTestCase(unittest.TestCase):
         lines = set([l1, l2, l3, l4, l5, l6, l7, l8, l9])
         graph.lines = lines
         graph.preprocess_lines()
-        result = graph.get_lines()
+        result = graph.lines
         self.assertEqual(len(result), 3)
         self.assertFalse(l7 in result)
         self.assertFalse(l8 in result)
@@ -184,8 +184,9 @@ class ConnectedComponentsTestCase(unittest.TestCase):
         graph.compute_connected_components()
         ccs = graph.connected_components
         self.assertEqual(len(ccs), 1)
-        self.assertEquals(len(ccs_edges), 1)
-        self.assertItemsEqual(cc, points)
+        cc = ccs.get_connected_component(3)
+        points_indices = range(0,6)
+        self.assertItemsEqual(cc, points_indices)
         
         graph.compute_spanning_tree_on_ccs()
         cc_edges = graph.solution
@@ -211,11 +212,11 @@ class ConnectedComponentsTestCase(unittest.TestCase):
         ccs = graph.connected_components
         self.assertEqual(len(ccs), 2)
         c1 = [ 0, 1, 5]
-        self.assertItemsEqual(c1, ccs.get_conncected_component(0))
+        self.assertItemsEqual(c1, ccs.get_connected_component(0))
         c1_edges = [(0, 1), (1, 5)]
         c2 = [ 2, 3, 4]
-        self.assertItemsEqual(c1, ccs.get_conncected_component(3))
-        self.assertNotEqual(ccs.get_conncected_component(0), ccs.get_conncected_component(3))
+        self.assertItemsEqual(c1, ccs.get_connected_component(3))
+        self.assertNotEqual(ccs.get_connected_component(0), ccs.get_connected_component(3))
         c2_edges = [(3, 4), (2, 3)]
         expected_sol = c1_edges + c2_edges
         self.assertItemsEqual(expected_sol, graph.solution)

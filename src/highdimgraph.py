@@ -233,7 +233,7 @@ class HighDimGraph:
             i = queue.popleft()
             visited.add(i)
             yield i
-            for neighbor in self.solution_adj_nodes(i):
+            for neighbor in self.solution.adj_nodes(i):
                 if neighbor not in visited:
                     queue.append(neighbor)
                     
