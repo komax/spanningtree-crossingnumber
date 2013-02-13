@@ -45,15 +45,16 @@ def plot(graph):
     plt.show()
 
 def main():
-    #graph = create_grid_graph(2**2, 2)
-    graph = create_uniform_graph(2, 2)
+    graph = create_grid_graph(2**2, 2)
+    #graph = create_uniform_graph(2, 2)
     graph.create_all_lines()
     graph.preprocess_lines()
     #graph.create_stabbing_lines()
     #points = dtgen.generate_points_uniformly(6, 100.0)
     #lines = dtgen.generate_lines(points)
-    #import mult_weights_solver as mws
-    #solution = mws.compute_spanning_tree(points, lines)
+    import mult_weights_solver as mws
+    
+    mws.compute_spanning_tree(graph)
     plot(graph)
 
 if __name__ == '__main__':

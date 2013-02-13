@@ -148,8 +148,9 @@ def create_grid_graph(n, d):
     return HighDimGraph(points, edges, n, d)
 
 def create_graph(points, n, d):
+    point_set = create_pointset(points, n, d)
     edges = create_all_edges(n)
-    return HighDimGraph(points, edges, n, d)
+    return HighDimGraph(point_set, edges, n, d)
 
 class ConnectedComponents:
     def __init__(self, n):
@@ -190,8 +191,8 @@ class ConnectedComponents:
         
 class HighDimGraph:
     def __init__(self, points, edges, n, d):
-        #assert points.n == n
-        #assert points.d == d
+        assert points.n == n
+        assert points.d == d
         self.point_set = points
         self.edges = edges
         self.n = n
