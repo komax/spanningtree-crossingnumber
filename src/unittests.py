@@ -119,18 +119,14 @@ class GraphTestCase(unittest.TestCase):
         self.assertEqual(adjacent_vertices, [0,2,3])
 
     def test_get_edges(self):
-        edges = []
-        for (i,j) in self.graph.edges:
-            edges.append((i,j))
+        edges = list(self.graph.edges)
         expected_edges = [(0,1),(0,2),(0,3), (1,2), (1,3), (2,3)]
         self.assertEqual(edges, expected_edges)
 
     def test_merge_connected_components(self):
         # TODO fix this testcase
         self.graph.connected_components.merge_by_vertices(0,1)
-        edges = []
-        for (i,j) in self.graph.edges:
-            edges.append((i,j))
+        edges = list(self.graph.edges)
         expected_edges = [(0,1),(0,2),(0,3), (1,2), (1,3), (2,3)]
         expected_edges.remove((0,1))
         self.assertEqual(edges, expected_edges)
@@ -140,9 +136,7 @@ class GraphTestCase(unittest.TestCase):
         self.graph.connected_components.merge_by_vertices(0,1)
         self.graph.connected_components.merge_by_vertices(0,2)
         self.graph.connected_components.merge_by_vertices(3,1)
-        edges = []
-        for (i,j) in self.graph.edges:
-            edges.append((i,j))
+        edges = list(self.graph.edges)
         self.assertEqual(edges, [])
 
     def test_get_connected_component(self):
@@ -166,67 +160,66 @@ class MultWeightsSolvingTestCase(unittest.TestCase):
 
     def test_solution(self):
         mwsolv.compute_spanning_tree(self.graph)
-        solution = []
-        for (i,j) in self.graph.solution:
-            solution.append((i,j))
+        solution = list(self.graph.solution)
         self.assertEqual(len(solution), 4)
         self.assertTrue((2, 3) in solution)
         self.assertTrue((0, 1) in solution)
         self.assertTrue((2, 4) in solution or\
                 (3, 4) in solution)
         self.assertTrue((1, 4) in solution)
-#
-#
-# class ConnectedComponentsTestCase(unittest.TestCase):
-#    def test_results_one_connected_component(self):
-#        points = [ (0.,3.), (3.,4.), (9., 10.), (7.,8.), (5., 6.), (2., 1.)]
-#        edges = [ ((3., 4.), (0., 3.)),
-#                  ((2., 1.), (3., 4.)),
-#                  ((3., 4.), (5., 6.)),
-#                  ((7., 8.), (5., 6.)),
-#                  ((9., 10.), (7., 8.)) ]
-#        (ccs, ccs_edges) = slpsolv.connected_components(points, edges)
-#        self.assertEqual(len(ccs), 1)
-#        self.assertEquals(len(ccs_edges), 1)
-#        cc = ccs[0]
-#        self.assertItemsEqual(cc, points)
-#        cc_edges = ccs_edges[0]
-#        print cc_edges
-#        for (p,q) in edges:
-#            if p < q:
-#                edge = (p,q)
-#            else:
-#                edge = (q,p)
-#            self.assertTrue(edge in cc_edges, "%s not in %s" % (edge, cc_edges))
-#
-#    """def test_results_two_connected_components(self):
-#        points = [ (0.,3.), (3.,4.), (9., 10.), (7.,8.), (5., 6.), (2., 1.)]
-#        edges = [ ((3., 4.), (0., 3.)),
-#                  ((2., 1.), (3., 4.)),
-#                  #((3., 4.), (5., 6.)), now two connected components
-#                  ((7., 8.), (5., 6.)),
-#                  ((9., 10.), (7., 8.)) ]
-#        (ccs, ccs_edges) = slpsolv.connected_components(points, edges)
-#        print ccs_edges
-#        self.assertEqual(len(ccs), 2)
-#        self.assertEqual(len(ccs_edges), 2)
-#        c1 = [ (0.,3.), (3.,4.), (2., 1.)]
-#        c1_edges = [((0.,3.), (3.,4.)), ((2., 1.), (3., 4.))]
-#        c2 = [ (9., 10.), (7.,8.), (5., 6.)]
-#        c2_edges = [((5., 6.), (7., 8.)), ((7., 8.),(9., 10.))]
-#        if (0., 3.) in ccs[0]:
-#            self.assertItemsEqual(ccs[0], c1)
-#            self.assertItemsEqual(ccs_edges[0], c1_edges)
-#            self.assertItemsEqual(ccs[1], c2)
-#            self.assertItemsEqual(ccs_edges[1], c2_edges)
-#        elif (0., 3.) in ccs[1]:
-#            self.assertItemsEqual(ccs[1], c1)
-#            self.assertItemsEqual(ccs_edges[1], c1_edges)
-#            self.assertItemsEqual(ccs[0], c2)
-#            self.assertItemsEqual(ccs_edges[0], c2_edges)
-#        else:
-#            self.fail()
-# """
+
+
+class ConnectedComponentsTestCase(unittest.TestCase):
+    def test_results_one_connected_component(self):
+        points = np.array([ (0.,3.), (3.,4.), (9., 10.), (7.,8.), (5., 6.), (2., 1.)])
+        graph = create_graph(points, 6, 2)
+        edges = [ (1, 0),
+                  (5, 1),
+                  (1, 4),
+                  (3, 4),
+                  (2, 3)]
+        for (i,j) in edges:
+            graph.solution.update(i,j, True)
+        #(ccs, ccs_edges) = slpsolv.connected_components(points, edges)
+        graph.compute_connected_components()
+        ccs = graph.connected_components
+        self.assertEqual(len(ccs), 1)
+        self.assertEquals(len(ccs_edges), 1)
+        self.assertItemsEqual(cc, points)
+        
+        graph.compute_spanning_tree_on_ccs()
+        cc_edges = graph.solution
+        print cc_edges
+        for (i,j) in edges:
+            if i < j:
+                edge = (i,j)
+            else:
+                edge = (j,i)
+            self.assertTrue(edge in cc_edges, "%s not in %s" % (edge, cc_edges))
+
+    def test_results_two_connected_components(self):
+        points = np.array([ (0.,3.), (3.,4.), (9., 10.), (7.,8.), (5., 6.), (2., 1.)])
+        graph = create_graph(points, 6, 2)
+        edges = [ (1, 0),
+                  (5, 1),
+                  #(1, 4), now two connected components
+                  (3, 4),
+                  (2, 3)]
+        for (i,j) in edges:
+            graph.solution.update(i,j, True)
+        graph.compute_connected_components()
+        ccs = graph.connected_components
+        self.assertEqual(len(ccs), 2)
+        c1 = [ 0, 1, 5]
+        self.assertItemsEqual(c1, ccs.get_conncected_component(0))
+        c1_edges = [(0, 1), (1, 5)]
+        c2 = [ 2, 3, 4]
+        self.assertItemsEqual(c1, ccs.get_conncected_component(3))
+        self.assertNotEqual(ccs.get_conncected_component(0), ccs.get_conncected_component(3))
+        c2_edges = [(3, 4), (2, 3)]
+        expected_sol = c1_edges + c2_edges
+        self.assertItemsEqual(expected_sol, graph.solution)
+
 # class SarielsLPSolvingTestCase(unittest.TestCase):
 #    def setUp(self):
 #        self.points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
