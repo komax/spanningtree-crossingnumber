@@ -22,12 +22,14 @@ def plot(graph):
 #    x_frange = frange(max(xs))
 
     # first plot lines
+    l = list(graph.lines)
+    print l
+    assert l
     for line in graph.lines:
         plt.plot(xs, line(xs), 'r', zorder=1)
     # then plot solution
     xlines = []
     ylines = []
-    
     
     for (i, j) in graph.solution:
         (x1, y1) = partition(points[i])

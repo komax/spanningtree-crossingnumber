@@ -110,6 +110,8 @@ class SpanningTreeExperiment:
     def __init__(self, solver_type, d, n, distribution_type, lines_type, has_plot, verbose):
         graph = generate_graph(d, n, distribution_type)
         generate_lines(graph, lines_type)
+        print list(graph.lines)
+        assert list(graph.lines)
         self.graph = graph
         self.solver_type = solver_type
         self.solver = get_solver(solver_type)
@@ -125,7 +127,7 @@ class SpanningTreeExperiment:
         '''
         cleaning up old results
         '''
-        self.elapsed_time = self.solution = self.min_crossing_number = None
+        self.elapsed_time = self.solution = None
         self.crossing_number = self.crossings = None
 
 

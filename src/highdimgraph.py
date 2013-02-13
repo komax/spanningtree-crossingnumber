@@ -6,6 +6,7 @@ Created on Feb 5, 2013
 import numpy as np
 import math
 import random
+import copy
 from collections import deque
 from pydoc import deque
 
@@ -208,7 +209,9 @@ class HighDimGraph:
         
     def copy_graph(self):
         np_points = self.point_set.points
-        return create_graph(np_points, self.n, self.d)
+        copied_graph = create_graph(np_points, self.n, self.d)
+        copied_graph.lines = copy.deepcopy(self.lines)
+        return copied_graph
     
     def bfs(self, root):
         visited = set([root])
@@ -293,6 +296,7 @@ class HighDimGraph:
             (p, q) = self.point_set.get_point(i), self.point_set.get_point(j)
             pq_lines = self.__create_lines(p, q)
             lines.union(pq_lines)
+        print lines
         self.lines = lines
         return
     
