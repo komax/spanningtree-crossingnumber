@@ -180,7 +180,6 @@ class ConnectedComponentsTestCase(unittest.TestCase):
                   (2, 3)]
         for (i,j) in edges:
             graph.solution.update(i,j, True)
-        #(ccs, ccs_edges) = slpsolv.connected_components(points, edges)
         graph.compute_connected_components()
         ccs = graph.connected_components
         self.assertEqual(len(ccs), 1)

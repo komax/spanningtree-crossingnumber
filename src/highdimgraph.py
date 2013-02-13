@@ -22,9 +22,12 @@ def np_assert_allclose(a, b):
 class PointSet:
     def __init__(self, n, dimension):
         self.n = n
-        self.dimension = dimension
+        self.d = dimension
         shape = (n, dimension)
         self.points = np.random.uniform(0, n, shape)
+        
+    def get_point(self, i):
+        return self.points[i]
         
     def has_point(self, p):
         for point in self.points:
@@ -42,7 +45,7 @@ class PointSet:
         return self.points.__iter__()
     
     def __str__(self):
-        return 'PointSet(n=%s,d=%s,points=%s' % (self.n, self.dimension, self.points)
+        return 'PointSet(n=%s,d=%s,points=%s' % (self.n, self.d, self.points)
     
     def __repr__(self):
         return self.__str__()
@@ -59,15 +62,6 @@ def create_uniform_points(n, d):
 
 def create_grid_points(n, d):
     assert d == 2
-    point_set = PointSet(n, d)
-    root_n = int(math.ceil(math.sqrt(n)))
-    eps = 0.1
-    x = 0.0
-    y = 0.0
-    row = 0
-    for i in range(root_n):
-        y = 0.0
-        for j in range(root_n):assert d == 2
     point_set = PointSet(n, d)
     root_n = int(math.ceil(math.sqrt(n)))
     eps = 0.1
@@ -109,7 +103,7 @@ class Edges:
         return self.as_tuple()
     
     def __str__(self):
-        return 'Edges(n=%s, adj_matrix=%s)' % (self.n,self.adj_matrix)
+        return 'Edges(n=%s, adj_matrix=%s)' % (self.n, self.adj_matrix)
     
     def __repr__(self):
         return self.__str__()
@@ -196,7 +190,8 @@ class ConnectedComponents:
         
 class HighDimGraph:
     def __init__(self, points, edges, n, d):
-        assert points.shape == (n, d)
+        assert points.n == n
+        assert points.d == d
         self.point_set = points
         self.edges = edges
         self.n = n
@@ -209,21 +204,6 @@ class HighDimGraph:
         
         self.lines_registry = {}
         self.line_segments = {}
-    
-    def get_points(self):
-        return self.point_set[..., :-1]
-    
-    def get_y(self):
-        return self.point_set[..., -1:]
-    
-    def get_solution(self):
-        for (i, j) in self.solution:
-            yield (self.point_set[i], self.point_set[j])
-    
-    def create_stabbing_lines(self):
-        for (i, j) in self.edges:
-            self.__get_line(i, j)
-        return
     
     def bfs(self, root):
         visited = set([root])
@@ -288,17 +268,35 @@ class HighDimGraph:
             self.solution.update(i, j, True)
         return 
         
-    def create_all_lines(self):
-        # TODO update implementation for 3D
-        pass
+    def create_stabbing_lines(self):
+        for (i, j) in self.edges:
+            line = self.__get_line(i, j)
+            self.lines.add(line)
+        return
     
-    def __create_lines(self, p, q, eps):
+    def create_all_lines(self):
+        ''' 
+        compute all possible seperators (lines_registry) on the point set. There maybe
+        duplicates within this set
+        '''
+        # TODO update implementation for 3D
+        for (i, j) in self.edges:
+            (p, q) = self.point_set.get_point(i), self.point_set.get_point(j)
+            pq_lines = self.__create_lines(p,q)
+            self.lines.update(pq_lines)
+        return
+    
+    def __create_lines(self, p, q):
         '''
         for two points p,q compute all four possible separation lines_registry
         '''
         # TODO update it for high dimensions
-        (x1, y1) = p
-        (x2, y2) = q
+        (x1, y1) = partition(p)
+        print x1
+        print y1
+        (x2, y2) = partition(q)
+        print x2
+        print y2
         y_delta = math.fabs(y1 - y2)
         eps = 0.1
         delta = y_delta * eps
@@ -309,19 +307,19 @@ class HighDimGraph:
             x1r = x1 + delta
             x2l = x2 - delta
             x2r = x2 + delta
-            pq_line_set.add(self.__create_line((x1l, y1), (x2l, y2)))
-            pq_line_set.add(self.__create_line((x1r, y1), (x2r, y2)))
-            pq_line_set.add(self.__create_line((x1l, y1), (x2r, y2)))
-            pq_line_set.add(self.__create_line((x1r, y1), (x2l, y2)))
+            pq_line_set.add(HighDimLine(np.array([(x1l, y1), (x2l, y2)])))
+            pq_line_set.add(HighDimLine(np.array([(x1r, y1), (x2r, y2)])))
+            pq_line_set.add(HighDimLine(np.array([(x1l, y1), (x2r, y2)])))
+            pq_line_set.add(HighDimLine(np.array([(x1r, y1), (x2l, y2)])))
         else:
             y1u = y1 + delta
             y1b = y1 - delta
             y2u = y2 + delta
             y2b = y2 - delta
-            pq_line_set.add(self.__create_line((x1, y1u), (x2, y2u)))
-            pq_line_set.add(self.__create_line((x1, y1b), (x2, y2b)))
-            pq_line_set.add(self.__create_line((x1, y1u), (x2, y2b)))
-            pq_line_set.add(self.__create_line((x1, y1b), (x2, y2u)))
+            pq_line_set.add(HighDimLine(np.array([(x1, y1u), (x2, y2u)])))
+            pq_line_set.add(HighDimLine(np.array([(x1, y1b), (x2, y2b)])))
+            pq_line_set.add(HighDimLine(np.array([(x1, y1u), (x2, y2b)])))
+            pq_line_set.add(HighDimLine(np.array([(x1, y1b), (x2, y2u)])))
         return pq_line_set
     
     def generate_lines(self, points):
@@ -349,7 +347,7 @@ class HighDimGraph:
         above_points = list()
         below_points = list()
         for i in range(self.n):
-            #print self.point_set[i]
+            # print self.point_set[i]
             p = self.point_set[i]
             if line.is_on(p):
                 return ()
@@ -359,7 +357,7 @@ class HighDimGraph:
                 below_points.append(i)
             else:
                 raise StandardError('can not find point i=%s:p=%s on line=%s' % 
-                        (i,p, line))
+                        (i, p, line))
         above_points.sort()
         below_points.sort()
         return (tuple(above_points), tuple(below_points))
@@ -389,14 +387,14 @@ class HighDimGraph:
     
     def __get_line(self, i, j):
         if not (i, j) in self.lines_registry:
-            (p, q) = self.point_set[i], self.point_set[j]
+            (p, q) = self.point_set.get_point(i), self.point_set.get_point(j)
             line = create_line(p, q)
             self.lines_registry[(i, j)] = line
         return self.lines_registry[(i, j)]
     
     def get_line_segment(self, i, j):
         if not (i, j) in self.line_segments:
-            (p, q) = self.point_set[i], self.point_set[j]
+            (p, q) = self.point_set.get_point(i), self.point_set.get_point(j)
             line_segment = create_linesegment(p, q)
             self.line_segments[(i, j)] = line_segment
         return self.line_segments[(i, j)]
@@ -461,6 +459,7 @@ class HighDimLine:
         assert X.shape[0] == 2
         p = X[0]
         q = X[1]
+        print X
         if p[..., -1] < q[..., -1]:
             self.X = X
         else:
@@ -498,28 +497,27 @@ class HighDimLine:
 
     def __repr__(self):
         return self.__str__()
-    
-    @staticmethod
-    def partition(p):
-        x = p[..., :-1]
-        y = p[..., -1:]
-        return (x, y)
 
     def is_on(self, p):
-        (x, y) = HighDimLine.partition(p)
+        (x, y) = partition(p)
         y_line = self.call(x)
         return np_allclose(y_line, y)
 
     def is_above(self, p):
-        (x, y) = HighDimLine.partition(p)
+        (x, y) = partition(p)
         y_line = self.call(x)
         return (y > y_line).all() and not self.is_on(p)
 
     def is_below(self, p):
-        (x, y) = HighDimLine.partition(p)
+        (x, y) = partition(p)
         y_line = self.call(x)
         return (y < y_line).all() and not self.is_on(p)
-    
+
+
+def partition(p):
+    x = p[..., :-1]
+    y = p[..., -1:]
+    return (x, y)
     
 def create_linesegment(p, q):
     assert len(p.shape) == 1
@@ -535,7 +533,7 @@ class HighDimLineSegment(HighDimLine):
        return 'HighDimLineSegment(theta=\n%s, points=\n%s)' % (self.theta, self.X)
 
     def is_between(self, x):
-        # TODO update this implementation for higher dimension. Is this still correct?
+        # TODO update this implementation for higher d. Is this still correct?
         # p = self.X[0, ..., :-1]
         # q = self.X[1, ..., :-1]
         p = self.X[0, 0, ...]
@@ -558,7 +556,7 @@ class HighDimLineSegment(HighDimLine):
         # return np_allclose(res, 0.0)
 
     def is_on(self, p):
-        (x, y) = HighDimLine.partition(p)
+        (x, y) = partition(p)
         if self.is_between(x):
             return HighDimLine.is_on(self, p)
         else:
