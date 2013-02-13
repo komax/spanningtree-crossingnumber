@@ -5,13 +5,11 @@
 
 import argparse
 import time
-import copy
-import datagenerator as dgen
 import mult_weights_solver as mws
 import sariel_lp_solver as slpsolv
 import fekete_lp_solver as flpsolv
 import opt_solver
-from lines import crossing_tuple, preprocess_lines
+import highdimgraph
 import plotting
 
 def main():
@@ -24,7 +22,7 @@ def main():
 # constants for options
 SOLVER_OPTIONS = ['opt', 'mult_weight', 'fekete_lp', 'sariel_lp']
 DATA_DISTRIBUTION_OPTIONS = ['uniform', 'grid']
-NO_LINES_SAMPLING = -1
+LINE_OPTIONS = ['all', 'stabbing', 'random']
 
 def parse_args():
     '''
@@ -45,9 +43,9 @@ def parse_args():
     parser.add_argument("-g", "--generate", default='uniform',
             choices=DATA_DISTRIBUTION_OPTIONS,
         help="how should the point set be sampled")
-    parser.add_argument("-l", "--linessize", type=int,
-            default=NO_LINES_SAMPLING,
-        help="quantify how many random lines you want")
+    parser.add_argument("-l", "--linesampling", default='all',
+            choices=LINE_OPTIONS,
+        help="structure of the line set")
     parser.add_argument("-p", "--plot", action='store_true', default=False,
         help="plots the computed solution into a widget")
     parser.add_argument("-v", "--verbose", action='store_true',
@@ -60,9 +58,9 @@ def prepare_experiment(args):
     factory for creating a SpanningTreeExperiment from arguments
     '''
     return SpanningTreeExperiment(args.solver, args.dimensions, args.number,
-            args.generate, args.linessize, args.plot, args.verbose)
+            args.generate, args.linesampling, args.plot, args.verbose)
 
-def generate_point_set(d, n, distribution_type):
+def generate_graph(d, n, distribution_type):
     '''
     generic sampling function for different point sets (dimensions,
     distributions)
@@ -70,9 +68,9 @@ def generate_point_set(d, n, distribution_type):
     # TODO currently omitting d parameter. update it
     assert distribution_type in DATA_DISTRIBUTION_OPTIONS
     if distribution_type == 'uniform':
-        return dgen.generate_points_uniformly(n)
+        return highdimgraph.create_uniform_graph(n, d)
     elif distribution_type == 'grid':
-        return dgen.generate_points_grid(n)
+        return highdimgraph.create_grid_graph(n, d)
 
 def get_solver(solver_type):
     '''
@@ -91,19 +89,28 @@ def get_solver(solver_type):
     else:
         raise StandardError('Not yet supported this |%s| solver type' %
                 solver_type)
+        
+def generate_lines(graph, line_type):
+    assert line_type in LINE_OPTIONS
+    if line_type == 'all':
+        graph.create_all_lines()
+    elif line_type == 'stabbing':
+        graph.create_stabbing_lines()
+    else:
+        raise StandardError('Not yet supported this |%s| line-sampling type' %
+                            line_type)
+    graph.preprocess_lines()
+    return 
 
 class SpanningTreeExperiment:
     '''
     stores all necessary information, data and options to preprocess point or
     line set before running a solver and takes care of time measuring
     '''
-    def __init__(self, solver_type, d, n, distribution_type, linessize, has_plot, verbose):
-        self.points = generate_point_set(d, n, distribution_type)
-        if linessize == NO_LINES_SAMPLING:
-            lines = dgen.generate_lines(self.points)
-        else:
-            lines = dgen.generate_random_lines(linessize, self.points)
-        self.lines = preprocess_lines(lines, self.points)
+    def __init__(self, solver_type, d, n, distribution_type, lines_type, has_plot, verbose):
+        graph = generate_graph(d, n, distribution_type)
+        generate_lines(graph, lines_type)
+        self.graph = graph
         self.solver_type = solver_type
         self.solver = get_solver(solver_type)
         self.has_plot = has_plot
@@ -111,7 +118,6 @@ class SpanningTreeExperiment:
 
         self.elapsed_time = None
         self.solution = None
-        self.min_crossing_number = None
         self.crossing_number = None
         self.crossings = None
 
@@ -123,13 +129,13 @@ class SpanningTreeExperiment:
         self.crossing_number = self.crossings = None
 
 
-    def update_point_set(self, d, n, distribution_type):
+    def update_point_set(self, d, n, distribution_type, lines_type):
         '''
         set a new point set like specified and update also the line set
         '''
-        self.points = generate_point_set(d, n, distribution_type)
-        lines = dgen.generate_lines(self.points)
-        self.lines = preprocess_lines(lines, self.points)
+        graph = generate_graph(d, n, distribution_type)
+        generate_lines(graph, lines_type)
+        self.graph = graph
 
     def update_solver(self, solver_type):
         '''
@@ -141,18 +147,16 @@ class SpanningTreeExperiment:
     def run(self):
         '''
         compute a spanning tree and takes care of
-        caching of points, lines, time mearsuring and storing the crossing
+        caching of points, lines, time measuring and storing the crossing
         number
         '''
-        points = copy.deepcopy(self.points)
-        lines = copy.deepcopy(self.lines)
+        # have fresh graph for each new computation (overriding solution and edges)
+        self.graph = self.graph.copy_graph()
         start = time.time()
-        self.solution = self.solver(points, lines)
+        self.solution = self.solver(self.graph)
         end = time.time()
         self.elapsed_time = end - start
-        (min_crossing_number, crossing_number, crossings) = \
-            crossing_tuple(self.lines, self.solution)
-        self.min_crossing_number = min_crossing_number
+        (crossing_number, crossings) = self.graph.crossing_tuple()
         self.crossing_number = crossing_number
         self.crossings = crossings
 
@@ -162,17 +166,15 @@ class SpanningTreeExperiment:
         CPU time. If verbose flag is set:
          - number of points
          - number of lines,
-         - minimum crossing number,
          - sum of all crossings and
          - average crossing number
         '''
         print "CPU time (in sec) %s" % self.elapsed_time
         print "crossing number=%s" % self.crossing_number
         if self.verbose:
-            print "number of points=%s" % len(self.points)
-            no_lines = len(self.lines)
+            print "number of points=%s" % self.graph.n
+            no_lines = len(self.graph.lines)
             print "number of lines=%s" % no_lines
-            print "minimum crossing number=%s" % self.min_crossing_number
             print "all crossings=%s" % self.crossings
             average_crossing_number = float(self.crossings) / no_lines
             print "average crossing number=%s" % average_crossing_number
@@ -182,7 +184,7 @@ class SpanningTreeExperiment:
         if plot option is set, plot
         '''
         if self.has_plot:
-            plotting.plot(self.points, self.lines, self.solution)
+            plotting.plot(self.graph)
         return
 
     def results(self):
@@ -193,15 +195,13 @@ class SpanningTreeExperiment:
         # of lines,
         CPU time in seconds,
         crossing number,
-        minimum crossing number,
         average crossing number,
         crossings (overall)
         ]
         '''
-        no_lines = len(self.lines)
-        results = [ str(len(self.points)), str(no_lines),
-                str(self.elapsed_time), str(self.crossing_number),
-                str(self.min_crossing_number)]
+        no_lines = len(self.graph.lines)
+        results = [ str(self.graph.n), str(no_lines),
+                str(self.elapsed_time), str(self.crossing_number)]
         average_crossing_number = float(self.crossings) / no_lines
         results.append(str(average_crossing_number))
         results.append(str(self.crossings))

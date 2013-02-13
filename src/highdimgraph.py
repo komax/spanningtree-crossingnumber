@@ -205,6 +205,10 @@ class HighDimGraph:
         
         self.lines_registry = {}
         self.line_segments = {}
+        
+    def copy_graph(self):
+        np_points = self.point_set.points
+        return create_graph(np_points, self.n, self.d)
     
     def bfs(self, root):
         visited = set([root])
@@ -270,10 +274,13 @@ class HighDimGraph:
         return 
         
     def create_stabbing_lines(self):
+        lines = set()
         for (i, j) in self.edges:
             line = self.__get_line(i, j)
-            self.lines.add(line)
+            lines.add(line)
+        self.lines = lines
         return
+    
     
     def create_all_lines(self):
         ''' 
@@ -281,10 +288,12 @@ class HighDimGraph:
         duplicates within this set
         '''
         # TODO update implementation for 3D
+        lines = set()
         for (i, j) in self.edges:
             (p, q) = self.point_set.get_point(i), self.point_set.get_point(j)
             pq_lines = self.__create_lines(p, q)
-            self.lines.update(pq_lines)
+            lines.add(pq_lines)
+        self.lines = lines
         return
     
     def __create_lines(self, p, q):
