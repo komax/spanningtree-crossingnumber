@@ -210,10 +210,10 @@ class ConnectedComponentsTestCase(unittest.TestCase):
         graph.compute_connected_components()
         ccs = graph.connected_components
         self.assertEqual(len(ccs), 2)
-        c1 = [ 0, 1, 5]
+        c1 = set([ 0, 1, 5])
         self.assertItemsEqual(c1, ccs.get_connected_component(0))
         c1_edges = [(0, 1), (1, 5)]
-        c2 = [ 2, 3, 4]
+        c2 = set([ 2, 3, 4])
         self.assertItemsEqual(c1, ccs.get_connected_component(3))
         self.assertNotEqual(ccs.get_connected_component(0), ccs.get_connected_component(3))
         c2_edges = [(3, 4), (2, 3)]
