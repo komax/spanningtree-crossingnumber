@@ -190,8 +190,8 @@ class ConnectedComponents:
         
 class HighDimGraph:
     def __init__(self, points, edges, n, d):
-        assert points.n == n
-        assert points.d == d
+        #assert points.n == n
+        #assert points.d == d
         self.point_set = points
         self.edges = edges
         self.n = n
@@ -282,7 +282,7 @@ class HighDimGraph:
         # TODO update implementation for 3D
         for (i, j) in self.edges:
             (p, q) = self.point_set.get_point(i), self.point_set.get_point(j)
-            pq_lines = self.__create_lines(p,q)
+            pq_lines = self.__create_lines(p, q)
             self.lines.update(pq_lines)
         return
     
@@ -292,12 +292,15 @@ class HighDimGraph:
         '''
         # TODO update it for high dimensions
         (x1, y1) = partition(p)
+        x1 = x1[0]
         print x1
         print y1
         (x2, y2) = partition(q)
+        x2 = x2[0]
         print x2
         print y2
         y_delta = math.fabs(y1 - y2)
+        print y_delta
         eps = 0.1
         delta = y_delta * eps
         pq_line_set = set()
@@ -348,7 +351,7 @@ class HighDimGraph:
         below_points = list()
         for i in range(self.n):
             # print self.point_set[i]
-            p = self.point_set[i]
+            p = self.point_set.get_point(i)
             if line.is_on(p):
                 return ()
             elif line.is_above(p):

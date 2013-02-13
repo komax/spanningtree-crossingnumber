@@ -45,9 +45,10 @@ def plot(graph):
     plt.show()
 
 def main():
-    graph = create_grid_graph(2**2, 2)
-    #graph = create_uniform_graph(2, 2)
+    #graph = create_grid_graph(2**2, 2)
+    graph = create_uniform_graph(2, 2)
     graph.create_all_lines()
+    graph.preprocess_lines()
     #graph.create_stabbing_lines()
     #points = dtgen.generate_points_uniformly(6, 100.0)
     #lines = dtgen.generate_lines(points)
