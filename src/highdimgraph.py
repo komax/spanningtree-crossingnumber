@@ -292,7 +292,7 @@ class HighDimGraph:
         for (i, j) in self.edges:
             (p, q) = self.point_set.get_point(i), self.point_set.get_point(j)
             pq_lines = self.__create_lines(p, q)
-            lines.add(pq_lines)
+            lines.union(pq_lines)
         self.lines = lines
         return
     
