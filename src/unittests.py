@@ -170,6 +170,26 @@ class MultWeightsSolvingTestCase(unittest.TestCase):
 
 
 class ConnectedComponentsTestCase(unittest.TestCase):
+    def test_compute_spanning_tree_on_ccs(self):
+        points = np.array([ (0.,3.), (3.,4.), (9., 10.), (7.,8.)])
+        graph = create_graph(points, 4, 2)
+        edges = [ (1, 0),
+                  (0, 2),
+                  (2, 3),
+                  (1, 2) ]
+        for (i,j) in edges:
+            graph.solution.update(i,j, True)
+        graph.compute_connected_components()
+        ccs = graph.connected_components
+        self.assertEqual(len(ccs), 1)
+        cc = ccs.get_connected_component(2)
+        points_indices = range(0,4)
+        self.assertItemsEqual(cc, points_indices)
+                
+        graph.compute_spanning_tree_on_ccs()
+        sol_edges = [(0,2), (0,1), (2,3)]
+        self.assertItemsEqual(sol_edges, graph.solution)    
+    
     def test_results_one_connected_component(self):
         points = np.array([ (0.,3.), (3.,4.), (9., 10.), (7.,8.), (5., 6.), (2., 1.)])
         graph = create_graph(points, 6, 2)
@@ -189,7 +209,8 @@ class ConnectedComponentsTestCase(unittest.TestCase):
         
         graph.compute_spanning_tree_on_ccs()
         cc_edges = graph.solution
-        print cc_edges
+        for (i,j) in cc_edges:
+            print (i,j)
         for (i,j) in edges:
             if i < j:
                 edge = (i,j)
