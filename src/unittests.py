@@ -235,7 +235,7 @@ class ConnectedComponentsTestCase(unittest.TestCase):
         self.assertItemsEqual(c1, ccs.get_connected_component(0))
         c1_edges = [(0, 1), (1, 5)]
         c2 = set([ 2, 3, 4])
-        self.assertItemsEqual(c1, ccs.get_connected_component(3))
+        self.assertItemsEqual(c2, ccs.get_connected_component(3))
         self.assertNotEqual(ccs.get_connected_component(0), ccs.get_connected_component(3))
         c2_edges = [(3, 4), (2, 3)]
         expected_sol = c1_edges + c2_edges

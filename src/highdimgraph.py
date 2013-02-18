@@ -255,6 +255,7 @@ class HighDimGraph:
             else:
                 spanning_tree_edges.add((i, j))
             i = j
+        print "spanning tree_edges from root=%s: >%s<" % (root, spanning_tree_edges)
         return spanning_tree_edges
     
     def compute_spanning_tree_on_ccs(self):
