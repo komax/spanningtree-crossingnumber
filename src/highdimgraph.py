@@ -284,6 +284,18 @@ class HighDimGraph:
         self.lines = lines
         return
     
+    def create_random_lines(self):
+        n = 2 * self.n
+        points_for_lines = create_uniform_points(n, self.d)
+        lines = set()
+        for i in range(0,n,2):
+            p = points_for_lines.get_point(i)
+            q = points_for_lines.get_point(i + 1)
+            line = create_line(p, q)
+            lines.add(line)
+        self.lines = lines
+        return
+    
     
     def create_all_lines(self):
         ''' 
