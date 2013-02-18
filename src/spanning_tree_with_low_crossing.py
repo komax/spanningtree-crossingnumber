@@ -96,6 +96,8 @@ def generate_lines(graph, line_type):
         graph.create_all_lines()
     elif line_type == 'stabbing':
         graph.create_stabbing_lines()
+    elif line_type == 'random':
+        grpah.create_random_lines()
     else:
         raise StandardError('Not yet supported this |%s| line-sampling type' %
                             line_type)
