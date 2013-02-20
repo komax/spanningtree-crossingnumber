@@ -4,19 +4,19 @@ planar 2D
 using Gurobi as standard solver
 '''
 
+import numpy as np
 import gurobipy as grb
-from lines import get_line, get_line_segment, has_crossing
-from solver_helper import get_edges
+from highdimgraph import *
 from gurobipy import quicksum
-import copy
 import math
 import itertools
 
-def nonempty_subsets(points):
+def nonempty_subsets(n):
     '''
     returns all non empty subsets from the points set as generator
     '''
-    for i in range(1,len(points)):
+    points = range(0,n)
+    for i in range(1,n):
         for subset in itertools.combinations(points, i):
             yield list(subset)
 
@@ -26,28 +26,40 @@ def cut(subset, edges):
     subset (or the other way round)
     '''
     #cut_edges = []
-    for i in subset:
-        for (i,j) in edges.select(i, '*'):
-            if j not in subset:
-                yield (i,j)
-                #cut_edges.append((i,j))
-        for (j,i) in edges.select('*', i):
-            if j not in subset:
-                yield (j,i)
-                #cut_edges.append((j,i))
+    for (i,j) in edges:
+        if i in subset and j not in subset:
+            yield (i,j)
+        elif i not in subset and j in subset:
+            yield (i,j)
+#    for i in subset:
+#        for (p,q) in edges:
+#            if j not in subset:
+#                if i < j:
+#                    yield (i,j)
+#                else:
+#                    yield (j,i)
+#                #cut_edges.append((i,j))
+#        for (j,i) in edges.select('*', i):
+#            if j not in subset:
+#                yield (j,i)
+#                #cut_edges.append((j,i))
     #return cut_edges
 
 # global variables for decision variables
 x = {}
 t = 0
 
-def create_lp(points, edges, lines):
+def create_lp(graph):
     '''
     create a gurobi model containing LP formulation like that in the Fekete
     paper
     '''
     lambda_lp = grb.Model("fekete_lp_2d")
-    n = len(points)
+    number_of_edges = 0
+    points = graph.point_set
+    n = graph.n
+    edges = graph.edges
+    
     for (p,q) in edges:
         x[p,q] = lambda_lp.addVar(# TODO maybe needed: obj=euclidean_distance(p,q),
                 name='edge|%s - %s|' % (p,q))
@@ -60,19 +72,20 @@ def create_lp(points, edges, lines):
     # correct number of edges
     lambda_lp.addConstr(quicksum(x[i,j] for (i,j) in edges) == (n-1))
 
-    subsets = nonempty_subsets(points)
+    subsets = nonempty_subsets(n)
     # connectivity constraints
     for subset in subsets:
         lambda_lp.addConstr(quicksum(x[i,j] for (i,j) in cut(subset, edges))
                 >= 1)
 
+    lines = graph.lines
     # bound crossing number
     for line in lines:
         s = quicksum(x[p,q] for (p,q) in edges if has_crossing(line,
-            get_line_segment(p,q)))
+            graph.get_line_segment(p,q)))
         if s != 0.0:
             lambda_lp.addConstr(s <= t)
-
+            
     return lambda_lp
 
 
@@ -88,13 +101,15 @@ def solve_lp(lambda_lp):
     else:
         raise StandardError('lp has no optimum')
 
-def round_and_update_lp(edges, solution, alpha):
+def round_and_update_lp(graph, alpha):
     '''
     find edges that are in the fractional solution, round them up and update the
     LP model
 
     returns the selected edges in the fractional solution (of this iteration)
     '''
+    edges = graph.edges
+    solution = graph.solution
     # TODO or find only the heaviest edge and bound it to 1
     (max_i, max_j) = (None, None)
     max_val = None
@@ -105,10 +120,12 @@ def round_and_update_lp(edges, solution, alpha):
 
     x[max_i,max_j].lb = 1.
     x[max_i,max_j].ub = 1.
-    edges.remove((max_i,max_j))
-    if max_i > max_j:
-        (max_i, max_j) = (max_j, max_i)
-    return [(max_i, max_j)]
+    edges.update(max_i,max_j, False)
+    solution.update(max_i, max_j, True)
+    return
+#    if max_i > max_j:
+#        (max_i, max_j) = (max_j, max_i)
+#    return [(max_i, max_j)]
     #round_edges = []
     #for (i,j) in edges:
     #    if (i,j) not in solution and x[i,j].X >= 1./alpha:
@@ -120,46 +137,48 @@ def round_and_update_lp(edges, solution, alpha):
     #return round_edges'''
 
 
-def compute_spanning_tree(points, lines, alpha=2.0):
-    solution = []
-    n = len(points)
-    edges = grb.tuplelist(get_edges(points))
+def compute_spanning_tree(graph, alpha=2.0):
+    solution = graph.solution
+    n = graph.n
+    #edges = grb.tuplelist(get_edges(points))
 
     #i = 1
-    number_of_edges = 0
-    lp_model = create_lp(points, edges, lines)
+    lp_model = create_lp(graph)
 
-    while number_of_edges < n-1:
+    while len(solution) < n-1:
         #print "round i=%s" % i
         solve_lp(lp_model)
         for var in lp_model.getVars():
             print var
-        round_edges = round_and_update_lp(edges, solution, alpha)
-        number_of_round_edges = len(round_edges)
-        if  number_of_edges + number_of_round_edges <= n-1:
-            # TODO check if resulting support graph is planar or has crossings
-            solution += round_edges
-            number_of_edges += number_of_round_edges
-        else:
-            # TODO check if resulting support graph is planar or has crossings
-            l = (n-1) - number_of_edges
-            solution += round_edges[:l]
-            number_of_edges = n-1
-            break
+        round_and_update_lp(graph, alpha)
+#        number_of_round_edges = len(round_edges)
+#        if  number_of_edges + number_of_round_edges <= n-1:
+#            # TODO check if resulting support graph is planar or has crossings
+#            solution += round_edges
+#            number_of_edges += number_of_round_edges
+#        else:
+#            # TODO check if resulting support graph is planar or has crossings
+#            l = (n-1) - number_of_edges
+#            solution += round_edges[:l]
+#            number_of_edges = n-1
+#            break
         #i += 1
-    return solution
+    return
 
 def main():
-    points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.),
-            (4.25, 5.)]
-    l1 = get_line((2., 6.), (3., 2.)) # y = -4x + 14
-    l2 = get_line((2., 3.), (6., 5.)) # y = 0.5x + 2
-    l3 = get_line((3., 5.5), (5., 6.5)) # y = 0.5x + 4
+    # minimal example to find optimal spanning tree
+    points = np.array([(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)])
+    graph = create_graph(points, 5, 2)
+    l1 = create_line(np.array((2., 6.)), np.array((3., 2.))) # y = -4x + 14
+    l2 = create_line(np.array((2., 3.)), np.array((6., 5.))) # y = 0.5x + 2
+    l3 = create_line(np.array((3., 5.5)), np.array((5., 6.5))) # y = 0.5x + 4
     lines = [l1, l2, l3]
-    solution = compute_spanning_tree(points, lines)
-    print solution
+    graph.lines = lines
+    graph.preprocess_lines()
+    solution = compute_spanning_tree(graph)
+    print "crossing number = %s" % graph.crossing_number()
     import plotting
-    plotting.plot(points, lines, solution)
+    plotting.plot(graph)
 
 if __name__ == '__main__':
     main()

@@ -103,6 +103,12 @@ class Edges:
     def __iter__(self):
         return self.as_tuple()
     
+    def __len__(self):
+        length = 0
+        for (i,j) in self.as_tuple():
+            length += 1
+        return length
+    
     def __str__(self):
         return 'Edges(n=%s, adj_matrix=%s)' % (self.n, self.adj_matrix)
     
