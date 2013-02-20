@@ -231,6 +231,19 @@ class HighDimGraph:
                 if neighbor not in visited:
                     queue.append(neighbor)
                     
+    def euclidean_distance(self, i, j):
+        p = self.point_set.get_point(i)
+        q = self.point_set.get_point(j)
+        return np.linalg.norm(p - q)
+    
+    def merge_cc(self, i, j):
+        self.connected_components.merge_by_vertices(i, j)
+        cc = self.connected_components.get_connected_component(i)
+        for p in cc:
+            for q in cc:
+                if p != q:
+                    self.edges.update(p,q, False) 
+                    
     def compute_connected_component(self, root):
         connected_component = set([root])
         for bfs_node in self.bfs(root):

@@ -59,13 +59,14 @@ def create_lp(graph):
     points = graph.point_set
     n = graph.n
     edges = graph.edges
-    
     for (p,q) in edges:
         x[p,q] = lambda_lp.addVar(# TODO maybe needed: obj=euclidean_distance(p,q),
                 name='edge|%s - %s|' % (p,q))
     t = lambda_lp.addVar(obj=1.0, vtype=grb.GRB.INTEGER)
 
     lambda_lp.modelSense = grb.GRB.MINIMIZE
+    lambda_lp.setParam('Cuts', 3)
+    lambda_lp.setParam('Threads', 4)
 
     lambda_lp.update()
 
@@ -85,7 +86,6 @@ def create_lp(graph):
             graph.get_line_segment(p,q)))
         if s != 0.0:
             lambda_lp.addConstr(s <= t)
-            
     return lambda_lp
 
 

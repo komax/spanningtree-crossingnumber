@@ -5,10 +5,8 @@ using Gurobi as standard solver
 '''
 
 import gurobipy as grb
-from lines import get_line, get_line_segment, has_crossing, preprocess_lines
-from solver_helper import euclidean_distance, get_edges
+from highdimgraph import *
 from gurobipy import quicksum
-import copy
 import math
 import random
 
@@ -87,65 +85,14 @@ def has_proper_no_of_connected_components(points, ccs):
     else:
         return False
 
-def connected_components(points, edges):
-    '''
-    compute for a graph (points, edges) the connected components as a list of
-    connected components (dict keys is a list of vertices and value is a list
-    of edges)
-    '''
-    remaining_points = copy.deepcopy(points)
-    edges = grb.tuplelist(edges)
-    ccs = []
-    ccs_edges = []
-
-    while remaining_points:
-        p = remaining_points.pop()
-        p_edges = edges.select(p, "*") + edges.select("*", p)
-        queue = []
-
-        for (u,v) in p_edges:
-            if v == p:
-                (u,v) = (v,u)
-            if v in remaining_points:
-                remaining_points.remove(v)
-            queue.append(v)
-
-        new_connected_component = [p]
-        edges_connected_component = []
-        while queue:
-            q = queue.pop()
-            print (p,q)
-            new_connected_component.append(q)
-            q_edges = edges.select(q, "*") + edges.select("*", q)
-            if (p,q) in q_edges:
-                if p < q:
-                    edges_connected_component.append((p,q))
-                else:
-                    edges_connected_component.append((q,p))
-            elif (q,p) in q_edges:
-                if p < q:
-                    edges_connected_component.append((p,q))
-                else:
-                    edges_connected_component.append((q,p))
-            for (u,v) in q_edges:
-                if v == q:
-                    (u,v) = (v,u)
-                if not v in new_connected_component and v in remaining_points:
-                    queue.append(v)
-                    remaining_points.remove(v)
-            p = q
-        edges_connected_component.sort()
-        print edges_connected_component
-        ccs.append(new_connected_component)
-        ccs_edges.append(edges_connected_component)
-    print ccs_edges
-    return (ccs,ccs_edges)
-
 def estimate_t(points):
     return math.sqrt(len(points))
 
-def compute_spanning_tree(points, lines):
-    solution = []
+def compute_spanning_tree(graph):
+    n = graph.n
+    points = range(0,n)
+    solution = graph.solution
+    lines = graph.lines
     i = 1
     while len(points) > 1:
         points.sort()
@@ -174,16 +121,19 @@ def compute_spanning_tree(points, lines):
     return solution
 
 def main():
-    points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.),
-            (4.25, 5.)]
-    l1 = get_line((2., 6.), (3., 2.)) # y = -4x + 14
-    l2 = get_line((2., 3.), (6., 5.)) # y = 0.5x + 2
-    l3 = get_line((3., 5.5), (5., 6.5)) # y = 0.5x + 4
+    # minimal example to find optimal spanning tree
+    points = np.array([(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)])
+    graph = create_graph(points, 5, 2)
+    l1 = create_line(np.array((2., 6.)), np.array((3., 2.))) # y = -4x + 14
+    l2 = create_line(np.array((2., 3.)), np.array((6., 5.))) # y = 0.5x + 2
+    l3 = create_line(np.array((3., 5.5)), np.array((5., 6.5))) # y = 0.5x + 4
     lines = [l1, l2, l3]
-    solution = compute_spanning_tree(copy.deepcopy(points),
-            copy.deepcopy(lines))
+    graph.lines = lines
+    graph.preprocess_lines()
+    solution = compute_spanning_tree(graph)
+    print "crossing number = %s" % graph.crossing_number()
     import plotting
-    plotting.plot(points, lines, solution)
+    plotting.plot(graph)
 
 if __name__ == '__main__':
     main()
