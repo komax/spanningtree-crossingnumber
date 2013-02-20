@@ -48,8 +48,8 @@ def compute_spanning_tree(graph):
         (i, j) = find_min_edge(graph, weights)
         add_edge_to_solution_merge_ccs(graph, i, j)
         
-    print graph.edges
-    print graph.solution
+#    print graph.edges
+#    print graph.solution
     return
 
 def main():

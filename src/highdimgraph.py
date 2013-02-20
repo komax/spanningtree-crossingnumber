@@ -202,7 +202,7 @@ class HighDimGraph:
         self.solution = create_solution_edges(n)
         self.connected_components = ConnectedComponents(n)
         
-        self.lines = set()
+        self.lines = []
         
         self.lines_registry = {}
         self.line_segments = {}
@@ -285,22 +285,22 @@ class HighDimGraph:
         return 
         
     def create_stabbing_lines(self):
-        lines = set()
+        lines = []
         for (i, j) in self.edges:
             line = self.__get_line(i, j)
-            lines.add(line)
+            lines.append(line)
         self.lines = lines
         return
     
     def create_random_lines(self):
         n = 2 * self.n
         points_for_lines = create_uniform_points(n, self.d)
-        lines = set()
+        lines = []
         for i in range(0,n,2):
             p = points_for_lines.get_point(i)
             q = points_for_lines.get_point(i + 1)
             line = create_line(p, q)
-            lines.add(line)
+            lines.append(line)
         self.lines = lines
         return
     
@@ -311,12 +311,12 @@ class HighDimGraph:
         duplicates within this set
         '''
         # TODO update implementation for 3D
-        lines = set()
+        lines = []
         for (i, j) in self.edges:
             (p, q) = self.point_set.get_point(i), self.point_set.get_point(j)
             pq_lines = self.__create_lines(p, q)
-            lines.union(pq_lines)
-        print lines
+            lines += pq_lines
+#        print lines
         self.lines = lines
         return
     
@@ -327,37 +327,37 @@ class HighDimGraph:
         # TODO update it for high dimensions
         (x1, y1) = partition(p)
         x1 = x1[0]
-        print x1
-        print y1
+#        print x1
+#        print y1
         (x2, y2) = partition(q)
         x2 = x2[0]
-        print x2
-        print y2
+#        print x2
+#        print y2
         y_delta = math.fabs(y1 - y2)
-        print y_delta
+#        print y_delta
         eps = 0.1
         delta = y_delta * eps
-        pq_line_set = set()
+        pq_lines = []
         if x1 == x2:
             # special case if point are in a grid
             x1l = x1 - delta
             x1r = x1 + delta
             x2l = x2 - delta
             x2r = x2 + delta
-            pq_line_set.add(HighDimLine(np.array([(x1l, y1), (x2l, y2)])))
-            pq_line_set.add(HighDimLine(np.array([(x1r, y1), (x2r, y2)])))
-            pq_line_set.add(HighDimLine(np.array([(x1l, y1), (x2r, y2)])))
-            pq_line_set.add(HighDimLine(np.array([(x1r, y1), (x2l, y2)])))
+            pq_lines.append(HighDimLine(np.array([(x1l, y1), (x2l, y2)])))
+            pq_lines.append(HighDimLine(np.array([(x1r, y1), (x2r, y2)])))
+            pq_lines.append(HighDimLine(np.array([(x1l, y1), (x2r, y2)])))
+            pq_lines.append(HighDimLine(np.array([(x1r, y1), (x2l, y2)])))
         else:
             y1u = y1 + delta
             y1b = y1 - delta
             y2u = y2 + delta
             y2b = y2 - delta
-            pq_line_set.add(HighDimLine(np.array([(x1, y1u), (x2, y2u)])))
-            pq_line_set.add(HighDimLine(np.array([(x1, y1b), (x2, y2b)])))
-            pq_line_set.add(HighDimLine(np.array([(x1, y1u), (x2, y2b)])))
-            pq_line_set.add(HighDimLine(np.array([(x1, y1b), (x2, y2u)])))
-        return pq_line_set
+            pq_lines.append(HighDimLine(np.array([(x1, y1u), (x2, y2u)])))
+            pq_lines.append(HighDimLine(np.array([(x1, y1b), (x2, y2b)])))
+            pq_lines.append(HighDimLine(np.array([(x1, y1u), (x2, y2b)])))
+            pq_lines.append(HighDimLine(np.array([(x1, y1b), (x2, y2u)])))
+        return pq_lines
     
     def generate_lines(self, points):
         ''' compute all possible seperators (lines_registry) on the point set. There maybe
@@ -420,7 +420,7 @@ class HighDimGraph:
             else:
                 # new equivalent class, store this line
                 lines_dict[partition_tuple] = line
-        self.lines = set(lines_dict.values())
+        self.lines = lines_dict.values()
     
     def __get_line(self, i, j):
         if not (i, j) in self.lines_registry:
@@ -496,7 +496,6 @@ class HighDimLine:
         assert X.shape[0] == 2
         p = X[0]
         q = X[1]
-        print X
         if p[..., -1] < q[..., -1]:
             self.X = X
         else:

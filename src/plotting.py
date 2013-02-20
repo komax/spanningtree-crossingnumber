@@ -23,7 +23,7 @@ def plot(graph):
 
     # first plot lines
     l = list(graph.lines)
-    print l
+    #print l
     assert l
     for line in graph.lines:
         plt.plot(xs, line(xs), 'r', zorder=1)
@@ -43,17 +43,18 @@ def plot(graph):
         ylines.append(None)
     plt.plot(xlines, ylines, 'g', zorder=2)
     # then plot points
-    plt.scatter(xs, ys,  s=120, zorder=3)
+    plt.scatter(xs, ys, s=120, zorder=3)
     plt.show()
 
 def main():
-    graph = create_grid_graph(2**2, 2)
-    #graph = create_uniform_graph(2, 2)
-    graph.create_all_lines()
-    graph.preprocess_lines()
+    graph = create_grid_graph(2 ** 2, 2)
+    # graph = create_uniform_graph(2, 2)
+    #graph.create_all_lines()
+    graph.create_random_lines()
     #graph.create_stabbing_lines()
-    #points = dtgen.generate_points_uniformly(6, 100.0)
-    #lines = dtgen.generate_lines(points)
+    assert graph.lines
+    graph.preprocess_lines()
+    assert graph.lines
     import mult_weights_solver as mws
     
     mws.compute_spanning_tree(graph)
