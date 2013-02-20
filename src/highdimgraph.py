@@ -244,18 +244,25 @@ class HighDimGraph:
                     
     def spanning_tree(self, root):
         spanning_tree_edges = set()
-        bfs_generator = self.bfs(root)
-        # save because root is always within bfs as first element
-        i = bfs_generator.next()  
-        j = None
-        for bfs_node in bfs_generator:
-            j = bfs_node
-            if j < i:
-                spanning_tree_edges.add((j, i))
+        bfs_list = list(enumerate(self.bfs(root)))
+        prev = root
+        for (i, p) in bfs_list:
+            j = i - 1
+            # find first edge upwards from nearest neighbor to root
+            while not self.solution.has_edge(p, prev):
+                # do not go up if p == root
+                if i == 0:
+                    break
+                else:
+                    j = j-1
+                    j, prev = bfs_list[j]
             else:
-                spanning_tree_edges.add((i, j))
-            i = j
-        print "spanning tree_edges from root=%s: >%s<" % (root, spanning_tree_edges)
+                if prev < p:
+                    spanning_tree_edges.add((prev, p))
+                else:
+                    spanning_tree_edges.add((p, prev))
+            prev = p  
+#        print "spanning tree_edges from root=%s: >%s<" % (root, spanning_tree_edges)
         return spanning_tree_edges
     
     def compute_spanning_tree_on_ccs(self):

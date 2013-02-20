@@ -126,7 +126,8 @@ class GraphTestCase(unittest.TestCase):
     def test_merge_connected_components(self):
         # TODO fix this testcase
         self.graph.connected_components.merge_by_vertices(0,1)
-        edges = list(self.graph.edges)
+        self.graph.compute_spanning_tree_on_ccs()
+        edges = list(self.graph.solution)
         expected_edges = [(0,1),(0,2),(0,3), (1,2), (1,3), (2,3)]
         expected_edges.remove((0,1))
         self.assertEqual(edges, expected_edges)
@@ -136,7 +137,8 @@ class GraphTestCase(unittest.TestCase):
         self.graph.connected_components.merge_by_vertices(0,1)
         self.graph.connected_components.merge_by_vertices(0,2)
         self.graph.connected_components.merge_by_vertices(3,1)
-        edges = list(self.graph.edges)
+        self.graph.compute_spanning_tree_on_ccs()
+        edges = list(self.graph.solution)
         self.assertEqual(edges, [])
 
     def test_get_connected_component(self):
