@@ -12,7 +12,7 @@ import math
 from spanning_tree_with_low_crossing import SpanningTreeExperiment
 from spanning_tree_with_low_crossing import SOLVER_OPTIONS
 from spanning_tree_with_low_crossing import DATA_DISTRIBUTION_OPTIONS
-from spanning_tree_with_low_crossing import NO_LINES_SAMPLING
+from spanning_tree_with_low_crossing import LINE_OPTIONS
 
 def main():
     args = parse_args()
@@ -39,6 +39,9 @@ def parse_args():
     parser.add_argument("-g", "--generate", default='uniform',
             choices=DATA_DISTRIBUTION_OPTIONS,
         help="how should the point set be sampled")
+    parser.add_argument("-l", "--linesampling", default='all',
+            choices=LINE_OPTIONS,
+        help="structure of the line set")
     parser.add_argument("-f", "--begin", type=int, default=4,
         help="starting with how many points")
     parser.add_argument("-t", "--to", type=int, default=16,
@@ -53,8 +56,9 @@ def prepare_experiment(args):
     factory method creating a CompoundExperiment object out of argparse
     arguments
     '''
-    return CompoundExperiment(args.out, args.solver, args.generate, args.begin,
-            args.to, args.increment, args.csvheader)
+    return CompoundExperiment(args.out, args.solver, args.generate, 
+                              args.linesampling, args.begin, 
+                              args.to, args.increment, args.csvheader)
 
 csv_header = [
         'size of point set',
@@ -67,7 +71,7 @@ csv_header = [
 
 
 class CompoundExperiment:
-    def __init__(self, file_name, solver_type, distribution_type, lb, ub,
+    def __init__(self, file_name, solver_type, distribution_type, line_option, lb, ub,
             step, has_header):
         self.file_name = file_name
         dimension = 2
@@ -78,8 +82,9 @@ class CompoundExperiment:
         self.ub = ub
         self.step = step
         self.has_header = has_header
+        self.line_opton = line_option
         self.experiment = SpanningTreeExperiment(solver_type, dimension, lb,
-                distribution_type, NO_LINES_SAMPLING, has_plot, verbose)
+                distribution_type, line_option, has_plot, verbose)
 
     def write_csv(self):
         with open(self.file_name, 'wb') as csvfile:
@@ -100,7 +105,7 @@ class CompoundExperiment:
                     i = i**2
 
                 self.experiment.update_point_set(dimension, i,
-                       self.distribution_type)
+                       self.distribution_type, self.line_opton)
                 self.experiment.run()
                 results = self.experiment.results()
                 csv_writer.writerow(results)

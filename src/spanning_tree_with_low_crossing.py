@@ -94,14 +94,15 @@ def generate_lines(graph, line_type):
     assert line_type in LINE_OPTIONS
     if line_type == 'all':
         graph.create_all_lines()
+        graph.preprocess_lines()
     elif line_type == 'stabbing':
         graph.create_stabbing_lines()
     elif line_type == 'random':
         grpah.create_random_lines()
+        graph.preprocess_lines()
     else:
         raise StandardError('Not yet supported this |%s| line-sampling type' %
                             line_type)
-    graph.preprocess_lines()
     return 
 
 class SpanningTreeExperiment:
@@ -112,7 +113,7 @@ class SpanningTreeExperiment:
     def __init__(self, solver_type, d, n, distribution_type, lines_type, has_plot, verbose):
         graph = generate_graph(d, n, distribution_type)
         generate_lines(graph, lines_type)
-        print list(graph.lines)
+        #print list(graph.lines)
         assert list(graph.lines)
         self.graph = graph
         self.solver_type = solver_type
