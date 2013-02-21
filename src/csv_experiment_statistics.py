@@ -48,6 +48,8 @@ def parse_args():
         help="ending up with how many points")
     parser.add_argument("-i", "--increment", type=int, default=1,
         help="number of steps in the size of point set for next experiment")
+    parser.add_argument("-v", "--verbose", action='store_true',
+        help="adds verbose outputs to STDOUT")
     args = parser.parse_args()
     return args
 
@@ -56,9 +58,10 @@ def prepare_experiment(args):
     factory method creating a CompoundExperiment object out of argparse
     arguments
     '''
-    return CompoundExperiment(args.out, args.solver, args.generate, 
-                              args.linesampling, args.begin, 
-                              args.to, args.increment, args.csvheader)
+    return CompoundExperiment(args.out, args.solver, args.generate,
+                              args.linesampling, args.begin,
+                              args.to, args.increment, args.csvheader,
+                              args.verbose)
 
 csv_header = [
         'size of point set',
@@ -72,11 +75,11 @@ csv_header = [
 
 class CompoundExperiment:
     def __init__(self, file_name, solver_type, distribution_type, line_option, lb, ub,
-            step, has_header):
+            step, has_header, verbose):
         self.file_name = file_name
         dimension = 2
         has_plot = False
-        verbose = False
+        self.verbose = verbose
         self.distribution_type = distribution_type
         self.lb = lb
         self.ub = ub
@@ -104,13 +107,17 @@ class CompoundExperiment:
                 if self.distribution_type == 'grid':
                     i = i**2
 
+                if self.verbose:
+                    print "Starting now a new experiment for n=%s..." % i
+
                 self.experiment.update_point_set(dimension, i,
                        self.distribution_type, self.line_opton)
                 self.experiment.run()
                 results = self.experiment.results()
+                if self.verbose:
+                    print "Computation finished. Writing results to csv..."
                 csv_writer.writerow(results)
         return
-
 
 if __name__ == '__main__':
     main()
