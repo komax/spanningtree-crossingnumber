@@ -3,8 +3,8 @@
 
 import unittest
 import mult_weights_solver as mwsolv
-from highdimgraph import HighDimLine, HighDimLineSegment, has_crossing 
-from highdimgraph import np_assert_allclose, create_line, create_linesegment
+from highdimgraph import HighDimLine, HighDimLineSegment, has_crossing
+from highdimgraph import np_assert_allclose, create_linesegment
 from highdimgraph import create_graph
 import highdimgraph
 import sariel_lp_solver as slpsolv
@@ -72,21 +72,21 @@ class PreprocessingLinesTestCase(unittest.TestCase):
     def test_preprocessing_lines_omits_duplicates(self):
         points = np.array([(2., 2.), (6., 4.), (3., 6.), (5., 7.), (4.25, 5.)])
         graph = create_graph(points, 5, 2)
-        l1 = create_line(np.array((2., 6.)), np.array((3., 2.)))  # y = -4x + 14
-        l2 = create_line(np.array((2., 3.)), np.array((6., 5.)))  # y = 0.5x + 2
-        l3 = create_line(np.array((3., 5.5)), np.array((5., 6.5)))  # y = 0.5x + 4
+        l1 = HighDimLine(np.array([(2., 6.), (3., 2.)]))  # y = -4x + 14
+        l2 = HighDimLine(np.array([(2., 3.), (6., 5.)]))  # y = 0.5x + 2
+        l3 = HighDimLine(np.array([(3., 5.5), (5., 6.5)]))  # y = 0.5x + 4
         # duplicates part
         l4 = HighDimLine(np.array(((2.5, 6.), (3.5, 2.))))  # y = -4x + 16
         l5 = HighDimLine(np.array(((2., 2.5), (6., 4.5))))  # y = 0.5x + 1.5
         l6 = HighDimLine(np.array(((3., 5.), (5., 6.))))  # y = 0.5x + 3.5
         # lines outside of point set
         # above
-        l7 = create_line(np.array((0., 7.)), np.array((1., 10.)))  # y = 3 x + 7
+        l7 = HighDimLine(np.array([(0., 7.), (1., 10.)]))  # y = 3 x + 7
         # below
-        l8 = create_line(np.array((0., -1.)), np.array((6., 1.)))  # y = 1/3 x - 1
+        l8 = HighDimLine(np.array([(0., -1.), (6., 1.)]))  # y = 1/3 x - 1
         # line between points omit it
-        l9 = create_line(np.array((3., 6.)), np.array((5., 7.)))
-        lines = set([l1, l2, l3, l4, l5, l6, l7, l8, l9])
+        l9 = HighDimLine(np.array([(3., 6.), (5., 7.)]))
+        lines = [l1, l2, l3, l4, l5, l6, l7, l8, l9]
         graph.lines = lines
         graph.preprocess_lines()
         result = graph.lines

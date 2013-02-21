@@ -27,7 +27,7 @@ class PointSet:
         shape = (n, dimension)
         self.points = np.random.uniform(0, n, shape)
         
-    def get_point(self, i):
+    def __getitem__(self, i):
         return self.points[i]
         
     def has_point(self, p):
@@ -51,12 +51,11 @@ class PointSet:
     def __repr__(self):
         return self.__str__()
             
-    def subset(self, subset_points):
-        indices_subset = set()
-        for point in subset_points:
-            if self.has_point(point):
-                indices_subset.add(self.get_index(point))
-        return indices_subset
+    def subset(self, indices_subset):
+        indices_subset = sorted(list(set(indices_subset)))
+        for x in indices_subset:
+            assert 0 <= x < self.n
+        return self.points[indices_subset]
     
 def create_uniform_points(n, d):
     return PointSet(n, d)
@@ -316,9 +315,8 @@ class HighDimGraph:
         points_for_lines = create_uniform_points(n, self.d)
         lines = []
         for i in range(0,n,2):
-            p = points_for_lines.get_point(i)
-            q = points_for_lines.get_point(i + 1)
-            line = create_line(p, q)
+            pq = points_for_lines.subset((i,i+1))
+            line = HighDimLine(pq)
             lines.append(line)
         self.lines = lines
         return
@@ -332,7 +330,7 @@ class HighDimGraph:
         # TODO update implementation for 3D
         lines = []
         for (i, j) in self.edges:
-            (p, q) = self.point_set.get_point(i), self.point_set.get_point(j)
+            (p, q) = self.point_set[i], self.point_set[j]
             pq_lines = self.__create_lines(p, q)
             lines += pq_lines
 #        print lines
@@ -343,7 +341,7 @@ class HighDimGraph:
         '''
         for two points p,q compute all four possible separation lines_registry
         '''
-        # TODO update it for high dimensions
+        # TODO update it for high dimensionsindices_subset
         (x1, y1) = partition(p)
         x1 = x1[0]
 #        print x1
@@ -404,7 +402,7 @@ class HighDimGraph:
         below_points = list()
         for i in range(self.n):
             # print self.point_set[i]
-            p = self.point_set.get_point(i)
+            p = self.point_set[i]
             if line.is_on(p):
                 return ()
             elif line.is_above(p):
@@ -450,7 +448,7 @@ class HighDimGraph:
     
     def get_line_segment(self, i, j):
         if not (i, j) in self.line_segments:
-            (p, q) = self.point_set.get_point(i), self.point_set.get_point(j)
+            (p, q) = self.point_set[i], self.point_set[j]
             line_segment = create_linesegment(p, q)
             self.line_segments[(i, j)] = line_segment
         return self.line_segments[(i, j)]
@@ -504,11 +502,10 @@ class HighDimGraph:
         ''' alias for maximum crossing number '''
         return self.maximum_crossing_number()
     
-def create_line(p, q):
-    assert len(p.shape) == 1
-    assert len(q.shape) == 1
-    X = np.array([p, q])
-    return HighDimLine(X)
+#def create_line(P, i, j):
+#    
+#    X = np.array([p, q])
+#    return HighDimLine(X)
         
 class HighDimLine:
     def __init__(self, X):

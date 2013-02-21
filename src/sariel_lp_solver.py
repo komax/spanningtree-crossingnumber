@@ -124,9 +124,9 @@ def main():
     # minimal example to find optimal spanning tree
     points = np.array([(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)])
     graph = create_graph(points, 5, 2)
-    l1 = create_line(np.array((2., 6.)), np.array((3., 2.))) # y = -4x + 14
-    l2 = create_line(np.array((2., 3.)), np.array((6., 5.))) # y = 0.5x + 2
-    l3 = create_line(np.array((3., 5.5)), np.array((5., 6.5))) # y = 0.5x + 4
+    l1 = HighDimLine(np.array([(2., 6.), (3., 2.)])) # y = -4x + 14
+    l2 = HighDimLine(np.array([(2., 3.), (6., 5.)])) # y = 0.5x + 2
+    l3 = HighDimLine(np.array([(3., 5.5), (5., 6.5)])) # y = 0.5x + 4
     lines = [l1, l2, l3]
     graph.lines = lines
     graph.preprocess_lines()
