@@ -4,7 +4,7 @@
 import unittest
 import mult_weights_solver as mwsolv
 from highdimgraph import HighDimLine, HighDimLineSegment, has_crossing
-from highdimgraph import np_assert_allclose, create_linesegment
+from highdimgraph import np_assert_allclose
 from highdimgraph import create_graph
 import highdimgraph
 import sariel_lp_solver as slpsolv

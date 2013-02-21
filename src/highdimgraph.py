@@ -26,10 +26,10 @@ class PointSet:
         self.d = dimension
         shape = (n, dimension)
         self.points = np.random.uniform(0, n, shape)
-        
+
     def __getitem__(self, i):
         return self.points[i]
-        
+
     def has_point(self, p):
         for point in self.points:
             if np_allclose(point, p):
@@ -221,7 +221,7 @@ class HighDimGraph:
     def bfs(self, root):
         visited = set([root])
         queue = deque([root])
-        
+
         while queue:
             i = queue.popleft()
             visited.add(i)
@@ -229,26 +229,29 @@ class HighDimGraph:
             for neighbor in self.solution.adj_nodes(i):
                 if neighbor not in visited:
                     queue.append(neighbor)
-                    
+
+
     def euclidean_distance(self, i, j):
-        p = self.point_set.get_point(i)
-        q = self.point_set.get_point(j)
+        p = self.point_set[i]
+        q = self.point_set[j]
         return np.linalg.norm(p - q)
-    
+
+
     def merge_cc(self, i, j):
         self.connected_components.merge_by_vertices(i, j)
         cc = self.connected_components.get_connected_component(i)
         for p in cc:
             for q in cc:
                 if p != q:
-                    self.edges.update(p,q, False) 
-                    
+                    self.edges.update(p,q, False)
+
+
     def compute_connected_component(self, root):
         connected_component = set([root])
         for bfs_node in self.bfs(root):
             connected_component.add(bfs_node)
         return connected_component
-    
+
     def compute_connected_components(self):
         remaining_points = range(self.n)
         while remaining_points:
@@ -438,18 +441,18 @@ class HighDimGraph:
                 # new equivalent class, store this line
                 lines_dict[partition_tuple] = line
         self.lines = lines_dict.values()
-    
+
     def __get_line(self, i, j):
         if not (i, j) in self.lines_registry:
-            (p, q) = self.point_set.get_point(i), self.point_set.get_point(j)
-            line = create_line(p, q)
+            pq = self.point_set.subset((i,j))
+            line = HighDimLine(pq)
             self.lines_registry[(i, j)] = line
         return self.lines_registry[(i, j)]
-    
+
     def get_line_segment(self, i, j):
         if not (i, j) in self.line_segments:
-            (p, q) = self.point_set[i], self.point_set[j]
-            line_segment = create_linesegment(p, q)
+            pq = self.point_set.subset((i,j))
+            line_segment = HighDimLineSegment(pq)
             self.line_segments[(i, j)] = line_segment
         return self.line_segments[(i, j)]
 
@@ -463,7 +466,7 @@ class HighDimGraph:
             if has_crossing(line, line_segment):
                 crossings += 1
         return crossings
-    
+
     def crossing_tuple(self):
         '''
         returns (crossing number, overall crossings)
@@ -570,17 +573,17 @@ def partition(p):
     x = p[..., :-1]
     y = p[..., -1:]
     return (x, y)
-    
-def create_linesegment(p, q):
-    assert len(p.shape) == 1
-    assert len(q.shape) == 1
-    X = np.array([p, q])
-    return HighDimLineSegment(X)        
-    
+
+#def create_linesegment(p, q):
+#    assert len(p.shape) == 1
+#    assert len(q.shape) == 1
+#    X = np.array([p, q])
+#    return HighDimLineSegment(X)        
+
 class HighDimLineSegment(HighDimLine):
     def __init__(self, X):
         HighDimLine.__init__(self, X)
-        
+
     def __str__(self):
        return 'HighDimLineSegment(theta=\n%s, points=\n%s)' % (self.theta, self.X)
 
@@ -617,12 +620,12 @@ class HighDimLineSegment(HighDimLine):
     def __call__(self, X):
         if self.is_between(X):
             return HighDimLine.__call__(self, X)
-        
+
 def has_crossing(line, line_seg):
     '''
     Has line a crossing with the line segment
     '''
-    
+
     # print line.theta, line_seg.theta
     # print line.theta[..., :-1], line_seg.theta[..., :]
     if np_allclose(line.theta[..., :-1], line_seg.theta[..., :-1]):
@@ -632,7 +635,7 @@ def has_crossing(line, line_seg):
         A = np.vstack([line.theta, line_seg.theta])
         b = -A[..., -1:]
         A[..., -1] = -np.ones(len(A))
-        intersection_point = (np.linalg.solve(A, b)).flatten() 
+        intersection_point = (np.linalg.solve(A, b)).flatten()
         # print "intersection point= %s" % intersection_point
         x = intersection_point[..., :-1]
         # print x
