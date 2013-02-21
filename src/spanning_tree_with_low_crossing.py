@@ -89,7 +89,7 @@ def get_solver(solver_type):
     else:
         raise StandardError('Not yet supported this |%s| solver type' %
                 solver_type)
-        
+
 def generate_lines(graph, line_type):
     assert line_type in LINE_OPTIONS
     if line_type == 'all':
@@ -103,7 +103,7 @@ def generate_lines(graph, line_type):
     else:
         raise StandardError('Not yet supported this |%s| line-sampling type' %
                             line_type)
-    return 
+    return
 
 class SpanningTreeExperiment:
     '''
@@ -111,8 +111,14 @@ class SpanningTreeExperiment:
     line set before running a solver and takes care of time measuring
     '''
     def __init__(self, solver_type, d, n, distribution_type, lines_type, has_plot, verbose):
+        if verbose:
+            print "Start generating graph..."
         graph = generate_graph(d, n, distribution_type)
+        if verbose:
+            print "Graph has been sampled.\nSampling of lines started..."
         generate_lines(graph, lines_type)
+        if verbose:
+            print "Sampling of lines finished."
         #print list(graph.lines)
         assert list(graph.lines)
         self.graph = graph
@@ -155,11 +161,15 @@ class SpanningTreeExperiment:
         caching of points, lines, time measuring and storing the crossing
         number
         '''
+        if self.verbose:
+            print "Start now computing a spanning tree..."
         # have fresh graph for each new computation (overriding solution and edges)
         self.graph = self.graph.copy_graph()
         start = time.time()
         self.solution = self.solver(self.graph)
         end = time.time()
+        if self.verbose:
+            print "Computing a spanning tree finished."
         self.elapsed_time = end - start
         (crossing_number, crossings) = self.graph.crossing_tuple()
         self.crossing_number = crossing_number
@@ -189,7 +199,11 @@ class SpanningTreeExperiment:
         if plot option is set, plot
         '''
         if self.has_plot:
+            if self.verbose:
+                print "Start now plotting..."
             plotting.plot(self.graph)
+            if self.verbose:
+                print "Closed plot."
         return
 
     def results(self):
