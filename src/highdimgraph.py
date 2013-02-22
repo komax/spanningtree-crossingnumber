@@ -4,11 +4,11 @@ Created on Feb 5, 2013
 @author: max
 '''
 import numpy as np
+import scipy
 import math
 import random
 import copy
 from collections import deque
-from pydoc import deque
 
 # numpy defaults for numpy.allclose()
 RTOL = 1e-05
@@ -36,27 +36,27 @@ class PointSet:
                 return True
         else:
             return False
-        
+
     def get_index(self, p):
         for row in range(0, self.n):
             if np_allclose(self.points[row], p):
                 return row
-    
+
     def __iter__(self):
         return self.points.__iter__()
-    
+
     def __str__(self):
         return 'PointSet(n=%s,d=%s,points=%s' % (self.n, self.d, self.points)
-    
+
     def __repr__(self):
         return self.__str__()
-            
+
     def subset(self, indices_subset):
         indices_subset = sorted(list(set(indices_subset)))
         for x in indices_subset:
             assert 0 <= x < self.n
         return self.points[indices_subset]
-    
+
 def create_uniform_points(n, d):
     return PointSet(n, d)
 
@@ -85,64 +85,64 @@ def create_pointset(np_array, n, d):
     point_set = PointSet(n, d)
     point_set.points = np_array
     return point_set
-            
+
 class Edges:
     def __init__(self, n, matrix):
         self.n = n
         assert matrix.shape == (n, n)
         assert matrix.dtype == bool
         self.adj_matrix = matrix
-            
+
     def as_tuple(self):
         for i in range(0, self.n):
             for j in range(0, self.n):
                 if i < j and self.adj_matrix[i, j]:
                     yield (i, j)
-            
+
     def __iter__(self):
         return self.as_tuple()
-    
+
     def __len__(self):
         length = 0
         for (i,j) in self.as_tuple():
             length += 1
         return length
-    
+
     def __str__(self):
         return 'Edges(n=%s, adj_matrix=%s)' % (self.n, self.adj_matrix)
-    
+
     def __repr__(self):
         return self.__str__()
-        
+
     def has_edge(self, i, j):
         return self.adj_matrix[i, j] or self.adj_matrix[j, i]
-    
+
     def adj_nodes(self, i):
         neighbors = set()
         for j in range(self.n):
             if i != j and self.adj_matrix[i, j]:
                 neighbors.add(j)
         return neighbors
-    
+
     def adj_edges(self, i):
         for j in self.adj_nodes(i):
             yield (i, j)
-    
+
     def update(self, i, j, new_val):
         self.adj_matrix[i, j] = self.adj_matrix[j, i] = new_val
-        
+
 def create_all_edges(n):
     adj_matrix = np.ones((n, n), dtype=bool)
     for i in range(0, n):
         adj_matrix[i, i] = False
     edges = Edges(n, adj_matrix)
     return edges
-        
+
 def create_solution_edges(n):
     sol_matrix = np.zeros((n, n), dtype=bool)
     solution = Edges(n, sol_matrix)
     return solution
-        
+
 def create_uniform_graph(n, d):
     points = create_uniform_points(n, d)
     edges = create_all_edges(n)
@@ -161,16 +161,16 @@ def create_graph(points, n, d):
 class ConnectedComponents:
     def __init__(self, n):
         self.ccs = list(set([i]) for i in range(n))
-        
+
     def get_connected_component(self, i):
         for cc in self.ccs:
             if i in cc:
                 return cc
         else:
             raise StandardError('can not find vertex=%s in this connected components=%s' % (i, self.ccs))
-    
+
     def merge(self, cc1, cc2):
-        ''' 
+        '''
         merge of two different connected components to a new one
         '''
         assert cc1 in self.ccs
@@ -179,9 +179,9 @@ class ConnectedComponents:
             self.ccs.remove(cc2)
             cc1.update(cc2)
         return
-    
+
     def merge_by_vertices(self, i, j):
-        ''' 
+        '''
         merge of two connected components but parameters are two points
         from the corresponding connected components
         '''
@@ -191,10 +191,10 @@ class ConnectedComponents:
             return self.merge(cc1, cc2)
         except:
             raise
-        
+
     def __len__(self):
         return len(self.ccs)
-        
+
 class HighDimGraph:
     def __init__(self, points, edges, n, d):
         assert points.n == n
@@ -203,21 +203,21 @@ class HighDimGraph:
         self.edges = edges
         self.n = n
         self.d = d
-        
+
         self.solution = create_solution_edges(n)
         self.connected_components = ConnectedComponents(n)
-        
+
         self.lines = []
-        
+
         self.lines_registry = {}
         self.line_segments = {}
-        
+
     def copy_graph(self):
         np_points = self.point_set.points
         copied_graph = create_graph(np_points, self.n, self.d)
         copied_graph.lines = copy.deepcopy(self.lines)
         return copied_graph
-    
+
     def bfs(self, root):
         visited = set([root])
         queue = deque([root])
@@ -260,9 +260,9 @@ class HighDimGraph:
             for cc_p in connected_component:
                 self.connected_components.merge_by_vertices(p, cc_p)
                 if cc_p in remaining_points:
-                    remaining_points.remove(cc_p)      
+                    remaining_points.remove(cc_p)
         return
-                    
+
     def spanning_tree(self, root):
         spanning_tree_edges = set()
         bfs_list = list(enumerate(self.bfs(root)))
@@ -282,10 +282,10 @@ class HighDimGraph:
                     spanning_tree_edges.add((prev, p))
                 else:
                     spanning_tree_edges.add((p, prev))
-            prev = p  
+            prev = p
 #        print "spanning tree_edges from root=%s: >%s<" % (root, spanning_tree_edges)
         return spanning_tree_edges
-    
+
     def compute_spanning_tree_on_ccs(self):
         new_solution_edges = set()
         remaining_points = range(self.n)
@@ -299,12 +299,12 @@ class HighDimGraph:
                     remaining_points.remove(i)
                 if j in remaining_points:
                     remaining_points.remove(j)
-                    
+
         self.solution = create_solution_edges(self.n)
         for (i, j) in new_solution_edges:
             self.solution.update(i, j, True)
-        return 
-        
+        return
+
     def create_stabbing_lines(self):
         lines = []
         for (i, j) in self.edges:
@@ -312,7 +312,7 @@ class HighDimGraph:
             lines.append(line)
         self.lines = lines
         return
-    
+
     def create_random_lines(self):
         n = 2 * self.n
         points_for_lines = create_uniform_points(n, self.d)
@@ -323,10 +323,10 @@ class HighDimGraph:
             lines.append(line)
         self.lines = lines
         return
-    
-    
+
+
     def create_all_lines(self):
-        ''' 
+        '''
         compute all possible seperators (lines_registry) on the point set. There maybe
         duplicates within this set
         '''
@@ -339,7 +339,7 @@ class HighDimGraph:
 #        print lines
         self.lines = lines
         return
-    
+
     def __create_lines(self, p, q):
         '''
         for two points p,q compute all four possible separation lines_registry
@@ -378,7 +378,7 @@ class HighDimGraph:
             pq_lines.append(HighDimLine(np.array([(x1, y1u), (x2, y2b)])))
             pq_lines.append(HighDimLine(np.array([(x1, y1b), (x2, y2u)])))
         return pq_lines
-    
+
     def generate_lines(self, points):
         ''' compute all possible seperators (lines_registry) on the point set. There maybe
             duplicates within this set
@@ -395,7 +395,7 @@ class HighDimGraph:
         for pq_lines in lines.values():
             line_set = line_set + pq_lines
         return line_set
-    
+
     def __partition_points_by_line(self, line):
         ''' partitioning of point set with discriminative function line
             (points above the line as tuples , points below the line as sets)
@@ -413,12 +413,12 @@ class HighDimGraph:
             elif line.is_below(p):
                 below_points.append(i)
             else:
-                raise StandardError('can not find point i=%s:p=%s on line=%s' % 
+                raise StandardError('can not find point i=%s:p=%s on line=%s' %
                         (i, p, line))
         above_points.sort()
         below_points.sort()
         return (tuple(above_points), tuple(below_points))
-    
+
     def preprocess_lines(self):
         ''' removes lines_registry that have same partitioning of the point set as
             equivalent ones
@@ -426,7 +426,7 @@ class HighDimGraph:
         '''
         lines_dict = {}
         for line in self.lines:
-            # FIXME update this implementation 
+            # FIXME update this implementation
             partition_tuple = self.__partition_points_by_line(line)
             if not partition_tuple:
                 # skip this line, because one point is on this line
@@ -504,7 +504,7 @@ class HighDimGraph:
     def crossing_number(self):
         ''' alias for maximum crossing number '''
         return self.maximum_crossing_number()
-    
+
 #def create_line(P, i, j):
 #    
 #    X = np.array([p, q])
@@ -524,7 +524,7 @@ class HighDimLine:
         self.theta = (np.linalg.lstsq(A, y)[0]).flatten()
         # self.theta = self.theta.flatten()
         # print "theta=%s, shape of it %s" %(self.theta, self.theta.shape)
-        
+
     def __key(self):
         return tuple(self.theta)
 
@@ -621,7 +621,46 @@ class HighDimLineSegment(HighDimLine):
         if self.is_between(X):
             return HighDimLine.__call__(self, X)
 
+class CrossingRegistry:
+    def __init__(self):
+        self.crossings = {}
+
+    @staticmethod
+    def convert(line, line_seg):
+        return (id(line), id(line_seg))
+
+    def put(self, line, line_seg, bool_val):
+        i, j = CrossingRegistry.convert(line, line_seg)
+        self.crossings[(i,j)] = bool_val
+
+    def has_entry(self, line, line_seg):
+        i, j = CrossingRegistry.convert(line, line_seg)
+        return (i,j) in self.crossings
+
+    def has_crossing(self, line, line_seg):
+        if self.has_entry(line, line_seg):
+            i, j = CrossingRegistry.convert(line, line_seg)
+            return self.crossings[(i,j)]
+        else:
+            raise StandardError('line=%s and line_seg=%s not in registry' %
+                    (line, line_seg))
+
+registry = CrossingRegistry()
+
+def new_crossing_registry():
+    global registry
+    registry = CrossingRegistry()
+
 def has_crossing(line, line_seg):
+    if registry.has_entry(line, line_seg):
+        return registry.has_crossing(line, line_seg)
+    else:
+        cross_val = calc_has_crossing(line, line_seg)
+        registry.put(line, line_seg, cross_val)
+        return cross_val
+
+
+def calc_has_crossing(line, line_seg):
     '''
     Has line a crossing with the line segment
     '''
