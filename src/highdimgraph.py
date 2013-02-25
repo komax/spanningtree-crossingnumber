@@ -216,6 +216,8 @@ class HighDimGraph:
         np_points = self.point_set.points
         copied_graph = create_graph(np_points, self.n, self.d)
         copied_graph.lines = copy.deepcopy(self.lines)
+        copied_graph.line_segments = copy.deepcopy(self.line_segments)
+        new_crossing_registry()
         return copied_graph
 
     def bfs(self, root):
