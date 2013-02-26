@@ -409,14 +409,14 @@ class HighDimGraph:
             line_set = line_set + pq_lines
         return line_set
 
-    def __partition_points_by_line(self, line):
+    def __partition_points_by_line(self, line, point_range):
         ''' partitioning of point set with discriminative function line
             (points above the line as tuples , points below the line as sets)
             both parts can be empty
         '''
         above_points = list()
         below_points = list()
-        for i in range(self.n):
+        for i in point_range:
             # print self.point_set[i]
             p = self.point_set[i]
             if line.is_on(p):
@@ -432,15 +432,19 @@ class HighDimGraph:
         below_points.sort()
         return (tuple(above_points), tuple(below_points))
 
-    def preprocess_lines(self):
+    def preprocess_lines(self, subset=None):
         ''' removes lines_registry that have same partitioning of the point set as
             equivalent ones
             lines_registry above or below the point set are also removed
         '''
+        if subset is None:
+            point_range = range(self.n)
+        else:
+            point_range = sorted(subset)
         lines_dict = {}
         for line in self.lines:
             # FIXME update this implementation
-            partition_tuple = self.__partition_points_by_line(line)
+            partition_tuple = self.__partition_points_by_line(line, point_range)
             if not partition_tuple:
                 # skip this line, because one point is on this line
                 continue
