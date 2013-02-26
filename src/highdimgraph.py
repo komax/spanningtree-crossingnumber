@@ -52,7 +52,7 @@ class PointSet:
         return self.__str__()
 
     def subset(self, indices_subset):
-        indices_subset = sorted(list(set(indices_subset)))
+        indices_subset = sorted(indices_subset)
         for x in indices_subset:
             assert 0 <= x < self.n
         return self.points[indices_subset]
@@ -98,6 +98,16 @@ class Edges:
             for j in range(0, self.n):
                 if i < j and self.adj_matrix[i, j]:
                     yield (i, j)
+
+    def iter_subset(self, subset=None):
+        if subset is None:
+            self.as_tuple()
+        else:
+            ranged_subset = sorted(subset)
+            for i in ranged_subset:
+                for j in ranged_subset:
+                    if i < j and self.adj_matrix[i, j]:
+                        yield (i, j)
 
     def __iter__(self):
         return self.as_tuple()
