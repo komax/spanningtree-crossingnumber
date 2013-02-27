@@ -40,17 +40,19 @@ def compute_spanning_tree(graph):
     
     number_of_crossings = {}
     weights = {}
-
+    iterations = 1
+    
     while len(graph.connected_components) > 1:
         for line in lines:
             number_of_crossings[line] = graph.calculate_crossing_with(line)
             weights[line] = 2.**(number_of_crossings[line])
         (i, j) = find_min_edge(graph, weights)
         add_edge_to_solution_merge_ccs(graph, i, j)
+        iterations += 1
         
 #    print graph.edges
 #    print graph.solution
-    return
+    return iterations
 
 def main():
     # minimal example to find optimal spanning tree

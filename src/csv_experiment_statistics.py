@@ -67,6 +67,7 @@ csv_header = [
         'size of point set',
         'size of line set',
         'CPU time in seconds',
+        'iterations'
         'crossing number',
         'minimum crossing number',
         'average crossing number',

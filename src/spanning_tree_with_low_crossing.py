@@ -128,15 +128,15 @@ class SpanningTreeExperiment:
         self.verbose = verbose
 
         self.elapsed_time = None
-        self.solution = None
         self.crossing_number = None
         self.crossings = None
+        self.iterations = None
 
     def clean_up(self):
         '''
         cleaning up old results
         '''
-        self.elapsed_time = self.solution = None
+        self.elapsed_time = self.iterations = None
         self.crossing_number = self.crossings = None
 
 
@@ -166,7 +166,7 @@ class SpanningTreeExperiment:
         # have fresh graph for each new computation (overriding solution and edges)
         self.graph = self.graph.copy_graph()
         start = time.time()
-        self.solution = self.solver(self.graph)
+        self.iterations = self.solver(self.graph)
         end = time.time()
         if self.verbose:
             print "Computing a spanning tree finished."
@@ -178,7 +178,7 @@ class SpanningTreeExperiment:
     def print_results(self):
         '''
         print all important statistics to STDOUT: crossing number, elapsed
-        CPU time. If verbose flag is set:
+        CPU time, iterations. If verbose flag followed by:
          - number of points
          - number of lines,
          - sum of all crossings and
@@ -186,6 +186,7 @@ class SpanningTreeExperiment:
         '''
         print "CPU time (in sec) %s" % self.elapsed_time
         print "crossing number=%s" % self.crossing_number
+        print "iterations=%s" % self.iterations
         if self.verbose:
             print "number of points=%s" % self.graph.n
             no_lines = len(self.graph.lines)
@@ -213,6 +214,7 @@ class SpanningTreeExperiment:
         # of points,
         # of lines,
         CPU time in seconds,
+        iterations,
         crossing number,
         average crossing number,
         crossings (overall)
@@ -220,7 +222,7 @@ class SpanningTreeExperiment:
         '''
         no_lines = len(self.graph.lines)
         results = [ str(self.graph.n), str(no_lines),
-                str(self.elapsed_time), str(self.crossing_number)]
+                str(self.elapsed_time), str(self.iterations), str(self.crossing_number)]
         average_crossing_number = float(self.crossings) / no_lines
         results.append(str(average_crossing_number))
         results.append(str(self.crossings))
@@ -228,9 +230,7 @@ class SpanningTreeExperiment:
 
     def results_csv(self):
         '''
-        returns all statistics about the experiment and its results as string:
-        # of points;# of lines;CPU time in seconds; crossing number;
-        minimum crossing number; average crossing number; crossings (overall)
+        same as results but as one string separarted by ;
         '''
         res = self.results()
         return ";".join(res)

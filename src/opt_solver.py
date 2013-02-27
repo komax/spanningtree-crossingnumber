@@ -79,7 +79,7 @@ def compute_spanning_tree(graph):
     ip_model = create_ip(graph)
     solve_ip(ip_model)
     create_solution(graph)
-    return
+    return 1
 
 def main():
     # minimal example to find optimal spanning tree

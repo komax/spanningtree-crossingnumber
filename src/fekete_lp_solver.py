@@ -142,7 +142,7 @@ def compute_spanning_tree(graph, alpha=2.0):
     n = graph.n
     #edges = grb.tuplelist(get_edges(points))
 
-    #i = 1
+    iterations = 1
     lp_model = create_lp(graph)
 
     while len(solution) < n-1:
@@ -162,8 +162,8 @@ def compute_spanning_tree(graph, alpha=2.0):
 #            solution += round_edges[:l]
 #            number_of_edges = n-1
 #            break
-        #i += 1
-    return
+        iterations += 1
+    return iterations
 
 def main():
     # minimal example to find optimal spanning tree

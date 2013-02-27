@@ -94,9 +94,9 @@ def compute_spanning_tree(graph):
     remaining_points = range(0,n)
     solution = graph.solution
     lines = graph.lines
-    i = 1
+    iterations = 1
     while len(remaining_points) > 1:
-        #print "round %i" % i
+        #print "round %iterations" % iterations
         t = estimate_t(remaining_points)
         #print "estimated t=%s" % t
         #print "remaining points=%s" % remaining_points
@@ -111,18 +111,18 @@ def compute_spanning_tree(graph):
         #print "solution edges = %s" % list(graph.solution)
         #print "spanning solution edges = %s" % list(graph.solution)
         new_point_set = []
-        #print "# of connected components %i" % len(connected_components)
+        #print "# of connected components %iterations" % len(connected_components)
         for connected_component in connected_components:
             #print "connected component |%s|" % connected_component
             p = random.sample(connected_component, 1)[0]
             new_point_set.append(p)
         remaining_points = new_point_set
         lines = graph.preprocess_lines(remaining_points)
-        i += 1
+        iterations += 1
     assert len(remaining_points) == 1
     graph.lines = stored_lines
     graph.compute_spanning_tree_on_ccs()
-    return
+    return iterations
 
 def main():
     # minimal example to find optimal spanning tree
