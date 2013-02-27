@@ -59,14 +59,12 @@ def solve_lp_and_round(graph, points):
         round_solution = []
         for (p,q) in edges:
             print  "|%s|" % x[p,q]
-            #probability = x[p,q].X
-            #ub = 1000
-            #sample = random.randint(0,ub)
-            #if sample <= ub * probability:
-            if x[p,q].X >= 1./12.:
+            val = x[p,q].X
+            sample = random.random()
+            if sample <= val:
+            #if val >= 1./12.:
                 graph.solution.update(p, q, True)
                 round_solution.append((p,q))
-        assert round_solution
         return round_solution
 
 def has_proper_no_of_connected_components(connected_components, points):
