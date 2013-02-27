@@ -90,8 +90,10 @@ def get_solver(solver_type):
         raise StandardError('Not yet supported this |%s| solver type' %
                 solver_type)
 
-def generate_lines(graph, line_type):
+def generate_lines(graph, line_type, verbose):
     assert line_type in LINE_OPTIONS
+    if verbose:
+        print "Sampling of lines started..."
     if line_type == 'all':
         graph.create_all_lines()
         graph.preprocess_lines()
@@ -103,6 +105,8 @@ def generate_lines(graph, line_type):
     else:
         raise StandardError('Not yet supported this |%s| line-sampling type' %
                             line_type)
+    if verbose:
+            print "Sampling of lines finished."
     return
 
 class SpanningTreeExperiment:
@@ -115,10 +119,8 @@ class SpanningTreeExperiment:
             print "Start generating graph..."
         graph = generate_graph(d, n, distribution_type)
         if verbose:
-            print "Graph has been sampled.\nSampling of lines started..."
-        generate_lines(graph, lines_type)
-        if verbose:
-            print "Sampling of lines finished."
+            print "Graph has been sampled."
+        generate_lines(graph, lines_type, verbose)
         #print list(graph.lines)
         assert list(graph.lines)
         self.graph = graph
@@ -145,7 +147,7 @@ class SpanningTreeExperiment:
         set a new point set like specified and update also the line set
         '''
         graph = generate_graph(d, n, distribution_type)
-        generate_lines(graph, lines_type)
+        generate_lines(graph, lines_type, self.verbose)
         self.graph = graph
 
     def update_solver(self, solver_type):
