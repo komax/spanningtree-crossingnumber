@@ -57,10 +57,8 @@ def solve_lp_and_round(graph, points):
 
     if gamma_lp.status == grb.GRB.status.OPTIMAL:
         round_solution = []
-        for key in x.keys():
-            print "%s => %s" % (key, x[key])
         for (p,q) in edges:
-            print  "printing gurobi var |%s|" % x[p,q]
+            print  "|%s|" % x[p,q]
             #probability = x[p,q].X
             #ub = 1000
             #sample = random.randint(0,ub)
@@ -96,6 +94,7 @@ def estimate_t(points):
 
 def compute_spanning_tree(graph):
     n = graph.n
+    stored_lines = graph.lines[:]
     remaining_points = range(0,n)
     solution = graph.solution
     lines = graph.lines
@@ -107,25 +106,28 @@ def compute_spanning_tree(graph):
         print "remaining points=%s" % remaining_points
         round_edges = solve_lp_and_round(graph, remaining_points)
         print "round edges %s" % round_edges
+        print "solution edges = %s" % list(graph.solution)
         graph.compute_connected_components()
         connected_components = graph.connected_components
-        if not has_proper_no_of_connected_components(connected_components, remaining_points):
-            put_back_round_edges(graph, round_edges)
-            continue
+        #if not has_proper_no_of_connected_components(connected_components, remaining_points):
+        #    put_back_round_edges(graph, round_edges)
+        #    continue
         print "solution edges = %s" % list(graph.solution)
+        graph.compute_spanning_tree_on_ccs()
+        print "spanning solution edges = %s" % list(graph.solution)
         new_point_set = []
         print "# of connected components %i" % len(connected_components)
         for connected_component in connected_components:
             assert len(connected_component) >= 1
             print "connected component |%s|" % connected_component
-            p = connected_component.pop()
+            p = random.sample(connected_component, 1)[0]
             new_point_set.append(p)
         remaining_points = new_point_set
         # TODO update line set and remove not necessary lines
         lines = graph.preprocess_lines(remaining_points)
         i += 1
     assert len(remaining_points) == 1
-    root = remaining_points[0]
+    graph.lines = stored_lines
     graph.compute_spanning_tree_on_ccs()
     return
 
@@ -139,7 +141,7 @@ def main():
     lines = [l1, l2, l3]
     graph.lines = lines
     graph.preprocess_lines()
-    solution = compute_spanning_tree(graph)
+    compute_spanning_tree(graph)
     print "crossing number = %s" % graph.crossing_number()
     import plotting
     plotting.plot(graph)

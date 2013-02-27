@@ -517,9 +517,9 @@ class HighDimGraph:
         '''
         max_crossing_number = 0
         for line in self.lines:
-            crossing_number = self.calculate_crossing_with(line)
-        if crossing_number > max_crossing_number:
-            max_crossing_number = crossing_number
+            crossing_no = self.calculate_crossing_with(line)
+            if crossing_no > max_crossing_number:
+                max_crossing_number = crossing_no
         return max_crossing_number
 
     def crossing_number(self):
