@@ -171,6 +171,10 @@ def create_graph(points, n, d):
 class ConnectedComponents:
     def __init__(self, n):
         self.ccs = list(set([i]) for i in range(n))
+        
+    def __iter__(self):
+        for cc in self.ccs:
+            yield cc
 
     def get_connected_component(self, i):
         for cc in self.ccs:
