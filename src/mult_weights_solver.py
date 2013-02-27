@@ -62,7 +62,7 @@ def main():
     lines = [l1, l2, l3]
     graph.lines = lines
     graph.preprocess_lines()
-    solution = compute_spanning_tree(graph)
+    compute_spanning_tree(graph)
     print "crossing number = %s" % graph.crossing_number()
     import plotting
     plotting.plot(graph)
