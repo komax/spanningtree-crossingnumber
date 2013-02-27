@@ -7,6 +7,7 @@ using Gurobi as standard solver
 import numpy as np
 import gurobipy as grb
 from highdimgraph import *
+from gurobi_helper import set_up_model
 from gurobipy import quicksum
 import math
 import itertools
@@ -54,7 +55,8 @@ def create_lp(graph):
     create a gurobi model containing LP formulation like that in the Fekete
     paper
     '''
-    lambda_lp = grb.Model("fekete_lp_2d")
+    lambda_lp = set_up_model("fekete_lp_2d")
+    lambda_lp.setParam('Cuts', 3)
     number_of_edges = 0
     points = graph.point_set
     n = graph.n
@@ -65,8 +67,6 @@ def create_lp(graph):
     t = lambda_lp.addVar(obj=1.0, vtype=grb.GRB.INTEGER)
 
     lambda_lp.modelSense = grb.GRB.MINIMIZE
-    lambda_lp.setParam('Cuts', 3)
-    lambda_lp.setParam('Threads', 4)
 
     lambda_lp.update()
 

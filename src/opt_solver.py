@@ -7,6 +7,7 @@ using Gurobi as standard solver
 import numpy as np
 import gurobipy as grb
 from highdimgraph import *
+from gurobi_helper import set_up_model
 from fekete_lp_solver import nonempty_subsets, cut
 from gurobipy import quicksum
 import math
@@ -19,7 +20,8 @@ def create_ip(graph):
     '''
     creates a gurobi model containing Fekete IP formulation
     '''
-    lambda_ip = grb.Model("fekete_ip_2d")
+    lambda_ip = set_up_model("fekete_ip_2d")
+    lambda_ip.setParam('Cuts', 3)
     n = graph.n
     edges = graph.edges
     for (p,q) in edges:
@@ -28,8 +30,6 @@ def create_ip(graph):
     t = lambda_ip.addVar(obj=1.0, vtype=grb.GRB.INTEGER)
 
     lambda_ip.modelSense = grb.GRB.MINIMIZE
-    lambda_ip.setParam('Cuts', 3)
-    lambda_ip.setParam('Threads', 4)
 
     lambda_ip.update()
 
