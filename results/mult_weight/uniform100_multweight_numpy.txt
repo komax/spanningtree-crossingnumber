@@ -1,0 +1,12 @@
+Start generating graph...
+Graph has been sampled.
+Sampling of lines started...
+Sampling of lines finished.
+Start now computing a spanning tree...
+Computing a spanning tree finished.
+CPU time (in sec) 10301.2541261
+crossing number=10
+number of points=100
+number of lines=3329
+all crossings=17552
+average crossing number=5.27245419045

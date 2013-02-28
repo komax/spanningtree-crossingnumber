@@ -1,0 +1,49 @@
+Start generating graph...
+Graph has been sampled.
+Sampling of lines started...
+Sampling of lines finished.
+Start now computing a spanning tree...
+Changed value of parameter Cuts to 3
+   Prev: -1   Min: -1   Max: 3   Default: -1
+Changed value of parameter Threads to 4
+   Prev: 0   Min: 0   Max: 8   Default: 0
+Optimize a model with 65658 rows, 121 columns and 3938316 nonzeros
+Presolve removed 32782 rows and 0 columns (presolve time = 7s) ...
+Presolve removed 32782 rows and 0 columns
+Presolve time: 7.65s
+Presolved: 32876 rows, 121 columns, 1971541 nonzeros
+Variable types: 0 continuous, 121 integer (120 binary)
+Found heuristic solution: objective 9.0000000
+Found heuristic solution: objective 8.0000000
+Found heuristic solution: objective 7.0000000
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+   12581    3.3333333e+00   0.000000e+00   0.000000e+00      5s
+
+Root relaxation: objective 3.333333e+00, 12581 iterations, 5.16 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    3.33333    0   12    7.00000    3.33333  52.4%     -   25s
+*    0     0               0       4.0000000    4.00000   0.0%     -   31s
+
+Cutting planes:
+  Gomory: 6
+  Zero half: 17
+  Mod-K: 27
+
+Explored 0 nodes (12906 simplex iterations) in 31.98 seconds
+Thread count was 4 (of 8 available processors)
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.000000000000e+00, best bound 4.000000000000e+00, gap 0.0%
+Computing a spanning tree finished.
+CPU time (in sec) 53.4910261631
+crossing number=4
+number of points=16
+number of lines=123
+all crossings=355
+average crossing number=2.88617886179
