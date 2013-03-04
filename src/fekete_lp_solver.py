@@ -147,8 +147,9 @@ def compute_spanning_tree(graph, alpha=2.0):
     while len(solution) < n-1:
         #print "round i=%s" % i
         solve_lp(lp_model)
-        for var in lp_model.getVars():
-            print var
+        # printing all variables of LP
+        #for var in lp_model.getVars():
+        #    print var
         round_and_update_lp(graph, alpha)
         iterations += 1
     return iterations
