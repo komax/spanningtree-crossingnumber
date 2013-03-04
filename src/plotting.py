@@ -9,28 +9,22 @@ from highdimgraph import create_uniform_graph, create_grid_graph, partition
 
 def plot(graph):
     assert graph.d == 2
-    # FIXME update this implementation to numpy graphs
     '''
     plots points as blue circles, lines as red ones and the edges from the
     spanning tree as green line segments
     '''
     points = graph.point_set.points
     (xs, ys) = partition(points)
-#    for (x,y) in points:
-#        xs.append(x)
-#        ys.append(y)
-#    x_frange = frange(max(xs))
 
     # first plot lines
     l = list(graph.lines)
-    #print l
     assert l
     for line in graph.lines:
         plt.plot(xs, line(xs), 'r', zorder=1)
     # then plot solution
     xlines = []
     ylines = []
-    
+
     for (i, j) in graph.solution:
         (x1, y1) = partition(points[i])
         (x2, y2) = partition(points[j])
@@ -56,7 +50,7 @@ def main():
     graph.preprocess_lines()
     assert graph.lines
     import mult_weights_solver as mws
-    
+
     mws.compute_spanning_tree(graph)
     plot(graph)
 
