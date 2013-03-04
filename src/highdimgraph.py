@@ -447,7 +447,6 @@ class HighDimGraph:
             point_range = sorted(subset)
         lines_dict = {}
         for line in self.lines:
-            # FIXME update this implementation
             partition_tuple = self.__partition_points_by_line(line, point_range)
             if not partition_tuple:
                 # skip this line, because one point is on this line
@@ -610,26 +609,11 @@ class HighDimLineSegment(HighDimLine):
 
     def is_between(self, x):
         # TODO update this implementation for higher d. Is this still correct?
-        # p = self.X[0, ..., :-1]
-        # q = self.X[1, ..., :-1]
         p = self.X[0, 0, ...]
         q = self.X[1, 0, ...]
         if p > q:
             (p, q) = (q, p)
-        # FIXME: why this is not working
-        # print p, q, x
-        # print (p <= x <= q).all()
-        # print q >= x
-        # print x >= p
         return (p <= x <= q).all()
-        # if True:   
-        #    print "in is_between: %s <= %s <= %s == %s" % (p, x, q, res) 
-        #    return res
-        # else:
-        #    return False
-        # res = np.abs(np.cross(p-x, q-x))/np.abs(p-x)
-        # print "in is_between: res=%s, allclose=%s" % (res, np_allclose(res, 0.0))
-        # return np_allclose(res, 0.0)
 
     def is_on(self, p):
         (x, y) = partition(p)

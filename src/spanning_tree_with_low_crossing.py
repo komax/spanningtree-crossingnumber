@@ -65,7 +65,6 @@ def generate_graph(d, n, distribution_type):
     generic sampling function for different point sets (dimensions,
     distributions)
     '''
-    # TODO currently omitting d parameter. update it
     assert distribution_type in DATA_DISTRIBUTION_OPTIONS
     if distribution_type == 'uniform':
         return highdimgraph.create_uniform_graph(n, d)
@@ -76,7 +75,6 @@ def get_solver(solver_type):
     '''
     select a solver by solver_type and use return solver function later
     '''
-    # TODO update if new solvers are supported
     assert solver_type in SOLVER_OPTIONS
     if solver_type == 'mult_weight':
         return mws.compute_spanning_tree

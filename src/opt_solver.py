@@ -55,8 +55,6 @@ def solve_ip(lambda_ip):
     '''
     computes solution in the IP
     '''
-    # TODO is this update call necessary
-    lambda_ip.update()
     lambda_ip.optimize()
 
     if lambda_ip.status == grb.GRB.status.OPTIMAL:
