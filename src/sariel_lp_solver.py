@@ -22,7 +22,6 @@ def solve_lp_and_round(graph, points):
     gamma_lp = set_up_model("sariels_lp_2d")
     n = len(points)
     edges = list(graph.edges.iter_subset(points))
-    #print "edges %s" % edges
     x = {}
     for (p,q) in edges:
         x[p,q] = gamma_lp.addVar(obj=graph.euclidean_distance(p,q), name='edge|%s - %s|' % (p,q))
@@ -57,7 +56,6 @@ def solve_lp_and_round(graph, points):
     if gamma_lp.status == grb.GRB.status.OPTIMAL:
         round_solution = []
         for (p,q) in edges:
-            #print "|%s|" % x[p,q]
             val = x[p,q].X
             sample = random.random()
             if sample <= val:
@@ -73,8 +71,6 @@ def has_proper_no_of_connected_components(connected_components, points):
     '''
     no_connected_components = len(connected_components)
     ratio_points = 19./20. * len(points)
-    #print "# connected components=%s <= %s, val=%s" % (no_connected_components,
-    #        ratio_points, no_connected_components <= ratio_points)
     if no_connected_components <= ratio_points:
         return True
     else:
@@ -96,24 +92,15 @@ def compute_spanning_tree(graph):
     lines = graph.lines
     iterations = 1
     while len(remaining_points) > 1:
-        #print "round %iterations" % iterations
         t = estimate_t(remaining_points)
-        #print "estimated t=%s" % t
-        #print "remaining points=%s" % remaining_points
         round_edges = solve_lp_and_round(graph, remaining_points)
-        #print "round edges %s" % round_edges
-        #print "solution edges = %s" % list(graph.solution)
         graph.compute_connected_components()
         connected_components = graph.connected_components
         if not has_proper_no_of_connected_components(connected_components, remaining_points):
             put_back_round_edges(graph, round_edges)
             continue
-        #print "solution edges = %s" % list(graph.solution)
-        #print "spanning solution edges = %s" % list(graph.solution)
         new_point_set = []
-        #print "# of connected components %iterations" % len(connected_components)
         for connected_component in connected_components:
-            #print "connected component |%s|" % connected_component
             p = random.sample(connected_component, 1)[0]
             new_point_set.append(p)
         remaining_points = new_point_set

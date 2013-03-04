@@ -119,7 +119,6 @@ class SpanningTreeExperiment:
         if verbose:
             print "Graph has been sampled."
         generate_lines(graph, lines_type, verbose)
-        #print list(graph.lines)
         assert list(graph.lines)
         self.graph = graph
         self.solver_type = solver_type

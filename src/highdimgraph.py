@@ -299,7 +299,6 @@ class HighDimGraph:
                 else:
                     spanning_tree_edges.add((p, prev))
             prev = p
-#        print "spanning tree_edges from root=%s: >%s<" % (root, spanning_tree_edges)
         return spanning_tree_edges
 
     def compute_spanning_tree_on_ccs(self):
@@ -353,7 +352,6 @@ class HighDimGraph:
             (p, q) = self.point_set[i], self.point_set[j]
             pq_lines = self.__create_lines(p, q)
             lines += pq_lines
-#        print lines
         self.lines = lines
         return
 
@@ -364,36 +362,20 @@ class HighDimGraph:
         # TODO update it for high dimensionsindices_subset
         (x1, y1) = partition(p)
         x1 = x1[0]
-#        print x1
-#        print y1
         (x2, y2) = partition(q)
         x2 = x2[0]
-#        print x2
-#        print y2
         y_delta = math.fabs(y1 - y2)
-#        print y_delta
         eps = 0.1
         delta = y_delta * eps
         pq_lines = []
-        if x1 == x2:
-            # special case if point are in a grid
-            x1l = x1 - delta
-            x1r = x1 + delta
-            x2l = x2 - delta
-            x2r = x2 + delta
-            pq_lines.append(HighDimLine(np.array([(x1l, y1), (x2l, y2)])))
-            pq_lines.append(HighDimLine(np.array([(x1r, y1), (x2r, y2)])))
-            pq_lines.append(HighDimLine(np.array([(x1l, y1), (x2r, y2)])))
-            pq_lines.append(HighDimLine(np.array([(x1r, y1), (x2l, y2)])))
-        else:
-            y1u = y1 + delta
-            y1b = y1 - delta
-            y2u = y2 + delta
-            y2b = y2 - delta
-            pq_lines.append(HighDimLine(np.array([(x1, y1u), (x2, y2u)])))
-            pq_lines.append(HighDimLine(np.array([(x1, y1b), (x2, y2b)])))
-            pq_lines.append(HighDimLine(np.array([(x1, y1u), (x2, y2b)])))
-            pq_lines.append(HighDimLine(np.array([(x1, y1b), (x2, y2u)])))
+        y1u = y1 + delta
+        y1b = y1 - delta
+        y2u = y2 + delta
+        y2b = y2 - delta
+        pq_lines.append(HighDimLine(np.array([(x1, y1u), (x2, y2u)])))
+        pq_lines.append(HighDimLine(np.array([(x1, y1b), (x2, y2b)])))
+        pq_lines.append(HighDimLine(np.array([(x1, y1u), (x2, y2b)])))
+        pq_lines.append(HighDimLine(np.array([(x1, y1b), (x2, y2u)])))
         return pq_lines
 
     def generate_lines(self, points):
@@ -421,7 +403,6 @@ class HighDimGraph:
         above_points = list()
         below_points = list()
         for i in point_range:
-            # print self.point_set[i]
             p = self.point_set[i]
             if line.is_on(p):
                 return ()
@@ -542,8 +523,6 @@ class HighDimLine:
         y = X[..., -1:]
         A = np.hstack([X[..., :-1], np.ones((X.shape[0], 1), dtype=X.dtype)])
         self.theta = (np.linalg.lstsq(A, y)[0]).flatten()
-        # self.theta = self.theta.flatten()
-        # print "theta=%s, shape of it %s" %(self.theta, self.theta.shape)
 
     def __key(self):
         return tuple(self.theta)
@@ -553,15 +532,13 @@ class HighDimLine:
 
     def __hash__(self):
         return hash(self.__key())
-    
+
     def call(self, p):
-        # print p
-        # print p.shape, len(p.shape)
         assert len(p.shape) == 1
         X = np.array([p])
         y = self(X)
         return y[0]
-        
+
     def __call__(self, X):
         paddedX = np.hstack([X, np.ones((X.shape[0], 1), dtype=X.dtype)])
         y = np.dot(paddedX, self.theta)
@@ -593,12 +570,6 @@ def partition(p):
     x = p[..., :-1]
     y = p[..., -1:]
     return (x, y)
-
-#def create_linesegment(p, q):
-#    assert len(p.shape) == 1
-#    assert len(q.shape) == 1
-#    X = np.array([p, q])
-#    return HighDimLineSegment(X)        
 
 class HighDimLineSegment(HighDimLine):
     def __init__(self, X):
@@ -670,17 +641,12 @@ def calc_has_crossing(line, line_seg):
     Has line a crossing with the line segment
     '''
 
-    # print line.theta, line_seg.theta
-    # print line.theta[..., :-1], line_seg.theta[..., :]
     if np_allclose(line.theta[..., :-1], line_seg.theta[..., :-1]):
-        # print "no crossing found"
         return False
     else:
         A = np.vstack([line.theta, line_seg.theta])
         b = -A[..., -1:]
         A[..., -1] = -np.ones(len(A))
         intersection_point = (np.linalg.solve(A, b)).flatten()
-        # print "intersection point= %s" % intersection_point
         x = intersection_point[..., :-1]
-        # print x
         return line_seg.is_between(x)

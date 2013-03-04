@@ -139,13 +139,11 @@ def round_and_update_lp(graph, alpha):
 def compute_spanning_tree(graph, alpha=2.0):
     solution = graph.solution
     n = graph.n
-    #edges = grb.tuplelist(get_edges(points))
 
     iterations = 1
     lp_model = create_lp(graph)
 
     while len(solution) < n-1:
-        #print "round i=%s" % i
         solve_lp(lp_model)
         # printing all variables of LP
         #for var in lp_model.getVars():

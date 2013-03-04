@@ -281,24 +281,23 @@ class FeketeLPSolvingTestCase(unittest.TestCase):
         self.assertTrue((2, 4) in solution or\
                 (3, 4) in solution)
         self.assertTrue((1, 4) in solution)
-        
+
     def test_subsets(self):
         points_size = 3
         subsets_gen = flpsolv.nonempty_subsets(points_size)
         subsets = list(subsets_gen)
-        # print subsets
         self.assertEqual(len(subsets), 2 ** (points_size) - 1 - 1)
 
 class OptSolverTestCase(unittest.TestCase):
     def setUp(self):
         points = np.array([(2., 2.), (6., 4.), (3., 6.), (5., 7.), (4.25, 5.)])
         self.graph = create_graph(points, 5, 2)
-        
+
         l1 = HighDimLine(np.array([(2., 6.), (3., 2.)]))  # y = -4x + 14
         l2 = HighDimLine(np.array([(2., 3.), (6., 5.)]))  # y = 0.5x + 2
         l3 = HighDimLine(np.array([(3., 5.5), (5., 6.5)]))  # y = 0.5x + 4
         self.graph.lines = [l1, l2, l3]
-                
+
     def test_solution(self):
         opt_solver.compute_spanning_tree(self.graph)
         solution = list(self.graph.solution)
