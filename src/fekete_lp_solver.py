@@ -110,7 +110,6 @@ def round_and_update_lp(graph, alpha):
     '''
     edges = graph.edges
     solution = graph.solution
-    # TODO or find only the heaviest edge and bound it to 1
     (max_i, max_j) = (None, None)
     max_val = None
     for (i,j) in edges:
@@ -151,17 +150,6 @@ def compute_spanning_tree(graph, alpha=2.0):
         for var in lp_model.getVars():
             print var
         round_and_update_lp(graph, alpha)
-#        number_of_round_edges = len(round_edges)
-#        if  number_of_edges + number_of_round_edges <= n-1:
-#            # TODO check if resulting support graph is planar or has crossings
-#            solution += round_edges
-#            number_of_edges += number_of_round_edges
-#        else:
-#            # TODO check if resulting support graph is planar or has crossings
-#            l = (n-1) - number_of_edges
-#            solution += round_edges[:l]
-#            number_of_edges = n-1
-#            break
         iterations += 1
     return iterations
 
