@@ -115,51 +115,51 @@ class GraphTestCase(unittest.TestCase):
         self.assertTrue(cc1 == cc3)
 
     def test_adjacent(self):
-        self.assertTrue(self.graph.edges.has_edge(1,2))
-        self.assertFalse(self.graph.edges.has_edge(1,1))
+        self.assertTrue(self.graph.edges.has_edge(1, 2))
+        self.assertFalse(self.graph.edges.has_edge(1, 1))
         adjacent_vertices = list(self.graph.edges.adj_nodes(1))
         adjacent_vertices.sort()
-        self.assertEqual(adjacent_vertices, [0,2,3])
+        self.assertEqual(adjacent_vertices, [0, 2, 3])
 
     def test_get_edges(self):
         edges = list(self.graph.edges)
-        expected_edges = [(0,1),(0,2),(0,3), (1,2), (1,3), (2,3)]
+        expected_edges = [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)]
         self.assertEqual(edges, expected_edges)
 
     def test_merge_connected_components(self):
         self.graph.compute_connected_components()
-        self.graph.merge_cc(0,1)
+        self.graph.merge_cc(0, 1)
         self.graph.compute_spanning_tree_on_ccs()
         edges = list(self.graph.edges)
-        expected_edges = [(0,2),(0,3), (1,2), (1,3), (2,3)]
+        expected_edges = [(0, 2), (0, 3), (1, 2), (1, 3), (2, 3)]
         self.assertEqual(edges, expected_edges)
 
     def test_merge_cc_with_vertices(self):
-        self.graph.connected_components.merge_by_vertices(0,1)
-        self.graph.connected_components.merge_by_vertices(0,2)
-        self.graph.connected_components.merge_by_vertices(3,1)
+        self.graph.connected_components.merge_by_vertices(0, 1)
+        self.graph.connected_components.merge_by_vertices(0, 2)
+        self.graph.connected_components.merge_by_vertices(3, 1)
         self.graph.compute_spanning_tree_on_ccs()
         edges = list(self.graph.solution)
         self.assertEqual(edges, [])
 
     def test_get_connected_component(self):
-        self.graph.connected_components.merge_by_vertices(0,1)
+        self.graph.connected_components.merge_by_vertices(0, 1)
         connected_component = list(self.graph.connected_components.get_connected_component(1))
         connected_component.sort()
-        self.assertEqual(connected_component, [0,1])
+        self.assertEqual(connected_component, [0, 1])
 
     def test_cannot_find_connected_component(self):
         self.assertRaises(StandardError, self.graph.connected_components.get_connected_component, 5)    
 
 class MultWeightsSolvingTestCase(unittest.TestCase):
     def setUp(self):
-        points = np.array([(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)])
+        points = np.array([(2., 2.), (6., 4.), (3., 6.), (5., 7.), (4.25, 5.)])
         self.graph = create_graph(points, 5, 2)
         
-        l1 = HighDimLine(np.array([(2., 6.), (3., 2.)])) # y = -4x + 14
-        l2 = HighDimLine(np.array([(2., 3.), (6., 5.)])) # y = 0.5x + 2
-        l3 = HighDimLine(np.array([(3., 5.5), (5., 6.5)])) # y = 0.5x + 4
-        self.graph.lines = set([l1, l2, l3])
+        l1 = HighDimLine(np.array([(2., 6.), (3., 2.)]))  # y = -4x + 14
+        l2 = HighDimLine(np.array([(2., 3.), (6., 5.)]))  # y = 0.5x + 2
+        l3 = HighDimLine(np.array([(3., 5.5), (5., 6.5)]))  # y = 0.5x + 4
+        self.graph.lines = [l1, l2, l3]
 
     def test_solution(self):
         mwsolv.compute_spanning_tree(self.graph)
@@ -174,61 +174,61 @@ class MultWeightsSolvingTestCase(unittest.TestCase):
 
 class ConnectedComponentsTestCase(unittest.TestCase):
     def test_compute_spanning_tree_on_ccs(self):
-        points = np.array([ (0.,3.), (3.,4.), (9., 10.), (7.,8.)])
+        points = np.array([ (0., 3.), (3., 4.), (9., 10.), (7., 8.)])
         graph = create_graph(points, 4, 2)
         edges = [ (1, 0),
                   (0, 2),
                   (2, 3),
                   (1, 2) ]
-        for (i,j) in edges:
-            graph.solution.update(i,j, True)
+        for (i, j) in edges:
+            graph.solution.update(i, j, True)
         graph.compute_connected_components()
         ccs = graph.connected_components
         self.assertEqual(len(ccs), 1)
         cc = ccs.get_connected_component(2)
-        points_indices = range(0,4)
+        points_indices = range(0, 4)
         self.assertItemsEqual(cc, points_indices)
                 
         graph.compute_spanning_tree_on_ccs()
-        sol_edges = [(0,2), (0,1), (2,3)]
+        sol_edges = [(0, 2), (0, 1), (2, 3)]
         self.assertItemsEqual(sol_edges, graph.solution)    
     
     def test_results_one_connected_component(self):
-        points = np.array([ (0.,3.), (3.,4.), (9., 10.), (7.,8.), (5., 6.), (2., 1.)])
+        points = np.array([ (0., 3.), (3., 4.), (9., 10.), (7., 8.), (5., 6.), (2., 1.)])
         graph = create_graph(points, 6, 2)
         edges = [ (1, 0),
                   (5, 1),
                   (1, 4),
                   (3, 4),
                   (2, 3)]
-        for (i,j) in edges:
-            graph.solution.update(i,j, True)
+        for (i, j) in edges:
+            graph.solution.update(i, j, True)
         graph.compute_connected_components()
         ccs = graph.connected_components
         self.assertEqual(len(ccs), 1)
         cc = ccs.get_connected_component(3)
-        points_indices = range(0,6)
+        points_indices = range(0, 6)
         self.assertItemsEqual(cc, points_indices)
         
         graph.compute_spanning_tree_on_ccs()
         cc_edges = graph.solution
-        for (i,j) in edges:
+        for (i, j) in edges:
             if i < j:
-                edge = (i,j)
+                edge = (i, j)
             else:
-                edge = (j,i)
+                edge = (j, i)
             self.assertTrue(edge in cc_edges, "%s not in %s" % (edge, cc_edges))
 
     def test_results_two_connected_components(self):
-        points = np.array([ (0.,3.), (3.,4.), (9., 10.), (7.,8.), (5., 6.), (2., 1.)])
+        points = np.array([ (0., 3.), (3., 4.), (9., 10.), (7., 8.), (5., 6.), (2., 1.)])
         graph = create_graph(points, 6, 2)
         edges = [ (1, 0),
                   (5, 1),
-                  #(1, 4), now two connected components
+                  # (1, 4), now two connected components
                   (3, 4),
                   (2, 3)]
-        for (i,j) in edges:
-            graph.solution.update(i,j, True)
+        for (i, j) in edges:
+            graph.solution.update(i, j, True)
         graph.compute_connected_components()
         ccs = graph.connected_components
         self.assertEqual(len(ccs), 2)
@@ -242,67 +242,72 @@ class ConnectedComponentsTestCase(unittest.TestCase):
         expected_sol = c1_edges + c2_edges
         self.assertItemsEqual(expected_sol, graph.solution)
 
-# class SarielsLPSolvingTestCase(unittest.TestCase):
-#    def setUp(self):
-#        self.points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
-#        l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
-#        l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
-#        l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
-#        self.lines = [l1, l2, l3]
-#
-#    def test_solution(self):
-#        solution = slpsolv.compute_spanning_tree(self.points, self.lines)
-#        print solution
-#        self.assertEqual(len(solution), 4)
-#        self.assertTrue(((3., 6.), (5.,7.)) in solution)
-#        self.assertTrue(((2., 2.), (6.,4.)) in solution)
-#        self.assertTrue(((3., 6.), (4.25,5.)) in solution or\
-#                ((4.25,5.), (5., 7.)) in solution)
-#        self.assertTrue(((4.25, 5.), (6.,4.)) in solution)
-#
-# class FeketeLPSolvingTestCase(unittest.TestCase):
-#    def setUp(self):
-#        self.points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
-#        l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
-#        l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
-#        l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
-#        self.lines = [l1, l2, l3]
-#
-#    def test_solution(self):
-#        solution = flpsolv.compute_spanning_tree(self.points, self.lines)
-#        print solution
-#        self.assertEqual(len(solution), 4)
-#        self.assertTrue(((3., 6.), (5.,7.)) in solution)
-#        self.assertTrue(((2., 2.), (6.,4.)) in solution)
-#        self.assertTrue(((3., 6.), (4.25,5.)) in solution or\
-#                ((4.25,5.), (5., 7.)) in solution)
-#        self.assertTrue(((4.25, 5.), (6.,4.)) in solution)
-#
-#    def test_subsets(self):
-#        self.points = range(1,4)
-#        subsets_gen = flpsolv.nonempty_subsets(self.points)
-#        subsets = [s for s in subsets_gen]
-#        print subsets
-#        self.assertEqual(len(subsets), 2**(len(self.points)) - 1 -1)
-#
-# class OptSolverTestCase(unittest.TestCase):
-#    def setUp(self):
-#        self.points = [(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)]
-#        l1 = Line2D((2., 6.), (3., 2.)) # y = -4x + 14
-#        l2 = Line2D((2., 3.), (6., 5.)) # y = 0.5x + 2
-#        l3 = Line2D((3., 5.5), (5., 6.5)) # y = 0.5x + 4
-#        self.lines = [l1, l2, l3]
-#
-#    def test_solution(self):
-#        solution = opt_solver.compute_spanning_tree(self.points, self.lines)
-#        print solution
-#        self.assertEqual(len(solution), 4)
-#        self.assertTrue(((3., 6.), (5.,7.)) in solution)
-#        self.assertTrue(((2., 2.), (6.,4.)) in solution)
-#        self.assertTrue(((3., 6.), (4.25,5.)) in solution or\
-#                ((4.25,5.), (5., 7.)) in solution)
-#        self.assertTrue(((4.25, 5.), (6.,4.)) in solution)
+class SarielsLPSolvingTestCase(unittest.TestCase):
+    def setUp(self):
+        points = np.array([(2., 2.), (6., 4.), (3., 6.), (5., 7.), (4.25, 5.)])
+        self.graph = create_graph(points, 5, 2)
+        
+        l1 = HighDimLine(np.array([(2., 6.), (3., 2.)]))  # y = -4x + 14
+        l2 = HighDimLine(np.array([(2., 3.), (6., 5.)]))  # y = 0.5x + 2
+        l3 = HighDimLine(np.array([(3., 5.5), (5., 6.5)]))  # y = 0.5x + 4
+        self.graph.lines = [l1, l2, l3]
+        
+    def test_solution(self):
+        slpsolv.compute_spanning_tree(self.graph)
+        solution = list(self.graph.solution)
+        self.assertEqual(len(solution), 4)
+        self.assertTrue((2, 3) in solution)
+        self.assertTrue((0, 1) in solution)
+        self.assertTrue((2, 4) in solution or\
+                (3, 4) in solution)
+        self.assertTrue((1, 4) in solution)
+        
+class FeketeLPSolvingTestCase(unittest.TestCase):
+    def setUp(self):
+        points = np.array([(2., 2.), (6., 4.), (3., 6.), (5., 7.), (4.25, 5.)])
+        self.graph = create_graph(points, 5, 2)
+        
+        l1 = HighDimLine(np.array([(2., 6.), (3., 2.)]))  # y = -4x + 14
+        l2 = HighDimLine(np.array([(2., 3.), (6., 5.)]))  # y = 0.5x + 2
+        l3 = HighDimLine(np.array([(3., 5.5), (5., 6.5)]))  # y = 0.5x + 4
+        self.graph.lines = [l1, l2, l3]
+        
+    def test_solution(self):
+        flpsolv.compute_spanning_tree(self.graph)
+        solution = list(self.graph.solution)
+        self.assertEqual(len(solution), 4)
+        self.assertTrue((2, 3) in solution)
+        self.assertTrue((0, 1) in solution)
+        self.assertTrue((2, 4) in solution or\
+                (3, 4) in solution)
+        self.assertTrue((1, 4) in solution)
+        
+    def test_subsets(self):
+        points_size = 3
+        subsets_gen = flpsolv.nonempty_subsets(points_size)
+        subsets = list(subsets_gen)
+        # print subsets
+        self.assertEqual(len(subsets), 2 ** (points_size) - 1 - 1)
 
+class OptSolverTestCase(unittest.TestCase):
+    def setUp(self):
+        points = np.array([(2., 2.), (6., 4.), (3., 6.), (5., 7.), (4.25, 5.)])
+        self.graph = create_graph(points, 5, 2)
+        
+        l1 = HighDimLine(np.array([(2., 6.), (3., 2.)]))  # y = -4x + 14
+        l2 = HighDimLine(np.array([(2., 3.), (6., 5.)]))  # y = 0.5x + 2
+        l3 = HighDimLine(np.array([(3., 5.5), (5., 6.5)]))  # y = 0.5x + 4
+        self.graph.lines = [l1, l2, l3]
+                
+    def test_solution(self):
+        opt_solver.compute_spanning_tree(self.graph)
+        solution = list(self.graph.solution)
+        self.assertEqual(len(solution), 4)
+        self.assertTrue((2, 3) in solution)
+        self.assertTrue((0, 1) in solution)
+        self.assertTrue((2, 4) in solution or\
+                (3, 4) in solution)
+        self.assertTrue((1, 4) in solution)
 
 if __name__ == '__main__':
     unittest.main()
