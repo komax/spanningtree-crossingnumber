@@ -9,10 +9,10 @@ See -h for further information
 import argparse
 import csv
 import math
-from spanning_tree_with_low_crossing import SpanningTreeExperiment
 from spanning_tree_with_low_crossing import SOLVER_OPTIONS
 from spanning_tree_with_low_crossing import DATA_DISTRIBUTION_OPTIONS
 from spanning_tree_with_low_crossing import LINE_OPTIONS
+from spanning_tree_with_low_crossing import create_experiment
 
 def main():
     args = parse_args()
@@ -33,6 +33,8 @@ def parse_args():
             default='experiments.csv', type=str)
     parser.add_argument("-c", "--csvheader", action='store_true', default=False,
         help="prepends a human readable header to csv file")
+    parser.add_argument("-d", "--dimensions", type=int, default=2,
+        help="number of dimensions of point set")
     parser.add_argument("-s", "--solver", default='mult_weight',
             choices=SOLVER_OPTIONS,
             help="choose an algorithm computing a feasible solution")
@@ -48,6 +50,8 @@ def parse_args():
         help="ending up with how many points")
     parser.add_argument("-i", "--increment", type=int, default=1,
         help="number of steps in the size of point set for next experiment")
+    parser.add_argument("-m", "--mean", type=int, default=1,
+        help="run experiment m times and return an averaged result")
     parser.add_argument("-v", "--verbose", action='store_true',
         help="adds verbose outputs to STDOUT")
     args = parser.parse_args()
@@ -58,10 +62,11 @@ def prepare_experiment(args):
     factory method creating a CompoundExperiment object out of argparse
     arguments
     '''
-    return CompoundExperiment(args.out, args.solver, args.generate,
+    return CompoundExperiment(args.out, args.solver, args.dimensions,
+                              args.generate,
                               args.linesampling, args.begin,
                               args.to, args.increment, args.csvheader,
-                              args.verbose)
+                              args.mean, args.verbose)
 
 csv_header = [
         'size of point set',
@@ -75,20 +80,20 @@ csv_header = [
 
 
 class CompoundExperiment:
-    def __init__(self, file_name, solver_type, distribution_type, line_option, lb, ub,
-            step, has_header, verbose):
+    def __init__(self, file_name, solver_type, dimensions, distribution_type, line_option, lb, ub,
+            step, has_header, mean, verbose):
         self.file_name = file_name
-        dimension = 2
         has_plot = False
         self.verbose = verbose
         self.distribution_type = distribution_type
+        self.line_option = line_option
         self.lb = lb
         self.ub = ub
         self.step = step
         self.has_header = has_header
-        self.line_option = line_option
-        self.experiment = SpanningTreeExperiment(solver_type, dimension, lb,
-                distribution_type, line_option, has_plot, verbose)
+        self.experiment = create_experiment(solver_type, dimensions, lb,
+                                            distribution_type,
+                                            line_option, mean, has_plot, verbose)
 
     def write_csv(self):
         with open(self.file_name, 'wb') as csvfile:
@@ -104,7 +109,6 @@ class CompoundExperiment:
                 ub = self.ub
             dimension = 2
             for i in range(lb, ub+1, self.step):
-                self.experiment.clean_up()
                 if self.distribution_type == 'grid':
                     i = i**2
 
@@ -112,7 +116,7 @@ class CompoundExperiment:
                     print "Starting now a new experiment for n=%s..." % i
 
                 self.experiment.update_point_set(dimension, i,
-                       self.distribution_type, self.line_opton)
+                       self.distribution_type, self.line_option)
                 self.experiment.run()
                 results = self.experiment.results()
                 if self.verbose:

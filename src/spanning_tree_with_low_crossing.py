@@ -58,17 +58,24 @@ def prepare_experiment(args):
     '''
     factory for creation of experiments from arguments
     '''
-    if args.solver != 'all':
-        experiment = SpanningTreeExperiment(args.solver, args.dimensions, args.number,
-                args.generate, args.linesampling, args.plot, args.verbose)
-        if args.mean > 1:
-            return AveragedExperiment(args.mean, experiment)
+    return create_experiment(args.solver, args.dimensions, args.number,
+                             args.generate, args.linesampling, args.mean,
+                             args.plot, args.verbose)
+    
+def create_experiment(solver_type, d, n, distribution_type, lines_type, mean,
+                      has_plot, verbose):
+    if solver_type != 'all':
+        experiment = SpanningTreeExperiment(solver_type, d, n,
+                distribution_type, lines_type, has_plot, verbose)
+        if mean > 1:
+            return AveragedExperiment(mean, experiment)
         else:
             return experiment
     else:
-        return AllSolversExperiment(args.solver, args.dimensions, args.number,
-                args.generate, args.linesampling, args.plot, args.verbose)
-
+        experiment = SpanningTreeExperiment(SOLVER_OPTIONS[0], d, n,
+                distribution_type, lines_type, has_plot, verbose)
+        return AllSolversExperiment(experiment)
+    
 def generate_graph(d, n, distribution_type):
     '''
     generic sampling function for different point sets (dimensions,
@@ -141,14 +148,6 @@ class SpanningTreeExperiment:
         self.crossings = None
         self.iterations = None
 
-    def clean_up(self):
-        '''
-        cleaning up old results
-        '''
-        self.elapsed_time = self.iterations = None
-        self.crossing_number = self.crossings = None
-
-
     def update_point_set(self, d, n, distribution_type, lines_type):
         '''
         set a new point set to distribution_type and updates also the line set
@@ -157,7 +156,7 @@ class SpanningTreeExperiment:
         generate_lines(graph, lines_type, self.verbose)
         self.graph = graph
 
-    def update_line_set(self, d, n, lines_type):
+    def update_line_set(self, lines_type):
         '''
         set a line set to new lines_type
         '''
@@ -258,15 +257,13 @@ class SpanningTreeExperiment:
         return ";".join(res)
 
 class AllSolversExperiment:
-    def __init__(self, solver_type, d, n, distribution_type, lines_type, has_plot, verbose):
-        assert solver_type == 'all'
-        self.experiment = SpanningTreeExperiment(SOLVER_OPTIONS[0], d, n, distribution_type, lines_type, has_plot, verbose)
+    def __init__(self, experiment):
+        self.experiment = experiment
 
     def __iter__(self):
         solvers = SOLVER_OPTIONS[:-1]
         for current_solver in solvers:
             self.experiment.update_solver(current_solver)
-            self.experiment.clean_up()
             yield self.experiment
 
     def process(self):
@@ -278,6 +275,18 @@ class AveragedExperiment:
         self.experiment = experiment
         self.rounds = rounds
         self.computed_results = []
+        
+    def update_point_set(self, d, n, distribution_type, lines_type):
+        self.computed_results = []
+        self.experiment.update_point_set(d, n, distribution_type, lines_type)
+        
+    def update_line_set(self, lines_type):
+        self.computed_results = []
+        self.experiment.update_line_set(lines_type)
+        
+    def update_solver(self, solver_type):
+        self.computed_results = []
+        self.experiment.update_solver(solver_type)
 
     def run(self):
         for i in range(self.rounds):
