@@ -84,6 +84,7 @@ class CompoundExperiment:
             step, has_header, mean, verbose):
         self.file_name = file_name
         has_plot = False
+        self.solver_type = solver_type
         self.verbose = verbose
         self.distribution_type = distribution_type
         self.line_option = line_option
@@ -94,34 +95,56 @@ class CompoundExperiment:
         self.experiment = create_experiment(solver_type, dimensions, lb,
                                             distribution_type,
                                             line_option, mean, has_plot, verbose)
-
+        
     def write_csv(self):
-        with open(self.file_name, 'wb') as csvfile:
-            csv_writer = csv.writer(csvfile)
-            if self.has_header:
-                csv_writer.writerow(csv_header)
+        self.write_header()
+        self.write_data()
+    
+    def write_header(self):
+        if self.has_header:
+            for file_name in self.get_files():
+                with open(file_name, 'wb') as csvfile:
+                    csv_writer = csv.writer(csvfile)
+                    csv_writer.writerow(csv_header)
+                    
+    
+    def get_files(self):
+        if self.solver_type == 'all':
+            return [self.file_name+'.'+solv_ext for solv_ext in SOLVER_OPTIONS[:-1]]
+        else:
+            return [self.file_name] 
 
+    def write_data(self):
+        if self.distribution_type == 'grid':
+            lb = int(math.sqrt(self.lb))
+            ub = int(math.sqrt(self.ub))
+        else:
+            lb = self.lb
+            ub = self.ub
+        dimension = 2
+        for i in range(lb, ub+1, self.step):
             if self.distribution_type == 'grid':
-                lb = int(math.sqrt(self.lb))
-                ub = int(math.sqrt(self.ub))
+                i = i**2
+            if self.verbose:
+                print "Starting now a new experiment for n=%s..." % i
+            if self.solver_type == 'all':
+                for experiment in self.experiment:
+                    experiment.update_point_set(dimension, i,
+                                                self.distribution_type,
+                                                self.line_option)
+                    experiment.run()
+                    results = experiment.results()
+                    if self.verbose:
+                        print "Computation finished. Writing results to csv..."
+                    with open(self.file_name+'.'+experiment.solver_type, 'ab') as csvfile:
+                        csv_writer = csv.writer(csvfile)
+                        csv_writer.writerow(results)
             else:
-                lb = self.lb
-                ub = self.ub
-            dimension = 2
-            for i in range(lb, ub+1, self.step):
-                if self.distribution_type == 'grid':
-                    i = i**2
-
-                if self.verbose:
-                    print "Starting now a new experiment for n=%s..." % i
-
-                self.experiment.update_point_set(dimension, i,
-                       self.distribution_type, self.line_option)
                 self.experiment.run()
                 results = self.experiment.results()
-                if self.verbose:
-                    print "Computation finished. Writing results to csv..."
-                csv_writer.writerow(results)
+                with open(self.file_name, 'ab') as csvfile:
+                        csv_writer = csv.writer(csvfile)
+                        csv_writer.writerow(results)
         return
 
 if __name__ == '__main__':
