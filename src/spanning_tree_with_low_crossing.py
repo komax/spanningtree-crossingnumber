@@ -16,9 +16,7 @@ import numpy as np
 def main():
     args = parse_args()
     experiment = prepare_experiment(args)
-    experiment.run()
-    experiment.print_results()
-    experiment.plot()
+    experiment.process()
 
 # constants for options
 SOLVER_OPTIONS = [ 'mult_weight', 'sariel_lp', 'fekete_lp', 'opt', 'all']
@@ -56,10 +54,14 @@ def parse_args():
 
 def prepare_experiment(args):
     '''
-    factory for creating a SpanningTreeExperiment from arguments
+    factory for creation of experiments from arguments
     '''
-    return SpanningTreeExperiment(args.solver, args.dimensions, args.number,
-            args.generate, args.linesampling, args.plot, args.verbose)
+    if args.solver != 'all':
+        return SpanningTreeExperiment(args.solver, args.dimensions, args.number,
+                args.generate, args.linesampling, args.plot, args.verbose)
+    else:
+        return AllSolversExperiment(args.solver, args.dimensions, args.number,
+                args.generate, args.linesampling, args.plot, args.verbose)
 
 def generate_graph(d, n, distribution_type):
     '''
@@ -102,7 +104,7 @@ def generate_lines(graph, line_type, verbose):
         graph.create_random_lines()
         graph.preprocess_lines()
     else:
-        raise StandardError('Not yet supported this |%s| line-sampling type' % 
+        raise StandardError('Not yet supported this |%s| line-sampling type' %
                             line_type)
     if verbose:
             print "Sampling of lines finished."
@@ -114,6 +116,7 @@ class SpanningTreeExperiment:
     line set before running a solver and takes care of time measuring
     '''
     def __init__(self, solver_type, d, n, distribution_type, lines_type, has_plot, verbose):
+        assert solver_type != 'all'
         if verbose:
             print "Start generating graph..."
         graph = generate_graph(d, n, distribution_type)
@@ -147,10 +150,10 @@ class SpanningTreeExperiment:
         graph = generate_graph(d, n, distribution_type)
         generate_lines(graph, lines_type, self.verbose)
         self.graph = graph
-        
+
     def update_line_set(self, d, n, lines_type):
         '''
-        set a line set to new lines_type 
+        set a line set to new lines_type
         '''
         generate_lines(graph, lines_type, self.verbose)
         return
@@ -159,10 +162,16 @@ class SpanningTreeExperiment:
         '''
         exchange a solver in the experiment with a new one
         '''
+        assert solver_type != 'all'
         self.solver_type = solver_type
         self.solver = get_solver(solver_type)
         if self.verbose:
             print "Changed solver to %s..." % solver_type
+
+    def process(self):
+        self.run()
+        self.print_results()
+        self.plot()
 
     def run(self):
         '''
@@ -193,16 +202,16 @@ class SpanningTreeExperiment:
          - sum of all crossings and
          - average crossing number
         '''
-        (no_points, no_lines, cpu_time, iterations, crossing_no,
-         avg_crossing_no, crossings) = self.results()
-        print "CPU time (in sec) %s" % cpu_time
-        print "crossing number=%s" % crossing_no
-        print "iterations=%s" % iterations
+        print "CPU time (in sec) %s" % self.elapsed_time
+        print "crossing number=%s" % self.crossing_number
+        print "iterations=%s" % self.iterations
         if self.verbose:
-            print "number of points=%s" % no_points
+            print "number of points=%s" % self.graph.n
+            no_lines = len(self.graph.lines)
             print "number of lines=%s" % no_lines
-            print "all crossings=%s" % crossings
-            print "average crossing number=%s" % avg_crossing_no
+            print "all crossings=%s" % self.crossings
+            avg_crossing_number = float(self.crossings) / no_lines
+            print "average crossing number=%s" % avg_crossing_number
 
     def plot(self):
         '''
@@ -243,36 +252,34 @@ class SpanningTreeExperiment:
         '''
         res = self.results()
         return ";".join(res)
-    
-    
-class AllSolversExperiment(SpanningTreeExperiment):
+
+class AllSolversExperiment:
     def __init__(self, solver_type, d, n, distribution_type, lines_type, has_plot, verbose):
         assert solver_type == 'all'
-        SpanningTreeExperiment.__init__(self, solver_type, d, n, distribution_type, lines_type, has_plot, verbose)
-        
-        
+        self.experiment = SpanningTreeExperiment(SOLVER_OPTIONS[0], d, n, distribution_type, lines_type, has_plot, verbose)
+
     def __iter__(self):
         solvers = SOLVER_OPTIONS[:-1]
         for current_solver in solvers:
-            self.update_solver(current_solver) 
-            self.clean_up()
-            yield self
-            
-    def run(self):
+            self.experiment.update_solver(current_solver)
+            self.experiment.clean_up()
+            yield self.experiment
+
+    def process(self):
         for experiment in self:
-            SpanningTreeExperiment.run(experiment)
-            
-class AveragedExperiment(SpanningTreeExperiment):
+            experiment.process()
+
+class AveragedExperiment:
     def __init__(self, rounds, experiment):
-        self = experiment
+        self.experiment = experiment
         self.rounds = rounds
         self.computed_results = []
-        
+
     def run(self):
         for i in range(rounds):
             SpanningTreeExperiment.run(self)
             self.computed_results.append(SpanningTreeExperiment.results(self))
-        
+
     def results(self):
         A = np.array(self.computed_results)
         res = np.mean(A, axis=0)
