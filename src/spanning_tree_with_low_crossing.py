@@ -45,6 +45,8 @@ def parse_args():
     parser.add_argument("-l", "--linesampling", default='all',
             choices=LINE_OPTIONS,
         help="structure of the line set")
+    parser.add_argument("-m", "--mean", type=int, default=1,
+        help="run experiment m times and returns averaged results")
     parser.add_argument("-p", "--plot", action='store_true', default=False,
         help="plots the computed solution into a widget")
     parser.add_argument("-v", "--verbose", action='store_true',
@@ -57,8 +59,12 @@ def prepare_experiment(args):
     factory for creation of experiments from arguments
     '''
     if args.solver != 'all':
-        return SpanningTreeExperiment(args.solver, args.dimensions, args.number,
+        experiment = SpanningTreeExperiment(args.solver, args.dimensions, args.number,
                 args.generate, args.linesampling, args.plot, args.verbose)
+        if args.mean > 1:
+            return AveragedExperiment(args.mean, experiment)
+        else:
+            return experiment
     else:
         return AllSolversExperiment(args.solver, args.dimensions, args.number,
                 args.generate, args.linesampling, args.plot, args.verbose)
@@ -227,8 +233,8 @@ class SpanningTreeExperiment:
 
     def results(self):
         '''
-        returns all statistics about the experiment and its results as list:
-        [
+        returns all statistics about the experiment and its results as a tuple:
+        (
         # of points,
         # of lines,
         CPU time in seconds,
@@ -236,14 +242,12 @@ class SpanningTreeExperiment:
         crossing number,
         average crossing number,
         crossings (overall)
-        ]
+        )
         '''
         no_lines = len(self.graph.lines)
-        results = [ str(self.graph.n), str(no_lines),
-                str(self.elapsed_time), str(self.iterations), str(self.crossing_number)]
-        average_crossing_number = float(self.crossings) / no_lines
-        results.append(str(average_crossing_number))
-        results.append(str(self.crossings))
+        results = (self.graph.n, no_lines,
+                self.elapsed_time, self.iterations, self.crossing_number,
+                (float(self.crossings) / no_lines), self.crossings)
         return results
 
     def results_csv(self):
@@ -276,15 +280,38 @@ class AveragedExperiment:
         self.computed_results = []
 
     def run(self):
-        for i in range(rounds):
-            SpanningTreeExperiment.run(self)
-            self.computed_results.append(SpanningTreeExperiment.results(self))
+        for i in range(self.rounds):
+            self.experiment.run()
+            self.computed_results.append(self.experiment.results())
 
     def results(self):
         A = np.array(self.computed_results)
         res = np.mean(A, axis=0)
         return res.tolist()
+    
+    def str_results(self):
+        (no_points, no_lines, cpu_time, 
+         iterations, crossing_no, avg_crossing_no, crossings) = self.results()
+        return (str(int(no_points)), str(int(no_lines)), str(cpu_time),
+                str(iterations), str(crossing_no), 
+                str(avg_crossing_no), str(crossings))
 
+    def print_results(self):
+        (no_points, no_lines, cpu_time, 
+         iterations, crossing_no, avg_crossing_no, crossings) = self.str_results()
+        print "CPU time (in sec) %s" % cpu_time
+        print "crossing number=%s" % crossing_no
+        print "iterations=%s" % iterations
+        if self.experiment.verbose:
+            print "number of points=%s" % no_points
+            print "number of lines=%s" % no_lines
+            print "all crossings=%s" % crossings
+            print "average crossing number=%s" % avg_crossing_no
+            
+    def process(self):
+        self.run()
+        self.print_results()
+        self.experiment.plot()
 
 if __name__ == '__main__':
     main()
