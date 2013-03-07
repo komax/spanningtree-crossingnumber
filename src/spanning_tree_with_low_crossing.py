@@ -42,6 +42,8 @@ def parse_args():
     parser.add_argument("-g", "--generate", default='uniform',
             choices=DATA_DISTRIBUTION_OPTIONS,
         help="how should the point set be sampled")
+    parser.add_argument("-i", "--input", type=str, default=None,
+        help="specify a input file")
     parser.add_argument("-l", "--linesampling", default='all',
             choices=LINE_OPTIONS,
         help="structure of the line set")
@@ -63,18 +65,33 @@ def prepare_experiment(args):
                              args.plot, args.verbose)
     
 def create_experiment(solver_type, d, n, distribution_type, lines_type, mean,
-                      has_plot, verbose):
-    if solver_type != 'all':
-        experiment = SpanningTreeExperiment(solver_type, d, n,
-                distribution_type, lines_type, has_plot, verbose)
-        if mean > 1:
-            return AveragedExperiment(mean, experiment)
-        else:
-            return experiment
+                      has_plot, verbose, input_filename=None):
+            
+    if input_filename == None:
+        if verbose:
+            print "Start generating graph..."
+        graph = generate_graph(d, n, distribution_type)
     else:
-        experiment = SpanningTreeExperiment(SOLVER_OPTIONS[0], d, n,
-                distribution_type, lines_type, has_plot, verbose)
+        if verbose:
+            print "Reading graph from file %s..." % input_filename
+        graph = graph_from_file(input_filename)
+    if verbose:
+        print "Graph has been created."
+    
+    if solver_type == 'all':
+        experiment = SpanningTreeExperiment(SOLVER_OPTIONS[0], graph,
+                                            lines_type, has_plot, verbose)
+    else:
+        experiment = SpanningTreeExperiment(solver_type, graph, lines_type,
+                                            has_plot, verbose)
+        
+    if mean > 1:
+        experiment = AveragedExperiment(mean, experiment)
+        
+    if solver_type == 'all':
         return AllSolversExperiment(experiment)
+    else:
+        return experiment
     
 def generate_graph(d, n, distribution_type):
     '''
@@ -86,6 +103,9 @@ def generate_graph(d, n, distribution_type):
         return highdimgraph.create_uniform_graph(n, d)
     elif distribution_type == 'grid':
         return highdimgraph.create_grid_graph(n, d)
+    
+def graph_from_file(input_filename):
+    pass
 
 def get_solver(solver_type):
     '''
@@ -128,16 +148,12 @@ class SpanningTreeExperiment:
     stores all necessary information, data and options to preprocess point or
     line set before running a solver and takes care of time measuring
     '''
-    def __init__(self, solver_type, d, n, distribution_type, lines_type, has_plot, verbose):
+    def __init__(self, solver_type, graph, lines_type, has_plot, verbose):
         assert solver_type != 'all'
-        if verbose:
-            print "Start generating graph..."
-        graph = generate_graph(d, n, distribution_type)
-        if verbose:
-            print "Graph has been sampled."
+        self.graph = graph
+        self.lines_type = lines_type
         generate_lines(graph, lines_type, verbose)
         assert list(graph.lines)
-        self.graph = graph
         self.solver_type = solver_type
         self.solver = get_solver(solver_type)
         self.has_plot = has_plot
@@ -147,6 +163,9 @@ class SpanningTreeExperiment:
         self.crossing_number = None
         self.crossings = None
         self.iterations = None
+        
+    def get_name(self):
+        return "%s_%s_%s" % (self.solver_type, self.graph.get_name(), self.lines_type)
 
     def update_point_set(self, d, n, distribution_type, lines_type):
         '''
@@ -160,7 +179,8 @@ class SpanningTreeExperiment:
         '''
         set a line set to new lines_type
         '''
-        generate_lines(graph, lines_type, self.verbose)
+        self.lines_type = lines_type
+        generate_lines(self.graph, lines_type, self.verbose)
         return
 
     def update_solver(self, solver_type):
@@ -275,6 +295,9 @@ class AveragedExperiment:
         self.experiment = experiment
         self.rounds = rounds
         self.computed_results = []
+        
+    def get_name(self):
+        return "%s_averaged_%s" % (self.experiment.get_name(), self.rounds)
         
     def update_point_set(self, d, n, distribution_type, lines_type):
         self.computed_results = []

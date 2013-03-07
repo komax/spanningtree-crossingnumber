@@ -26,6 +26,10 @@ class PointSet:
         self.d = dimension
         shape = (n, dimension)
         self.points = np.random.uniform(0, n, shape)
+        self.name = 'uniform'
+        
+    def get_name(self):
+        return self.name
 
     def __getitem__(self, i):
         return self.points[i]
@@ -78,12 +82,14 @@ def create_grid_points(n, d):
             y += 5.0
         x += 5.0
     assert row == n
+    point_set.name = 'grid'
     return point_set
 
-def create_pointset(np_array, n, d):
+def create_pointset(np_array, n, d, name):
     assert np_array.shape == (n, d)
     point_set = PointSet(n, d)
     point_set.points = np_array
+    point_set.name = name
     return point_set
 
 class Edges:
@@ -114,7 +120,7 @@ class Edges:
 
     def __len__(self):
         length = 0
-        for (i,j) in self.as_tuple():
+        for (i, j) in self.as_tuple():
             length += 1
         return length
 
@@ -163,51 +169,10 @@ def create_grid_graph(n, d):
     edges = create_all_edges(n)
     return HighDimGraph(points, edges, n, d)
 
-def create_graph(points, n, d):
-    point_set = create_pointset(points, n, d)
+def create_graph(points, n, d, name):
+    point_set = create_pointset(points, n, d, name)
     edges = create_all_edges(n)
     return HighDimGraph(point_set, edges, n, d)
-
-class ConnectedComponents:
-    def __init__(self, n):
-        self.ccs = list(set([i]) for i in range(n))
-        
-    def __iter__(self):
-        for cc in self.ccs:
-            yield cc
-
-    def get_connected_component(self, i):
-        for cc in self.ccs:
-            if i in cc:
-                return cc
-        else:
-            raise StandardError('can not find vertex=%s in this connected components=%s' % (i, self.ccs))
-
-    def merge(self, cc1, cc2):
-        '''
-        merge of two different connected components to a new one
-        '''
-        assert cc1 in self.ccs
-        assert cc2 in self.ccs
-        if cc1 != cc2:
-            self.ccs.remove(cc2)
-            cc1.update(cc2)
-        return
-
-    def merge_by_vertices(self, i, j):
-        '''
-        merge of two connected components but parameters are two points
-        from the corresponding connected components
-        '''
-        try:
-            cc1 = self.get_connected_component(i)
-            cc2 = self.get_connected_component(j)
-            return self.merge(cc1, cc2)
-        except:
-            raise
-
-    def __len__(self):
-        return len(self.ccs)
 
 class HighDimGraph:
     def __init__(self, points, edges, n, d):
@@ -225,10 +190,14 @@ class HighDimGraph:
 
         self.lines_registry = {}
         self.line_segments = {}
+        
+    def get_name(self):
+        return self.point_set.get_name()
 
     def copy_graph(self):
+        name = self.get_name()
         np_points = self.point_set.points
-        copied_graph = create_graph(np_points, self.n, self.d)
+        copied_graph = create_graph(np_points, self.n, self.d, name)
         copied_graph.lines = copy.deepcopy(self.lines)
         copied_graph.line_segments = copy.deepcopy(self.line_segments)
         new_crossing_registry()
@@ -259,7 +228,7 @@ class HighDimGraph:
         for p in cc:
             for q in cc:
                 if p != q:
-                    self.edges.update(p,q, False)
+                    self.edges.update(p, q, False)
 
 
     def compute_connected_component(self, root):
@@ -291,7 +260,7 @@ class HighDimGraph:
                 if i == 0:
                     break
                 else:
-                    j = j-1
+                    j = j - 1
                     j, prev = bfs_list[j]
             else:
                 if prev < p:
@@ -333,8 +302,8 @@ class HighDimGraph:
         n = 2 * number_of_random_lines
         points_for_lines = create_uniform_points(n, self.d)
         lines = []
-        for i in range(0,n,2):
-            pq = points_for_lines.subset((i,i+1))
+        for i in range(0, n, 2):
+            pq = points_for_lines.subset((i, i + 1))
             line = HighDimLine(pq)
             lines.append(line)
         self.lines = lines
@@ -411,7 +380,7 @@ class HighDimGraph:
             elif line.is_below(p):
                 below_points.append(i)
             else:
-                raise StandardError('can not find point i=%s:p=%s on line=%s' %
+                raise StandardError('can not find point i=%s:p=%s on line=%s' % 
                         (i, p, line))
         above_points.sort()
         below_points.sort()
@@ -445,14 +414,14 @@ class HighDimGraph:
 
     def __get_line(self, i, j):
         if not (i, j) in self.lines_registry:
-            pq = self.point_set.subset((i,j))
+            pq = self.point_set.subset((i, j))
             line = HighDimLine(pq)
             self.lines_registry[(i, j)] = line
         return self.lines_registry[(i, j)]
 
     def get_line_segment(self, i, j):
         if not (i, j) in self.line_segments:
-            pq = self.point_set.subset((i,j))
+            pq = self.point_set.subset((i, j))
             line_segment = HighDimLineSegment(pq)
             self.line_segments[(i, j)] = line_segment
         return self.line_segments[(i, j)]
@@ -506,10 +475,47 @@ class HighDimGraph:
         ''' alias for maximum crossing number '''
         return self.maximum_crossing_number()
 
-#def create_line(P, i, j):
-#    
-#    X = np.array([p, q])
-#    return HighDimLine(X)
+
+class ConnectedComponents:
+    def __init__(self, n):
+        self.ccs = list(set([i]) for i in range(n))
+        
+    def __iter__(self):
+        for cc in self.ccs:
+            yield cc
+
+    def get_connected_component(self, i):
+        for cc in self.ccs:
+            if i in cc:
+                return cc
+        else:
+            raise StandardError('can not find vertex=%s in this connected components=%s' % (i, self.ccs))
+
+    def merge(self, cc1, cc2):
+        '''
+        merge of two different connected components to a new one
+        '''
+        assert cc1 in self.ccs
+        assert cc2 in self.ccs
+        if cc1 != cc2:
+            self.ccs.remove(cc2)
+            cc1.update(cc2)
+        return
+
+    def merge_by_vertices(self, i, j):
+        '''
+        merge of two connected components but parameters are two points
+        from the corresponding connected components
+        '''
+        try:
+            cc1 = self.get_connected_component(i)
+            cc2 = self.get_connected_component(j)
+            return self.merge(cc1, cc2)
+        except:
+            raise
+
+    def __len__(self):
+        return len(self.ccs)
         
 class HighDimLine:
     def __init__(self, X):
@@ -607,18 +613,18 @@ class CrossingRegistry:
 
     def put(self, line, line_seg, bool_val):
         i, j = CrossingRegistry.convert(line, line_seg)
-        self.crossings[(i,j)] = bool_val
+        self.crossings[(i, j)] = bool_val
 
     def has_entry(self, line, line_seg):
         i, j = CrossingRegistry.convert(line, line_seg)
-        return (i,j) in self.crossings
+        return (i, j) in self.crossings
 
     def has_crossing(self, line, line_seg):
         if self.has_entry(line, line_seg):
             i, j = CrossingRegistry.convert(line, line_seg)
-            return self.crossings[(i,j)]
+            return self.crossings[(i, j)]
         else:
-            raise StandardError('line=%s and line_seg=%s not in registry' %
+            raise StandardError('line=%s and line_seg=%s not in registry' % 
                     (line, line_seg))
 
 registry = CrossingRegistry()
