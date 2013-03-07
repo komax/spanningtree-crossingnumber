@@ -12,6 +12,7 @@ import opt_solver
 import highdimgraph
 import plotting
 import numpy as np
+import os
 
 def main():
     args = parse_args()
@@ -62,10 +63,10 @@ def prepare_experiment(args):
     '''
     return create_experiment(args.solver, args.dimensions, args.number,
                              args.generate, args.linesampling, args.mean,
-                             args.plot, args.verbose)
+                             args.plot, args.verbose, args.input)
     
 def create_experiment(solver_type, d, n, distribution_type, lines_type, mean,
-                      has_plot, verbose, input_filename=None):
+                      has_plot, verbose, input_filename):
             
     if input_filename == None:
         if verbose:
@@ -105,7 +106,13 @@ def generate_graph(d, n, distribution_type):
         return highdimgraph.create_grid_graph(n, d)
     
 def graph_from_file(input_filename):
-    pass
+    with open(input_filename, 'r') as ifile:
+        points = np.loadtxt(ifile)
+        assert len(points.shape) == 2
+        (n, d) = points.shape
+        base = os.path.basename(input_filename)
+        dataname_without_ext = os.path.splitext(base)[0]
+        return highdimgraph.create_graph(points, n, d, dataname_without_ext)
 
 def get_solver(solver_type):
     '''
