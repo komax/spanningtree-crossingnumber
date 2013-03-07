@@ -29,8 +29,8 @@ def parse_args():
             a spanning tree with low crossing number and write all results
             in csv file
             """)
-    parser.add_argument('-o', '--out',
-            default='experiments.csv', type=str)
+    parser.add_argument('-o', '--outdir',
+            default='.', type=str)
     parser.add_argument("-c", "--csvheader", action='store_true', default=False,
         help="prepends a human readable header to csv file")
     parser.add_argument("-d", "--dimensions", type=int, default=2,
@@ -44,11 +44,13 @@ def parse_args():
     parser.add_argument("-l", "--linesampling", default='all',
             choices=LINE_OPTIONS,
         help="structure of the line set")
+    parser.add_argument("-i", "--input", type=str, default=None,
+        help="specify a input file")
     parser.add_argument("-f", "--begin", type=int, default=4,
         help="starting with how many points")
     parser.add_argument("-t", "--to", type=int, default=16,
         help="ending up with how many points")
-    parser.add_argument("-i", "--increment", type=int, default=1,
+    parser.add_argument("-p", "--increment", type=int, default=1,
         help="number of steps in the size of point set for next experiment")
     parser.add_argument("-m", "--mean", type=int, default=1,
         help="run experiment m times and return an averaged result")
@@ -62,11 +64,11 @@ def prepare_experiment(args):
     factory method creating a CompoundExperiment object out of argparse
     arguments
     '''
-    return CompoundExperiment(args.out, args.solver, args.dimensions,
+    return CompoundExperiment(args.outdir, args.solver, args.dimensions,
                               args.generate,
                               args.linesampling, args.begin,
                               args.to, args.increment, args.csvheader,
-                              args.mean, args.verbose)
+                              args.mean, args.verbose, args.input)
 
 csv_header = [
         'size of point set',
@@ -74,16 +76,15 @@ csv_header = [
         'CPU time in seconds',
         'iterations',
         'crossing number',
-        'minimum crossing number',
         'average crossing number',
         'crossing overall']
 
 
 class CompoundExperiment:
-    def __init__(self, file_name, solver_type, dimensions, distribution_type, line_option, lb, ub,
-            step, has_header, mean, verbose):
-        self.file_name = file_name
+    def __init__(self, out_path, solver_type, dimensions, distribution_type, line_option, lb, ub,
+            step, has_header, mean, verbose, input_filename):
         has_plot = False
+        self.out_path = out_path
         self.solver_type = solver_type
         self.verbose = verbose
         self.distribution_type = distribution_type
@@ -94,25 +95,36 @@ class CompoundExperiment:
         self.has_header = has_header
         self.experiment = create_experiment(solver_type, dimensions, lb,
                                             distribution_type,
-                                            line_option, mean, has_plot, verbose)
+                                            line_option, mean, has_plot, verbose, input_filename)
         
     def write_csv(self):
         self.write_header()
         self.write_data()
+        
+    def get_path(self):
+        return self.out_path + '/'
     
     def write_header(self):
         if self.has_header:
             for file_name in self.get_files():
-                with open(file_name, 'wb') as csvfile:
+                with open(self.get_path()+file_name, 'wb') as csvfile:
                     csv_writer = csv.writer(csvfile)
                     csv_writer.writerow(csv_header)
                     
     
     def get_files(self):
         if self.solver_type == 'all':
-            return [self.file_name+'.'+solv_ext for solv_ext in SOLVER_OPTIONS[:-1]]
+            for exp in self.experiment:
+                yield exp.get_name()+'.csv'
         else:
-            return [self.file_name] 
+            yield self.experiment.get_name()+'.csv'
+            
+    def iter_exp(self):
+        if self.solver_type == 'all':
+            for exp in self.experiment:
+                yield exp
+        else:
+            yield self.experiment
 
     def write_data(self):
         if self.distribution_type == 'grid':
@@ -127,24 +139,17 @@ class CompoundExperiment:
                 i = i**2
             if self.verbose:
                 print "Starting now a new experiment for n=%s..." % i
-            if self.solver_type == 'all':
-                for experiment in self.experiment:
-                    experiment.update_point_set(dimension, i,
-                                                self.distribution_type,
-                                                self.line_option)
-                    experiment.run()
-                    results = experiment.results()
-                    if self.verbose:
-                        print "Computation finished. Writing results to csv..."
-                    with open(self.file_name+'.'+experiment.solver_type, 'ab') as csvfile:
-                        csv_writer = csv.writer(csvfile)
-                        csv_writer.writerow(results)
-            else:
-                self.experiment.run()
-                results = self.experiment.results()
-                with open(self.file_name, 'ab') as csvfile:
-                        csv_writer = csv.writer(csvfile)
-                        csv_writer.writerow(results)
+            self.experiment.update_point_set(dimension, i,
+                                             self.distribution_type,
+                                             self.line_option)
+            for experiment in self.iter_exp():
+                experiment.run()
+                results = experiment.results()
+                if self.verbose:
+                    print "Computation finished. Writing results to csv..."
+                with open(self.get_path() + experiment.get_name()+'.csv', 'ab') as csvfile:
+                    csv_writer = csv.writer(csvfile)
+                    csv_writer.writerow(results)
         return
 
 if __name__ == '__main__':

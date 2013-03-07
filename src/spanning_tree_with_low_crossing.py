@@ -286,6 +286,15 @@ class SpanningTreeExperiment:
 class AllSolversExperiment:
     def __init__(self, experiment):
         self.experiment = experiment
+        
+    def update_point_set(self, d, n, distribution_type, lines_type):
+        self.experiment.update_point_set(d, n, distribution_type, lines_type)
+        
+    def update_line_set(self, lines_type):
+        self.experiment.update_line_set(lines_type)
+        
+    def update_solver(self, solver_type):
+        self.experiment.update_solver(solver_type)
 
     def __iter__(self):
         solvers = SOLVER_OPTIONS[:-1]
