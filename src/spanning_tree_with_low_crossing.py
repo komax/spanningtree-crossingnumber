@@ -336,17 +336,10 @@ class AveragedExperiment:
         A = np.array(self.computed_results)
         res = np.mean(A, axis=0)
         return res.tolist()
-    
-    def str_results(self):
-        (no_points, no_lines, cpu_time, 
-         iterations, crossing_no, avg_crossing_no, crossings) = self.results()
-        return (str(int(no_points)), str(int(no_lines)), str(cpu_time),
-                str(iterations), str(crossing_no), 
-                str(avg_crossing_no), str(crossings))
 
     def print_results(self):
         (no_points, no_lines, cpu_time, 
-         iterations, crossing_no, avg_crossing_no, crossings) = self.str_results()
+         iterations, crossing_no, avg_crossing_no, crossings) = self.results()
         print "CPU time (in sec) %s" % cpu_time
         print "crossing number=%s" % crossing_no
         print "iterations=%s" % iterations
