@@ -6,7 +6,7 @@ import spanningtree.solvers.mult_weights_solver as mwsolv
 from spanningtree.highdimgraph import HighDimLine, HighDimLineSegment, has_crossing
 from spanningtree.highdimgraph import np_assert_allclose
 from spanningtree.highdimgraph import create_graph
-import spanningtree.highdimgraph
+import spanningtree.highdimgraph as highdimgraph
 import spanningtree.solvers.sariel_lp_solver as slpsolv
 import spanningtree.solvers.fekete_lp_solver as flpsolv
 import spanningtree.solvers.opt_solver as opt_solver
@@ -105,7 +105,7 @@ class PreprocessingLinesTestCase(unittest.TestCase):
 class GraphTestCase(unittest.TestCase):
     def setUp(self):
         point_set = np.array([[0], [1], [2], [3]])
-        self.graph = create_graph(point_set, 4, 1)
+        self.graph = create_graph(point_set, 4, 1, "foo")
 
     def test_connected_components(self):
         cc1 = self.graph.connected_components.get_connected_component(1)
@@ -154,7 +154,7 @@ class GraphTestCase(unittest.TestCase):
 class MultWeightsSolvingTestCase(unittest.TestCase):
     def setUp(self):
         points = np.array([(2., 2.), (6., 4.), (3., 6.), (5., 7.), (4.25, 5.)])
-        self.graph = create_graph(points, 5, 2)
+        self.graph = create_graph(points, 5, 2, "foo")
         
         l1 = HighDimLine(np.array([(2., 6.), (3., 2.)]))  # y = -4x + 14
         l2 = HighDimLine(np.array([(2., 3.), (6., 5.)]))  # y = 0.5x + 2
@@ -221,7 +221,7 @@ class ConnectedComponentsTestCase(unittest.TestCase):
 
     def test_results_two_connected_components(self):
         points = np.array([ (0., 3.), (3., 4.), (9., 10.), (7., 8.), (5., 6.), (2., 1.)])
-        graph = create_graph(points, 6, 2)
+        graph = create_graph(points, 6, 2, "foo")
         edges = [ (1, 0),
                   (5, 1),
                   # (1, 4), now two connected components
@@ -265,7 +265,7 @@ class SarielsLPSolvingTestCase(unittest.TestCase):
 class FeketeLPSolvingTestCase(unittest.TestCase):
     def setUp(self):
         points = np.array([(2., 2.), (6., 4.), (3., 6.), (5., 7.), (4.25, 5.)])
-        self.graph = create_graph(points, 5, 2)
+        self.graph = create_graph(points, 5, 2, "foo")
         
         l1 = HighDimLine(np.array([(2., 6.), (3., 2.)]))  # y = -4x + 14
         l2 = HighDimLine(np.array([(2., 3.), (6., 5.)]))  # y = 0.5x + 2
