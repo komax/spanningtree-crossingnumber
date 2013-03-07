@@ -5,10 +5,10 @@
 
 import argparse
 import time
-import mult_weights_solver as mws
-import sariel_lp_solver as slpsolv
-import fekete_lp_solver as flpsolv
-import opt_solver
+import solvers.mult_weights_solver as mws
+import solvers.sariel_lp_solver as slpsolv
+import solvers.fekete_lp_solver as flpsolv
+import solvers.opt_solver as opt_solver
 import highdimgraph
 import plotting
 import numpy as np
