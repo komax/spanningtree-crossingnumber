@@ -3,9 +3,10 @@
 
 import unittest
 import spanningtree.solvers.mult_weights_solver as mwsolv
-from spanningtree.highdimgraph import HighDimLine, HighDimLineSegment, has_crossing
-from spanningtree.highdimgraph import np_assert_allclose
-from spanningtree.highdimgraph import create_graph
+from spanningtree.highdimgraph.lines import HighDimLine, HighDimLineSegment
+from spanningtree.highdimgraph.crossing import has_crossing
+from spanningtree.helper.numpy_helpers import np_assert_allclose
+from spanningtree.highdimgraph.factories import create_graph
 import spanningtree.highdimgraph as highdimgraph
 import spanningtree.solvers.sariel_lp_solver as slpsolv
 import spanningtree.solvers.fekete_lp_solver as flpsolv

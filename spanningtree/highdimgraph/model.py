@@ -3,11 +3,13 @@ Created on Feb 5, 2013
 
 @author: max
 '''
-import numpy as np
 import math
 import random
 import copy
 from collections import deque
+from spanningtree import np
+from lines import HighDimLineSegment
+import factories
 
 class PointSet:
     def __init__(self, n, dimension):
@@ -114,7 +116,7 @@ class HighDimGraph:
         self.n = n
         self.d = d
 
-        self.solution = create_solution_edges(n)
+        self.solution = factories.create_solution_edges(n)
         self.connected_components = ConnectedComponents(n)
 
         self.lines = []
@@ -215,7 +217,7 @@ class HighDimGraph:
                 if j in remaining_points:
                     remaining_points.remove(j)
 
-        self.solution = create_solution_edges(self.n)
+        self.solution = factories.create_solution_edges(self.n)
         for (i, j) in new_solution_edges:
             self.solution.update(i, j, True)
         return
@@ -447,8 +449,3 @@ class ConnectedComponents:
 
     def __len__(self):
         return len(self.ccs)
-
-def partition(p):
-    x = p[..., :-1]
-    y = p[..., -1:]
-    return (x, y)

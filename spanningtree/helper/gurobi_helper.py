@@ -1,5 +1,4 @@
 import gurobipy as grb
-from gurobipy import quicksum
 
 def set_up_model(name):
     new_model = grb.Model(name)

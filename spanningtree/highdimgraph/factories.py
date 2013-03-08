@@ -4,6 +4,9 @@ Created on Mar 8, 2013
 @author: max
 '''
 
+from model import PointSet, Edges, HighDimGraph
+from spanningtree import np
+
 def create_uniform_points(n, d):
     point_set = PointSet(n, d)
     point_set.name = 'uniform'

@@ -3,6 +3,9 @@ Created on Mar 8, 2013
 
 @author: max
 '''
+from spanningtree.helper.numpy_helpers import np_allclose
+from spanningtree import np
+
 class CrossingRegistry:
     def __init__(self):
         self.crossings = {}

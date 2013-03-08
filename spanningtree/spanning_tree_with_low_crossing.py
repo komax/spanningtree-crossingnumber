@@ -11,7 +11,6 @@ import solvers.fekete_lp_solver as flpsolv
 import solvers.opt_solver as opt_solver
 import highdimgraph
 import plotting
-import numpy as np
 import os
 
 def main():

@@ -3,6 +3,9 @@ Created on Mar 8, 2013
 
 @author: max
 '''
+from spanningtree import np
+from spanningtree.helper.numpy_helpers import partition, np_allclose
+
 class HighDimLine:
     def __init__(self, X):
         assert X.shape[0] == 2

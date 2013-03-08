@@ -7,6 +7,7 @@ using Gurobi as standard solver
 import gurobipy as grb
 from spanningtree.highdimgraph import *
 from spanningtree.helper.gurobi_helper import set_up_model
+from spanningtree.highdimgraph.crossing import has_crossing
 from gurobipy import quicksum
 import math
 import random
