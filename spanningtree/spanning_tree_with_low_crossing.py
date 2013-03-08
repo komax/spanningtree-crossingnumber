@@ -11,6 +11,7 @@ import solvers.fekete_lp_solver as flpsolv
 import solvers.opt_solver as opt_solver
 import highdimgraph.factories as factories
 import plotting
+from spanningtree import np
 import os
 
 def main():
@@ -111,7 +112,7 @@ def graph_from_file(input_filename):
         (n, d) = points.shape
         base = os.path.basename(input_filename)
         dataname_without_ext = os.path.splitext(base)[0]
-        return highdimgraph.create_graph(points, n, d, dataname_without_ext)
+        return factories.create_graph(points, n, d, dataname_without_ext)
 
 def get_solver(solver_type):
     '''

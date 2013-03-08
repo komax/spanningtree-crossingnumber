@@ -6,6 +6,8 @@ Created on Mar 8, 2013
 from spanningtree.helper.numpy_helpers import np_allclose
 from spanningtree import np
 
+CACHE_SIZE = 3000000
+
 class CrossingRegistry:
     def __init__(self):
         self.crossings = {}
@@ -13,9 +15,16 @@ class CrossingRegistry:
     @staticmethod
     def convert(line, line_seg):
         return (id(line), id(line_seg))
+    
+    def is_full(self):
+        global CACHE_SIZE
+        if len(self.crossings) >= CACHE_SIZE:
+            self.crossings = {}
+        return
 
     def put(self, line, line_seg, bool_val):
         i, j = CrossingRegistry.convert(line, line_seg)
+        self.is_full()
         self.crossings[(i, j)] = bool_val
 
     def has_entry(self, line, line_seg):
