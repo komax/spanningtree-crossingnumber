@@ -4,21 +4,10 @@ Created on Feb 5, 2013
 @author: max
 '''
 import numpy as np
-import scipy
 import math
 import random
 import copy
 from collections import deque
-
-# numpy defaults for numpy.allclose()
-RTOL = 1e-05
-ATOL = 1e-08
-
-def np_allclose(a, b):
-    return np.allclose(a, b, RTOL, ATOL)
-
-def np_assert_allclose(a, b):
-    return np.testing.assert_allclose(a, b, RTOL, ATOL)
 
 class PointSet:
     def __init__(self, n, dimension):
@@ -26,7 +15,7 @@ class PointSet:
         self.d = dimension
         shape = (n, dimension)
         self.points = np.random.uniform(0, n, shape)
-        self.name = 'uniform'
+        self.name = ''
         
     def get_name(self):
         return self.name
@@ -60,37 +49,6 @@ class PointSet:
         for x in indices_subset:
             assert 0 <= x < self.n
         return self.points[indices_subset]
-
-def create_uniform_points(n, d):
-    return PointSet(n, d)
-
-def create_grid_points(n, d):
-    assert d == 2
-    point_set = PointSet(n, d)
-    root_n = int(math.ceil(math.sqrt(n)))
-    eps = 0.1
-    x = 0.0
-    y = 0.0
-    row = 0
-    for i in range(root_n):
-        y = 0.0
-        for j in range(root_n):
-            x_eps = random.uniform(-eps, eps)
-            y_eps = random.uniform(-eps, eps)
-            point_set.points[row] = np.array((x + x_eps, y + y_eps))
-            row += 1
-            y += 5.0
-        x += 5.0
-    assert row == n
-    point_set.name = 'grid'
-    return point_set
-
-def create_pointset(np_array, n, d, name):
-    assert np_array.shape == (n, d)
-    point_set = PointSet(n, d)
-    point_set.points = np_array
-    point_set.name = name
-    return point_set
 
 class Edges:
     def __init__(self, n, matrix):
@@ -146,33 +104,6 @@ class Edges:
 
     def update(self, i, j, new_val):
         self.adj_matrix[i, j] = self.adj_matrix[j, i] = new_val
-
-def create_all_edges(n):
-    adj_matrix = np.ones((n, n), dtype=bool)
-    for i in range(0, n):
-        adj_matrix[i, i] = False
-    edges = Edges(n, adj_matrix)
-    return edges
-
-def create_solution_edges(n):
-    sol_matrix = np.zeros((n, n), dtype=bool)
-    solution = Edges(n, sol_matrix)
-    return solution
-
-def create_uniform_graph(n, d):
-    points = create_uniform_points(n, d)
-    edges = create_all_edges(n)
-    return HighDimGraph(points, edges, n, d)
-
-def create_grid_graph(n, d):
-    points = create_grid_points(n, d)
-    edges = create_all_edges(n)
-    return HighDimGraph(points, edges, n, d)
-
-def create_graph(points, n, d, name):
-    point_set = create_pointset(points, n, d, name)
-    edges = create_all_edges(n)
-    return HighDimGraph(point_set, edges, n, d)
 
 class HighDimGraph:
     def __init__(self, points, edges, n, d):
@@ -516,143 +447,8 @@ class ConnectedComponents:
 
     def __len__(self):
         return len(self.ccs)
-        
-class HighDimLine:
-    def __init__(self, X):
-        assert X.shape[0] == 2
-        p = X[0]
-        q = X[1]
-        if p[..., -1] < q[..., -1]:
-            self.X = X
-        else:
-            self.X = np.array([q, p])
-        y = X[..., -1:]
-        A = np.hstack([X[..., :-1], np.ones((X.shape[0], 1), dtype=X.dtype)])
-        self.theta = (np.linalg.lstsq(A, y)[0]).flatten()
-
-    def __key(self):
-        return tuple(self.theta)
-
-    def __eq__(a, b):
-        return np_allclose(a.theta, b.theta)
-
-    def __hash__(self):
-        return hash(self.__key())
-
-    def call(self, p):
-        assert len(p.shape) == 1
-        X = np.array([p])
-        y = self(X)
-        return y[0]
-
-    def __call__(self, X):
-        paddedX = np.hstack([X, np.ones((X.shape[0], 1), dtype=X.dtype)])
-        y = np.dot(paddedX, self.theta)
-        return y.flatten()
-
-    def __str__(self):
-       return 'HighDimLine(theta=\n%s, points=\n%s)' % (self.theta, self.X)
-
-    def __repr__(self):
-        return self.__str__()
-
-    def is_on(self, p):
-        (x, y) = partition(p)
-        y_line = self.call(x)
-        return np_allclose(y_line, y)
-
-    def is_above(self, p):
-        (x, y) = partition(p)
-        y_line = self.call(x)
-        return (y > y_line).all() and not self.is_on(p)
-
-    def is_below(self, p):
-        (x, y) = partition(p)
-        y_line = self.call(x)
-        return (y < y_line).all() and not self.is_on(p)
-
 
 def partition(p):
     x = p[..., :-1]
     y = p[..., -1:]
     return (x, y)
-
-class HighDimLineSegment(HighDimLine):
-    def __init__(self, X):
-        HighDimLine.__init__(self, X)
-
-    def __str__(self):
-       return 'HighDimLineSegment(theta=\n%s, points=\n%s)' % (self.theta, self.X)
-
-    def is_between(self, x):
-        # TODO update this implementation for higher d. Is this still correct?
-        p = self.X[0, 0, ...]
-        q = self.X[1, 0, ...]
-        if p > q:
-            (p, q) = (q, p)
-        return (p <= x <= q).all()
-
-    def is_on(self, p):
-        (x, y) = partition(p)
-        if self.is_between(x):
-            return HighDimLine.is_on(self, p)
-        else:
-            return False
-
-    def __call__(self, X):
-        if self.is_between(X):
-            return HighDimLine.__call__(self, X)
-
-class CrossingRegistry:
-    def __init__(self):
-        self.crossings = {}
-
-    @staticmethod
-    def convert(line, line_seg):
-        return (id(line), id(line_seg))
-
-    def put(self, line, line_seg, bool_val):
-        i, j = CrossingRegistry.convert(line, line_seg)
-        self.crossings[(i, j)] = bool_val
-
-    def has_entry(self, line, line_seg):
-        i, j = CrossingRegistry.convert(line, line_seg)
-        return (i, j) in self.crossings
-
-    def has_crossing(self, line, line_seg):
-        if self.has_entry(line, line_seg):
-            i, j = CrossingRegistry.convert(line, line_seg)
-            return self.crossings[(i, j)]
-        else:
-            raise StandardError('line=%s and line_seg=%s not in registry' % 
-                    (line, line_seg))
-
-registry = CrossingRegistry()
-
-def new_crossing_registry():
-    global registry
-    registry = CrossingRegistry()
-
-def has_crossing(line, line_seg):
-    if registry.has_entry(line, line_seg):
-        return registry.has_crossing(line, line_seg)
-    else:
-        cross_val = calc_has_crossing(line, line_seg)
-        registry.put(line, line_seg, cross_val)
-        return cross_val
-
-
-def calc_has_crossing(line, line_seg):
-    '''
-    Has line a crossing with the line segment
-    '''
-
-    if np_allclose(line.theta[..., :-1], line_seg.theta[..., :-1]):
-        return False
-    else:
-        A = np.vstack([line.theta, line_seg.theta])
-        b = -A[..., -1:]
-        A[..., -1] = -np.ones(len(A))
-        intersection_point = (np.linalg.solve(A, b)).flatten()
-        x = intersection_point[..., :-1]
-        return line_seg.is_between(x)
