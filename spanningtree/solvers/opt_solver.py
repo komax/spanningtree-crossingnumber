@@ -44,7 +44,7 @@ def create_ip(graph):
     lines = graph.lines
     # bound crossing number
     for line in lines:
-        s = quicksum(x[p,q] for (p,q) in edges if has_crossing(line,
+        s = quicksum(x[p,q] for (p,q) in edges if crossing.has_crossing(line,
             graph.get_line_segment(p,q)))
         if s != 0.0:
             lambda_ip.addConstr(s <= t)

@@ -16,7 +16,7 @@ import numpy as np
 
 class CrossingTestCase(unittest.TestCase):
     def setUp(self):
-        highdimgraph.new_crossing_registry()
+        highdimgraph.crossing.new_crossing_registry()
 
     def test_has_crossing(self):
         line = HighDimLine(np.array([(3., 2), (5., 0)]))  # y = -x + 5

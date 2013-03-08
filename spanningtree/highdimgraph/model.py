@@ -8,8 +8,10 @@ import random
 import copy
 from collections import deque
 from spanningtree import np
-from lines import HighDimLineSegment
+from lines import HighDimLineSegment, HighDimLine
+from spanningtree.helper.numpy_helpers import partition 
 import factories
+import crossing
 
 class PointSet:
     def __init__(self, n, dimension):
@@ -130,10 +132,10 @@ class HighDimGraph:
     def copy_graph(self):
         name = self.get_name()
         np_points = self.point_set.points
-        copied_graph = create_graph(np_points, self.n, self.d, name)
+        copied_graph = factories.create_graph(np_points, self.n, self.d, name)
         copied_graph.lines = copy.deepcopy(self.lines)
         copied_graph.line_segments = copy.deepcopy(self.line_segments)
-        new_crossing_registry()
+        crossing.new_crossing_registry()
         return copied_graph
 
     def bfs(self, root):
@@ -366,7 +368,7 @@ class HighDimGraph:
         crossings = 0
         for (p, q) in self.solution:
             line_segment = self.get_line_segment(p, q)
-            if has_crossing(line, line_segment):
+            if crossing.has_crossing(line, line_segment):
                 crossings += 1
         return crossings
 

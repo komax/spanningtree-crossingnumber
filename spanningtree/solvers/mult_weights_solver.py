@@ -3,7 +3,7 @@ computes a spanning tree for a point set s.t. it has low crossing number to
 the line set, using the multiplicative weights method
 '''
 import numpy as np
-from spanningtree.highdimgraph import *
+from spanningtree.highdimgraph import crossing
 
 def add_edge_to_solution_merge_ccs(graph, i, j):
     ccs = graph.connected_components
@@ -26,7 +26,7 @@ def find_min_edge(graph, line_weights):
         line_segment = graph.get_line_segment(p,q)
         weights[edge] = 0.0
         for line in graph.lines:
-            if has_crossing(line, line_segment):
+            if crossing.has_crossing(line, line_segment):
                 weights[edge] += line_weights[line]
     min_edge = min(weights, key=weights.get)
     (p,q) = min_edge

@@ -5,7 +5,8 @@ plots all points and the lines in the plane. Using matplotlib
 import matplotlib.pyplot as plt
 import math
 from pylab import frange
-from highdimgraph import create_uniform_graph, create_grid_graph, partition
+from highdimgraph.factories import create_uniform_graph, create_grid_graph
+from helper.numpy_helpers import partition
 
 def plot(graph):
     assert graph.d == 2

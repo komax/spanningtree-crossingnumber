@@ -9,7 +9,7 @@ import solvers.mult_weights_solver as mws
 import solvers.sariel_lp_solver as slpsolv
 import solvers.fekete_lp_solver as flpsolv
 import solvers.opt_solver as opt_solver
-import highdimgraph
+import highdimgraph.factories as factories
 import plotting
 import os
 
@@ -100,9 +100,9 @@ def generate_graph(d, n, distribution_type):
     '''
     assert distribution_type in DATA_DISTRIBUTION_OPTIONS
     if distribution_type == 'uniform':
-        return highdimgraph.create_uniform_graph(n, d)
+        return factories.create_uniform_graph(n, d)
     elif distribution_type == 'grid':
-        return highdimgraph.create_grid_graph(n, d)
+        return factories.create_grid_graph(n, d)
     
 def graph_from_file(input_filename):
     with open(input_filename, 'r') as ifile:
