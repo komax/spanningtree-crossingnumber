@@ -6,8 +6,8 @@ using Gurobi as standard solver
 
 import numpy as np
 import gurobipy as grb
-from highdimgraph import *
-from gurobi_helper import set_up_model
+from spanningtree.highdimgraph import *
+from spanningtree.helper.gurobi_helper import set_up_model
 from fekete_lp_solver import nonempty_subsets, cut
 from gurobipy import quicksum
 import math

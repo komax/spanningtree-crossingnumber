@@ -3,7 +3,7 @@ computes a spanning tree for a point set s.t. it has low crossing number to
 the line set, using the multiplicative weights method
 '''
 import numpy as np
-from highdimgraph import *
+from spanningtree.highdimgraph import *
 
 def add_edge_to_solution_merge_ccs(graph, i, j):
     ccs = graph.connected_components

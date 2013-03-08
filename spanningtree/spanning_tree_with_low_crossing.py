@@ -5,10 +5,10 @@
 
 import argparse
 import time
-import mult_weights_solver as mws
-import sariel_lp_solver as slpsolv
-import fekete_lp_solver as flpsolv
-import opt_solver
+import solvers.mult_weights_solver as mws
+import solvers.sariel_lp_solver as slpsolv
+import solvers.fekete_lp_solver as flpsolv
+import solvers.opt_solver as opt_solver
 import highdimgraph
 import plotting
 import numpy as np
@@ -336,17 +336,10 @@ class AveragedExperiment:
         A = np.array(self.computed_results)
         res = np.mean(A, axis=0)
         return res.tolist()
-    
-    def str_results(self):
-        (no_points, no_lines, cpu_time, 
-         iterations, crossing_no, avg_crossing_no, crossings) = self.results()
-        return (str(int(no_points)), str(int(no_lines)), str(cpu_time),
-                str(iterations), str(crossing_no), 
-                str(avg_crossing_no), str(crossings))
 
     def print_results(self):
         (no_points, no_lines, cpu_time, 
-         iterations, crossing_no, avg_crossing_no, crossings) = self.str_results()
+         iterations, crossing_no, avg_crossing_no, crossings) = self.results()
         print "CPU time (in sec) %s" % cpu_time
         print "crossing number=%s" % crossing_no
         print "iterations=%s" % iterations
