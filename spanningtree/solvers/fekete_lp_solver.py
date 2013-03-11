@@ -99,7 +99,7 @@ def solve_lp(lambda_lp):
     if lambda_lp.status == grb.GRB.status.OPTIMAL:
         return
     else:
-        raise StandardError('lp has no optimum')
+        raise StandardError('lp model has status=%s' % lambda_lp.status)
 
 def round_and_update_lp(graph, alpha):
     '''

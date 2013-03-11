@@ -6,6 +6,8 @@ Created on Mar 8, 2013
 
 from model import PointSet, Edges, HighDimGraph
 from spanningtree import np
+import math
+import random
 
 def create_uniform_points(n, d):
     point_set = PointSet(n, d)
