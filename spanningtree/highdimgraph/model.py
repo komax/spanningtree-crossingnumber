@@ -338,7 +338,7 @@ class HighDimGraph:
         for line in self.lines:
             (above, on, below) = self.__partition_points_by_line(line, point_range)
             partition_tuple = (above, on, below)
-            print partition_tuple
+#            print partition_tuple
 #            if not partition_tuple:
 #                # skip this line, because one point is on this line
 #                continue
