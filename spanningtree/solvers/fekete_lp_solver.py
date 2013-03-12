@@ -56,7 +56,7 @@ def create_lp(graph):
     paper
     '''
     lambda_lp = set_up_model("fekete_lp_2d")
-    lambda_lp.setParam('Cuts', 3)
+    #lambda_lp.setParam('Cuts', 3)
     number_of_edges = 0
     points = graph.point_set
     n = graph.n
@@ -64,7 +64,7 @@ def create_lp(graph):
     for (p,q) in edges:
         x[p,q] = lambda_lp.addVar(# TODO maybe needed: obj=euclidean_distance(p,q),
                 name='edge|%s - %s|' % (p,q))
-    t = lambda_lp.addVar(obj=1.0, vtype=grb.GRB.INTEGER)
+    t = lambda_lp.addVar(obj=1.0)#, vtype=grb.GRB.INTEGER)
 
     lambda_lp.modelSense = grb.GRB.MINIMIZE
 
@@ -99,7 +99,12 @@ def solve_lp(lambda_lp):
     if lambda_lp.status == grb.GRB.status.OPTIMAL:
         return
     else:
-        raise StandardError('lp model has status=%s' % lambda_lp.status)
+        format_string = 'Vars:\n'
+        for var in lambda_lp.getVars():
+            format_string += "%s\n" % var
+        #for constr in lambda_lp.getConstrs():
+        #    format_string += "%s\n" % constr
+        raise StandardError('%s\nlp model=%s' % (format_string,lambda_lp))
 
 def round_and_update_lp(graph, alpha):
     '''
@@ -113,7 +118,7 @@ def round_and_update_lp(graph, alpha):
     (max_i, max_j) = (None, None)
     max_val = None
     for (i,j) in edges:
-        if x[i,j].X > 1./3. and x[i,j].X > max_val:
+        if x[i,j].X > max_val and x[i,j] > 1./3.:
             (max_i, max_j) = (i,j)
             max_val = x[i,j].X
 
@@ -150,7 +155,7 @@ def compute_spanning_tree(graph, alpha=2.0):
         #    print var
         round_and_update_lp(graph, alpha)
         iterations += 1
-    return iterations
+    return iterations-1
 
 def main():
     # minimal example to find optimal spanning tree

@@ -6,7 +6,7 @@ Created on Mar 8, 2013
 from spanningtree.helper.numpy_helpers import np_allclose
 from spanningtree import np
 
-CACHE_SIZE = 3000000
+CACHE_SIZE = 6000000
 
 class CrossingRegistry:
     def __init__(self):
@@ -15,7 +15,7 @@ class CrossingRegistry:
     @staticmethod
     def convert(line, line_seg):
         return (id(line), id(line_seg))
-    
+
     def is_full(self):
         global CACHE_SIZE
         if len(self.crossings) >= CACHE_SIZE:
