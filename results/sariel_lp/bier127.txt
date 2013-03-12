@@ -1,15 +1,16 @@
+$ ./experiment.py -i data/tsplib/bier127.txt -l all -v -p -s sariel_lp
 Reading graph from file data/tsplib/bier127.txt...
 Graph has been created.
 Sampling of lines started...
 Sampling of lines finished.
 Start now computing a spanning tree...
 Computing a spanning tree finished.
-CPU time (in sec) 13003.5552518
-crossing number=22
+CPU time (in sec) 26794.6558161
+crossing number=23
 iterations=8
 number of points=127
-number of lines=8001
-all crossings=84641
-average crossing number=10.5788026497
+number of lines=4983
+all crossings=50752
+average crossing number=10.1850290989
 Start now plotting...
 
