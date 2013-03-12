@@ -137,15 +137,14 @@ def generate_lines(graph, line_type, verbose):
         print "Sampling of lines started..."
     if line_type == 'all':
         graph.create_all_lines()
-        graph.preprocess_lines()
     elif line_type == 'stabbing':
         graph.create_stabbing_lines()
     elif line_type == 'random':
         graph.create_random_lines()
-        graph.preprocess_lines()
     else:
         raise StandardError('Not yet supported this |%s| line-sampling type' %
                             line_type)
+    graph.preprocess_lines()
     if verbose:
             print "Sampling of lines finished."
     return

@@ -40,7 +40,7 @@ def compute_spanning_tree(graph):
     
     number_of_crossings = {}
     weights = {}
-    iterations = 1
+    iterations = 0
 
     while len(graph.connected_components) > 1:
         for line in lines:

@@ -145,7 +145,7 @@ def compute_spanning_tree(graph, alpha=2.0):
     solution = graph.solution
     n = graph.n
 
-    iterations = 1
+    iterations = 0
     lp_model = create_lp(graph)
 
     while len(solution) < n-1:
@@ -155,7 +155,7 @@ def compute_spanning_tree(graph, alpha=2.0):
         #    print var
         round_and_update_lp(graph, alpha)
         iterations += 1
-    return iterations-1
+    return iterations
 
 def main():
     # minimal example to find optimal spanning tree

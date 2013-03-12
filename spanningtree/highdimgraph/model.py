@@ -301,15 +301,17 @@ class HighDimGraph:
 
     def __partition_points_by_line(self, line, point_range):
         ''' partitioning of point set with discriminative function line
-            (points above the line as tuples , points below the line as sets)
-            both parts can be empty
+            (points above the line as tuples , point on line,
+             points below the line as sets)
+            all parts can be empty
         '''
         above_points = list()
+        lies_on_points = list()
         below_points = list()
         for i in point_range:
             p = self.point_set[i]
             if line.is_on(p):
-                return ()
+                lies_on_points.append(i)
             elif line.is_above(p):
                 above_points.append(i)
             elif line.is_below(p):
@@ -318,8 +320,10 @@ class HighDimGraph:
                 raise StandardError('can not find point i=%s:p=%s on line=%s' % 
                         (i, p, line))
         above_points.sort()
+        lies_on_points.sort()
         below_points.sort()
-        return (tuple(above_points), tuple(below_points))
+        return (tuple(above_points), tuple(lies_on_points),
+                tuple(below_points))
 
     def preprocess_lines(self, subset=None):
         ''' removes lines_registry that have same partitioning of the point set as
@@ -332,12 +336,15 @@ class HighDimGraph:
             point_range = sorted(subset)
         lines_dict = {}
         for line in self.lines:
-            partition_tuple = self.__partition_points_by_line(line, point_range)
-            if not partition_tuple:
-                # skip this line, because one point is on this line
-                continue
-            elif not partition_tuple[0] or not partition_tuple[1]:
-                # above or below part is empty, skip lineis_above
+            (above, on, below) = self.__partition_points_by_line(line, point_range)
+            partition_tuple = (above, on, below)
+            print partition_tuple
+#            if not partition_tuple:
+#                # skip this line, because one point is on this line
+#                continue
+            if not on and (not above or not below):
+                # above or below part is empty, skip lineis_above, when
+                # points
                 continue
             elif lines_dict.has_key(partition_tuple):
                 # skip this line, there is one equivalent line stored
