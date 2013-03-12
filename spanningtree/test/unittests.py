@@ -88,16 +88,13 @@ class PreprocessingLinesTestCase(unittest.TestCase):
         l7 = HighDimLine(np.array([(0., 7.), (1., 10.)]))  # y = 3 x + 7
         # below
         l8 = HighDimLine(np.array([(0., -1.), (6., 1.)]))  # y = 1/3 x - 1
-        # line between points omit it
-        l9 = HighDimLine(np.array([(3., 6.), (5., 7.)]))
-        lines = [l1, l2, l3, l4, l5, l6, l7, l8, l9]
+        lines = [l1, l2, l3, l4, l5, l6, l7, l8]
         graph.lines = lines
         graph.preprocess_lines()
         result = graph.lines
         self.assertEqual(len(result), 3)
         self.assertFalse(l7 in result)
         self.assertFalse(l8 in result)
-        self.assertFalse(l9 in result)
         self.assertTrue(l1 in result or l4 in result)
         self.assertTrue(l2 in result or l5 in result)
         self.assertTrue(l3 in result or l6 in result)
