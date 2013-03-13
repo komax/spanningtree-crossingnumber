@@ -62,7 +62,7 @@ def create_lp(graph):
     n = graph.n
     edges = graph.edges
     for (p,q) in edges:
-        x[p,q] = lambda_lp.addVar(# TODO maybe needed: obj=euclidean_distance(p,q),
+        x[p,q] = lambda_lp.addVar(#obj=graph.euclidean_distance(p,q),
                 name='edge|%s - %s|' % (p,q))
     t = lambda_lp.addVar(obj=1.0)#, vtype=grb.GRB.INTEGER)
 
@@ -89,7 +89,7 @@ def create_lp(graph):
     return lambda_lp
 
 
-def solve_lp(lambda_lp):
+def solve_lp(lambda_lp, graph):
     '''
     update (if needed) and solve the LP
     '''
@@ -104,7 +104,11 @@ def solve_lp(lambda_lp):
             format_string += "%s\n" % var
         #for constr in lambda_lp.getConstrs():
         #    format_string += "%s\n" % constr
-        raise StandardError('%s\nlp model=%s' % (format_string,lambda_lp))
+        print "number of lines = %s" % len(graph.lines)
+        print '%s\nlp model=%s' % (format_string,lambda_lp)
+        import spanningtree.plotting
+        spanningtree.plotting.plot(graph)
+        raise StandardError('Model infeasible')
 
 def round_and_update_lp(graph, alpha):
     '''
@@ -149,7 +153,7 @@ def compute_spanning_tree(graph, alpha=2.0):
     lp_model = create_lp(graph)
 
     while len(solution) < n-1:
-        solve_lp(lp_model)
+        solve_lp(lp_model, graph)
         # printing all variables of LP
         #for var in lp_model.getVars():
         #    print var

@@ -25,7 +25,8 @@ def solve_lp_and_round(graph, points):
     edges = list(graph.edges.iter_subset(points))
     x = {}
     for (p,q) in edges:
-        x[p,q] = gamma_lp.addVar(obj=graph.euclidean_distance(p,q), name='edge|%s - %s|' % (p,q))
+        x[p,q] = gamma_lp.addVar(obj=graph.euclidean_distance(p,q),
+                                 name='edge|%s - %s|' % (p,q))
 
     t = gamma_lp.addVar(obj=1.0)
     gamma_lp.modelSense = grb.GRB.MINIMIZE

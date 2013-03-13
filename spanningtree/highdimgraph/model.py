@@ -14,11 +14,12 @@ import factories
 import crossing
 
 class PointSet:
-    def __init__(self, n, dimension):
+    def __init__(self, np_points, n, dimension):
         self.n = n
         self.d = dimension
         shape = (n, dimension)
-        self.points = np.random.uniform(0, n, shape)
+        assert np_points.shape == shape
+        self.points = np_points
         self.name = ''
         
     def get_name(self):
