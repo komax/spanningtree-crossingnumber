@@ -24,6 +24,9 @@ class PointSet:
         
     def get_name(self):
         return self.name
+    
+    def max_val(self):
+        return np.max(self.points)
 
     def __getitem__(self, i):
         return self.points[i]
@@ -234,9 +237,11 @@ class HighDimGraph:
         return
 
     def create_random_lines(self):
-        number_of_random_lines = int(math.ceil(math.sqrt(2. * self.n)))
+        magic = 10
+        number_of_random_lines = int(magic * math.ceil(math.sqrt(2. * self.n)) )
         n = 2 * number_of_random_lines
-        points_for_lines = factories.create_uniform_points(n, self.d)
+        max_val = self.point_set.max_val()
+        points_for_lines = factories.create_uniform_points(n, self.d, max_val)
         lines = []
         for i in range(0, n, 2):
             pq = points_for_lines.subset((i, i + 1))

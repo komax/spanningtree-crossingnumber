@@ -9,9 +9,10 @@ from spanningtree import np
 import math
 import random
 
-def create_uniform_points(n, d):
-    point_range = n
-    np_points = np.random.randint(0, point_range, size=(n,d))
+def create_uniform_points(n, d, ub=None):
+    if ub == None:
+        ub = n
+    np_points = np.random.randint(0, ub, size=(n,d))
     eps = 0.1
     eps_points = np.random.uniform(-eps, eps, size=(n,d))
     np_points = np_points + eps_points
@@ -27,7 +28,7 @@ def create_grid_points(n, d):
     x = 0.0
     y = 0.0
     row = 0
-    diff = 50.0
+    diff = 5.0
     for i in range(root_n):
         y = 0.0
         for j in range(root_n):
