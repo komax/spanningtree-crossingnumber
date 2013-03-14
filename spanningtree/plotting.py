@@ -20,8 +20,8 @@ def plot(graph):
     # first plot lines
     l = list(graph.lines)
     assert l
-    for line in graph.lines:
-        plt.plot(xs, line(xs), 'r', zorder=1)
+    #for line in graph.lines:
+    #    plt.plot(xs, line(xs), 'r', zorder=1)
     # then plot solution
     xlines = []
     ylines = []

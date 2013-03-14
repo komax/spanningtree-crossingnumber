@@ -10,7 +10,7 @@ import math
 import random
 
 def create_uniform_points(n, d):
-    point_range = 10. * n
+    point_range = n
     np_points = np.random.randint(0, point_range, size=(n,d))
     eps = 0.1
     eps_points = np.random.uniform(-eps, eps, size=(n,d))

@@ -58,7 +58,6 @@ def create_lp(graph):
     lambda_lp = set_up_model("fekete_lp_2d")
     #lambda_lp.setParam('Cuts', 3)
     number_of_edges = 0
-    points = graph.point_set
     n = graph.n
     edges = graph.edges
     for (p,q) in edges:
@@ -118,11 +117,15 @@ def round_and_update_lp(graph, alpha):
     returns the selected edges in the fractional solution (of this iteration)
     '''
     edges = graph.edges
+    graph.compute_connected_components()
+    ccs = graph.connected_components
     solution = graph.solution
     (max_i, max_j) = (None, None)
     max_val = None
     for (i,j) in edges:
-        if x[i,j].X > max_val and x[i,j] > 1./3.:
+        cc_i = ccs.get_connected_component(i)
+        cc_j = ccs.get_connected_component(j) 
+        if cc_i != cc_j and x[i,j].X > max_val and x[i,j] > 1./3.:
             (max_i, max_j) = (i,j)
             max_val = x[i,j].X
 
