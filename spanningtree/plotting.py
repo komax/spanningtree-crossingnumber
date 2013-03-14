@@ -8,7 +8,7 @@ from pylab import frange
 from highdimgraph.factories import create_uniform_graph, create_grid_graph
 from helper.numpy_helpers import partition
 
-def plot(graph):
+def plot(graph, verbose=True):
     assert graph.d == 2
     '''
     plots points as blue circles, lines as red ones and the edges from the
@@ -16,16 +16,17 @@ def plot(graph):
     '''
     points = graph.point_set.points
     (xs, ys) = partition(points)
-
-    # first plot lines
-    l = list(graph.lines)
-    assert l
-    #for line in graph.lines:
-    #    plt.plot(xs, line(xs), 'r', zorder=1)
+    
+    if verbose:
+        # first plot lines
+        l = list(graph.lines)
+        assert l
+        for line in graph.lines:
+            plt.plot(xs, line(xs), 'r', zorder=1)
     # then plot solution
     xlines = []
     ylines = []
-
+    
     for (i, j) in graph.solution:
         (x1, y1) = partition(points[i])
         (x2, y2) = partition(points[j])

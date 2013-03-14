@@ -251,7 +251,7 @@ class SpanningTreeExperiment:
         if self.has_plot:
             if self.verbose:
                 print "Start now plotting..."
-            plotting.plot(self.graph)
+            plotting.plot(self.graph, self.verbose)
             if self.verbose:
                 print "Closed plot."
         return
