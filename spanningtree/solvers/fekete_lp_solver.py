@@ -16,10 +16,17 @@ def nonempty_subsets(n):
     '''
     returns all non empty subsets from the points set as generator
     '''
+    required_subsets = 2**(n-1) - 1
+    number_of_subsets = 0
     points = range(0,n)
-    for i in range(1,n):
-        for subset in itertools.combinations(points, i):
-            yield list(subset)
+    
+    subset_length = 1    
+    while number_of_subsets <= required_subsets:
+        for subset in itertools.combinations(points, subset_length):
+            number_of_subsets += 1
+            yield subset
+        subset_length += 1
+
 
 
 def cut(subset, edges):
