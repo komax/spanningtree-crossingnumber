@@ -20,16 +20,12 @@ def nonempty_subsets(n):
     number_of_subsets = 0
     points = range(0,n)
     subset_length = 1
-    
+
     while number_of_subsets <= required_subsets:
         for subset in itertools.combinations(points, subset_length):
             number_of_subsets += 1
             yield subset
         subset_length += 1
-        
-#    for i in range(1,n):
-#        for subset in itertools.combinations(points, i):
-#            yield subset
 
 def cut(subset, edges):
     '''
@@ -42,19 +38,6 @@ def cut(subset, edges):
             yield (i,j)
         elif i not in subset and j in subset:
             yield (i,j)
-#    for i in subset:
-#        for (p,q) in edges:
-#            if j not in subset:
-#                if i < j:
-#                    yield (i,j)
-#                else:
-#                    yield (j,i)
-#                #cut_edges.append((i,j))
-#        for (j,i) in edges.select('*', i):
-#            if j not in subset:
-#                yield (j,i)
-#                #cut_edges.append((j,i))
-    #return cut_edges
 
 # global variables for decision variables
 x = {}
