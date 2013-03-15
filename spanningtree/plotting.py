@@ -4,11 +4,11 @@ plots all points and the lines in the plane. Using matplotlib
 
 import matplotlib.pyplot as plt
 import math
-from pylab import frange
 from highdimgraph.factories import create_uniform_graph, create_grid_graph
 from helper.numpy_helpers import partition
 
-def plot(graph, verbose=True):
+def plot(graph, verbose=True, save_to_file=None, show=True):
+    assert save_to_file or show
     assert graph.d == 2
     '''
     plots points as blue circles, lines as red ones and the edges from the
@@ -40,7 +40,11 @@ def plot(graph, verbose=True):
     plt.plot(xlines, ylines, 'g', zorder=2)
     # then plot points
     plt.scatter(xs, ys, s=120, zorder=3)
-    plt.show()
+    if save_to_file:
+        filename = save_to_file+'.png'
+        plt.savefig(filename)
+    if show: 
+        plt.show()
 
 def main():
     graph = create_grid_graph(2 ** 2, 2)

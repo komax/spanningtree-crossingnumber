@@ -52,6 +52,8 @@ def parse_args():
         help="run experiment m times and returns averaged results")
     parser.add_argument("-p", "--plot", action='store_true', default=False,
         help="plots the computed solution into a widget")
+    parser.add_argument("-r", "--record", action='store_true', default=False,
+        help="record computed solution into a png")
     parser.add_argument("-v", "--verbose", action='store_true',
         help="adds verbose outputs to STDOUT")
     args = parser.parse_args()
@@ -63,10 +65,11 @@ def prepare_experiment(args):
     '''
     return create_experiment(args.solver, args.dimensions, args.number,
                              args.generate, args.linesampling, args.mean,
-                             args.plot, args.verbose, args.input)
+                             args.plot, args.record, args.verbose,
+                             args.input)
     
 def create_experiment(solver_type, d, n, distribution_type, lines_type, mean,
-                      has_plot, verbose, input_filename):
+                      has_plot, save_png, verbose, input_filename):
             
     if input_filename == None:
         if verbose:
@@ -81,10 +84,12 @@ def create_experiment(solver_type, d, n, distribution_type, lines_type, mean,
     
     if solver_type == 'all':
         experiment = SpanningTreeExperiment(SOLVER_OPTIONS[0], graph,
-                                            lines_type, has_plot, verbose)
+                                            lines_type, has_plot,
+                                            save_png, verbose)
     else:
         experiment = SpanningTreeExperiment(solver_type, graph, lines_type,
-                                            has_plot, verbose)
+                                            has_plot, save_png,
+                                            verbose)
         
     if mean > 1:
         experiment = AveragedExperiment(mean, experiment)
@@ -154,7 +159,8 @@ class SpanningTreeExperiment:
     stores all necessary information, data and options to preprocess point or
     line set before running a solver and takes care of time measuring
     '''
-    def __init__(self, solver_type, graph, lines_type, has_plot, verbose):
+    def __init__(self, solver_type, graph, lines_type, has_plot, save_png,
+                 verbose):
         assert solver_type != 'all'
         self.graph = graph
         self.lines_type = lines_type
@@ -163,6 +169,7 @@ class SpanningTreeExperiment:
         self.solver_type = solver_type
         self.solver = get_solver(solver_type)
         self.has_plot = has_plot
+        self.save_png = save_png
         self.verbose = verbose
 
         self.elapsed_time = None
@@ -248,10 +255,16 @@ class SpanningTreeExperiment:
         '''
         if plot option is set, plot
         '''
-        if self.has_plot:
+        
+        if self.has_plot or self.save_png:
             if self.verbose:
                 print "Start now plotting..."
-            plotting.plot(self.graph, self.verbose)
+            if self.save_png:
+                filename = self.get_name()
+            else:
+                filename = None
+            plotting.plot(self.graph, self.verbose,
+                          show=self.has_plot, save_to_file=filename)
             if self.verbose:
                 print "Closed plot."
         return

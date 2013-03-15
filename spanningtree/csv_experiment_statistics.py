@@ -84,6 +84,7 @@ class CompoundExperiment:
     def __init__(self, out_path, solver_type, dimensions, distribution_type, line_option, lb, ub,
             step, has_header, mean, verbose, input_filename):
         has_plot = False
+        save_to_file = False
         self.out_path = out_path
         self.solver_type = solver_type
         self.verbose = verbose
@@ -95,7 +96,9 @@ class CompoundExperiment:
         self.has_header = has_header
         self.experiment = create_experiment(solver_type, dimensions, lb,
                                             distribution_type,
-                                            line_option, mean, has_plot, verbose, input_filename)
+                                            line_option, mean, has_plot,
+                                            save_to_file, verbose,
+                                            input_filename)
         
     def write_csv(self):
         self.write_header()

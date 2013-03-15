@@ -284,9 +284,7 @@ class FeketeLPSolvingTestCase(unittest.TestCase):
         points_size = 4
         subsets_gen = flpsolv.nonempty_subsets(points_size)
         subsets = list(subsets_gen)
-        for subset in subsets:
-            print subset
-        self.assertEqual(len(subsets), 2 ** (points_size-1) - 1)
+        self.assertEqual(len(subsets), 2 ** points_size - 2)
 
 class OptSolverTestCase(unittest.TestCase):
     def setUp(self):
