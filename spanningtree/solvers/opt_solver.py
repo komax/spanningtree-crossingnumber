@@ -25,7 +25,7 @@ def create_ip(graph):
     n = graph.n
     edges = graph.edges
     for (p,q) in edges:
-        x[p,q] = lambda_ip.addVar(# TODO maybe needed: obj=euclidean_distance(p,q),
+        x[p,q] = lambda_ip.addVar(#obj=graph.euclidean_distance(p,q),
                 vtype=grb.GRB.BINARY,name='edge|%s - %s|' % (p,q))
     t = lambda_ip.addVar(obj=1.0, vtype=grb.GRB.INTEGER)
 

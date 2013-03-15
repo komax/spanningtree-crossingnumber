@@ -17,6 +17,7 @@ def plot(graph, verbose=True, save_to_file=None, show=True):
     points = graph.point_set.points
     (xs, ys) = partition(points)
     
+    plt.figure()
     if verbose:
         # first plot lines
         l = list(graph.lines)

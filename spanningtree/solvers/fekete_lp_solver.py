@@ -49,7 +49,7 @@ def create_lp(graph):
     n = graph.n
     edges = graph.edges
     for (p,q) in edges:
-        x[p,q] = lambda_lp.addVar(obj=graph.euclidean_distance(p,q),
+        x[p,q] = lambda_lp.addVar(#obj=graph.euclidean_distance(p,q),
                 name='edge|%s - %s|' % (p,q))
     t = lambda_lp.addVar(obj=1.0)#, vtype=grb.GRB.INTEGER)
 
