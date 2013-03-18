@@ -53,7 +53,7 @@ def solve_lp(graph):
     gamma_lp.optimize()
 
     if gamma_lp.status == grb.GRB.status.OPTIMAL:
-        print gamma_lp.getVars()
+        #print gamma_lp.getVars()
         #print x[2,3].X
         add_best_edge(graph, x)
         return
@@ -73,13 +73,16 @@ def add_best_edge(graph, x):
     solution = graph.solution
     (max_i, max_j) = (None, None)
     max_val = None
+    min_dist = 10000000
     for (i,j) in edges:
         cc_i = ccs.get_connected_component(i)
         cc_j = ccs.get_connected_component(j)
-        print cc_i, cc_j, i, j
-        if cc_i != cc_j and x[i,j].X > max_val:
+        #print cc_i, cc_j, i, j
+        dist = graph.euclidean_distance(i,j)
+        if cc_i != cc_j and x[i,j].X > max_val and dist < min_dist:
             (max_i, max_j) = (i,j)
             max_val = x[i,j].X
+            min_dist = dist
 
     graph.merge_cc(max_i, max_j)
     solution.update(max_i, max_j, True)
