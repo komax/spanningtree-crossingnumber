@@ -3,12 +3,17 @@ Created on Mar 18, 2013
 
 @author: max
 '''
-from mult_weights_solver import add_edge_to_solution_merge_ccs
 
-def solve_lp(graph, points):
+from spanningtree.helper.gurobi_helper import set_up_model
+import gurobipy as grb
+from gurobipy import quicksum
+import math
+from spanningtree.highdimgraph.crossing import has_crossing
+
+def solve_lp(graph):
+    points = range(0,graph.n)
     lines = graph.lines
     gamma_lp = set_up_model("connected_components_lp_2d")
-    graph.compute_connected_components()
     connected_components = graph.connected_components
     len_ccs = len(connected_components)
     edges = list(graph.edges.iter_subset(points))
@@ -40,16 +45,17 @@ def solve_lp(graph, points):
 
     # connectivity constraint
     for cc1 in connected_components:
-        gamma_lp.addConstr(
-                quicksum(x[p,q] for q in points if p < q and
+        gamma_lp.addConstr(quicksum(x[p,q] for (p,q) in edges if p < q and\
                          p in cc1 and q not in cc1) +
-                quicksum(x[q,p] for q in points if p > q and
+                quicksum(x[q,p] for (q,p) in edges if p > q and\
                          p in cc1 and q not in cc1)
-                >= 1)
-
+                >= 1.)
     gamma_lp.optimize()
 
     if gamma_lp.status == grb.GRB.status.OPTIMAL:
+        print gamma_lp.getVars()
+        #print x[2,3].X
+        add_best_edge(graph, x)
         return
     else:
         format_string = 'Vars:\n'
@@ -61,7 +67,7 @@ def solve_lp(graph, points):
         spanningtree.plotting.plot(graph)
         raise StandardError('Model infeasible')
     
-def add_best_edge(graph):
+def add_best_edge(graph, x):
     edges = graph.edges
     ccs = graph.connected_components
     solution = graph.solution
@@ -69,14 +75,13 @@ def add_best_edge(graph):
     max_val = None
     for (i,j) in edges:
         cc_i = ccs.get_connected_component(i)
-        cc_j = ccs.get_connected_component(j) 
-        if cc_i != cc_j and x[i,j].X > max_val and x[i,j] > 1./3.:
+        cc_j = ccs.get_connected_component(j)
+        print cc_i, cc_j, i, j
+        if cc_i != cc_j and x[i,j].X > max_val:
             (max_i, max_j) = (i,j)
             max_val = x[i,j].X
 
-    x[max_i,max_j].lb = 1.
-    x[max_i,max_j].ub = 1.
-    edges.update(max_i,max_j, False)
+    graph.merge_cc(max_i, max_j)
     solution.update(max_i, max_j, True)
     return
 
@@ -84,33 +89,26 @@ def compute_spanning_tree(graph):
     n = graph.n
     stored_lines = graph.lines[:]
     remaining_points = range(0,n)
-    solution = graph.solution
-    lines = graph.lines
+    #lines = graph.lines
     iterations = 1
-    while len(remaining_points) > 1:
-        t = estimate_t(remaining_points)
-        round_edges = solve_lp_and_round(graph, remaining_points)
-        graph.compute_connected_components()
-        connected_components = graph.connected_components
-        if not has_proper_no_of_connected_components(connected_components, remaining_points):
-            put_back_round_edges(graph, round_edges)
-            continue
-        new_point_set = []
-        for connected_component in connected_components:
-            p = random.sample(connected_component, 1)[0]
-            new_point_set.append(p)
-        remaining_points = new_point_set
-        lines = graph.preprocess_lines(remaining_points)
+    while len(graph.connected_components) > 1:
+        solve_lp(graph)
+        #print x[2,3].X
+        #add_best_edge(graph, x)
+        #graph.compute_connected_components()
+        #connected_components = graph.connected_components
+        #lines = graph.preprocess_lines(remaining_points)
         iterations += 1
-    assert len(remaining_points) == 1
-    graph.lines = stored_lines
-    graph.compute_spanning_tree_on_ccs()
+    #graph.lines = stored_lines
     return iterations
 
 def main():
     # minimal example to find optimal spanning tree
+    import numpy as np
     points = np.array([(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)])
-    graph = create_graph(points, 5, 2)
+    import spanningtree.highdimgraph.factories as factories
+    graph = factories.create_graph(points, 5, 2, 'custom')
+    from spanningtree.highdimgraph.lines import HighDimLine
     l1 = HighDimLine(np.array([(2., 6.), (3., 2.)])) # y = -4x + 14
     l2 = HighDimLine(np.array([(2., 3.), (6., 5.)])) # y = 0.5x + 2
     l3 = HighDimLine(np.array([(3., 5.5), (5., 6.5)])) # y = 0.5x + 4
@@ -119,7 +117,7 @@ def main():
     graph.preprocess_lines()
     compute_spanning_tree(graph)
     print "crossing number = %s" % graph.crossing_number()
-    import plotting
+    import spanningtree.plotting as plotting
     plotting.plot(graph)
 
 if __name__ == '__main__':

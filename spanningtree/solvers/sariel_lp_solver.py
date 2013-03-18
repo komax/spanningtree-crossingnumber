@@ -90,7 +90,6 @@ def compute_spanning_tree(graph):
     n = graph.n
     stored_lines = graph.lines[:]
     remaining_points = range(0,n)
-    solution = graph.solution
     lines = graph.lines
     iterations = 1
     while len(remaining_points) > 1:
