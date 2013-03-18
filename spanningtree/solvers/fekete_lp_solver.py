@@ -66,11 +66,19 @@ def create_lp(graph):
     # correct number of edges
     lambda_lp.addConstr(quicksum(x[i,j] for (i,j) in edges) == (n-1))
 
-    subsets = nonempty_subsets(n)
-    # connectivity constraints
-    for subset in subsets:
-        lambda_lp.addConstr(quicksum(x[i,j] for (i,j) in cut(subset, edges))
-                >= 1)
+#    subsets = nonempty_subsets(n)
+#    # connectivity constraints
+#    for subset in subsets:
+#        lambda_lp.addConstr(quicksum(x[i,j] for (i,j) in cut(subset, edges))
+#                >= 1)
+    # connectivity constraint
+    connected_components = graph.connected_components
+    for cc1 in connected_components:
+        lambda_lp.addConstr(quicksum(x[p,q] for (p,q) in edges if p < q and\
+                         p in cc1 and q not in cc1) +
+                quicksum(x[q,p] for (q,p) in edges if p > q and\
+                         p in cc1 and q not in cc1)
+                >= 1.)
 
     lines = graph.lines
     # bound crossing number
@@ -111,17 +119,19 @@ def round_and_update_lp(graph, alpha):
     returns the selected edges in the fractional solution (of this iteration)
     '''
     edges = graph.edges
-    graph.compute_connected_components()
     ccs = graph.connected_components
     solution = graph.solution
     (max_i, max_j) = (None, None)
     max_val = None
+    #min_dist = 100000000
     for (i,j) in edges:
         cc_i = ccs.get_connected_component(i)
-        cc_j = ccs.get_connected_component(j) 
-        if cc_i != cc_j and x[i,j].X > max_val and x[i,j] > 1./3.:
+        cc_j = ccs.get_connected_component(j)
+        #dist = graph.euclidean_distance(i, j)
+        if cc_i != cc_j and x[i,j].X > max_val:# and dist < min_dist:
             (max_i, max_j) = (i,j)
             max_val = x[i,j].X
+            #min_dist = dist
 
     x[max_i,max_j].lb = 1.
     x[max_i,max_j].ub = 1.
@@ -150,6 +160,7 @@ def compute_spanning_tree(graph, alpha=2.0):
     lp_model = create_lp(graph)
 
     while len(solution) < n-1:
+        graph.compute_connected_components()
         solve_lp(lp_model, graph)
         # printing all variables of LP
         #for var in lp_model.getVars():
