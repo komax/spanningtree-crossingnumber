@@ -9,6 +9,7 @@ import solvers.mult_weights_solver as mws
 import solvers.sariel_lp_solver as slpsolv
 import solvers.fekete_lp_solver as flpsolv
 import solvers.opt_solver as opt_solver
+import solvers.connected_components_lp_solver as cclp
 import highdimgraph.factories as factories
 import plotting
 from spanningtree import np
@@ -20,7 +21,8 @@ def main():
     experiment.process()
 
 # constants for options
-SOLVER_OPTIONS = [ 'mult_weight', 'sariel_lp', 'fekete_lp', 'opt', 'all']
+SOLVER_OPTIONS = [ 'mult_weight', 'sariel_lp', 'cc_lp', 'fekete_lp',
+                  'opt', 'all']
 DATA_DISTRIBUTION_OPTIONS = ['uniform', 'grid']
 LINE_OPTIONS = ['all', 'stabbing', 'random']
 
@@ -128,6 +130,8 @@ def get_solver(solver_type):
         return mws.compute_spanning_tree
     elif solver_type == 'sariel_lp':
         return slpsolv.compute_spanning_tree
+    elif solver_type == 'cc_lp':
+        return cclp.compute_spanning_tree
     elif solver_type == 'fekete_lp':
         return flpsolv.compute_spanning_tree
     elif solver_type == 'opt':
