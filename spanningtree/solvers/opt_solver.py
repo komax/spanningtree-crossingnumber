@@ -20,7 +20,7 @@ def create_ip(graph):
     creates a gurobi model containing Fekete IP formulation
     '''
     lambda_ip = set_up_model("fekete_ip_2d")
-    lambda_ip.setParam('Cuts', 3)
+    #lambda_ip.setParam('Cuts', 3)
     n = graph.n
     edges = graph.edges
     for (p,q) in edges:
@@ -35,7 +35,14 @@ def create_ip(graph):
     # correct number of edges
     lambda_ip.addConstr(quicksum(x[i,j] for (i,j) in edges) == (n-1))
 
-    # connectivity constraints
+#    # connectivity constraints
+#    connected_components = graph.connected_components
+#    for cc1 in connected_components:
+#        lambda_ip.addConstr(quicksum(x[p,q] for (p,q) in edges if p < q and\
+#                         p in cc1 and q not in cc1) +
+#                quicksum(x[q,p] for (q,p) in edges if p > q and\
+#                         p in cc1 and q not in cc1)
+#                >= 1.)
     for subset in nonempty_subsets(n):
         lambda_ip.addConstr(quicksum(x[i,j] for (i,j) in cut(subset, edges))
                 >= 1)
