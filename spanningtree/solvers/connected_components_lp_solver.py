@@ -93,13 +93,14 @@ def compute_spanning_tree(graph):
     stored_lines = graph.lines[:]
     remaining_points = range(0,n)
     #lines = graph.lines
-    iterations = 1
+    iterations = 0
     while len(graph.connected_components) > 1:
         solve_lp(graph)
         #print x[2,3].X
         #add_best_edge(graph, x)
         #graph.compute_connected_components()
         #connected_components = graph.connected_components
+        # TODO preprocess line set; include only lines between connected components
         #lines = graph.preprocess_lines(remaining_points)
         iterations += 1
     #graph.lines = stored_lines
