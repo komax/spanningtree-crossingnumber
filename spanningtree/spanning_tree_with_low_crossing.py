@@ -267,8 +267,8 @@ class SpanningTreeExperiment:
                 filename = self.get_name()
             else:
                 filename = None
-            plotting.plot(self.graph, self.verbose,
-                          show=self.has_plot, save_to_file=filename)
+            plotting.plot(self.graph,
+                show=self.has_plot, save_to_file=filename)
             if self.verbose:
                 print "Closed plot."
         return

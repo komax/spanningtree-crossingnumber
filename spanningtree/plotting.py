@@ -7,7 +7,7 @@ import math
 from highdimgraph.factories import create_uniform_graph, create_grid_graph
 from helper.numpy_helpers import partition
 
-def plot(graph, verbose=True, save_to_file=None, show=True):
+def plot(graph, verbose=False, save_to_file=None, show=True):
     assert save_to_file or show
     assert graph.d == 2
     '''
