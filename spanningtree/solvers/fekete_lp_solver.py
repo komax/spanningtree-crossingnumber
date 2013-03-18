@@ -4,9 +4,8 @@ planar 2D
 using Gurobi as standard solver
 '''
 
-import numpy as np
 import gurobipy as grb
-from spanningtree.highdimgraph import *
+import spanningtree.highdimgraph.crossing as crossing
 from spanningtree.helper.gurobi_helper import set_up_model
 from gurobipy import quicksum
 import math
@@ -161,8 +160,11 @@ def compute_spanning_tree(graph, alpha=2.0):
 
 def main():
     # minimal example to find optimal spanning tree
+    import numpy as np
     points = np.array([(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)])
-    graph = create_graph(points, 5, 2)
+    import spanningtree.highdimgraph.factories as factories
+    graph = factories.create_graph(points, 5, 2, 'custom')
+    from spanningtree.highdimgraph.lines import HighDimLine
     l1 = HighDimLine(np.array([(2., 6.), (3., 2.)])) # y = -4x + 14
     l2 = HighDimLine(np.array([(2., 3.), (6., 5.)])) # y = 0.5x + 2
     l3 = HighDimLine(np.array([(3., 5.5), (5., 6.5)])) # y = 0.5x + 4
@@ -171,7 +173,7 @@ def main():
     graph.preprocess_lines()
     compute_spanning_tree(graph)
     print "crossing number = %s" % graph.crossing_number()
-    import plotting
+    import spanningtree.plotting as plotting
     plotting.plot(graph)
 
 if __name__ == '__main__':
