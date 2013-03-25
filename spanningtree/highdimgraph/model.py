@@ -21,7 +21,7 @@ class PointSet:
         assert np_points.shape == shape
         self.points = np_points
         self.name = ''
-        
+
     def get_name(self):
         return self.name
     
