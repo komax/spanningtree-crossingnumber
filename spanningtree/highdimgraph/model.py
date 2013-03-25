@@ -9,7 +9,7 @@ import copy
 from collections import deque
 from spanningtree import np
 from lines import HighDimLineSegment, HighDimLine
-from spanningtree.helper.numpy_helpers import partition 
+from spanningtree.helper.numpy_helpers import partition
 import factories
 import crossing
 
