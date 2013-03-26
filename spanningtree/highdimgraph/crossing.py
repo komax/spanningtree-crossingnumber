@@ -27,7 +27,7 @@ class CrossingRegistry:
 
     def put(self, line, line_seg, bool_val):
         i, j = CrossingRegistry.convert(line, line_seg)
-        self.count_n_reset()
+        #self.count_n_reset()
         self.crossings[(i, j)] = bool_val
 
     def has_entry(self, line, line_seg):
