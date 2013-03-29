@@ -8,24 +8,23 @@ import gurobipy as grb
 import spanningtree.highdimgraph.crossing as crossing
 from spanningtree.helper.gurobi_helper import set_up_model
 from gurobipy import quicksum
-import math
 import itertools
+
 
 def nonempty_subsets(n):
     '''
     returns all non empty subsets from the points set as generator
     '''
-    required_subsets = 2**(n-1) - 1
+    required_subsets = 2 ** (n - 1) - 1
     number_of_subsets = 0
-    points = range(0,n)
-    
-    subset_length = 1    
+    points = range(n)
+
+    subset_length = 1
     while number_of_subsets <= required_subsets:
         for subset in itertools.combinations(points, subset_length):
             number_of_subsets += 1
             yield subset
         subset_length += 1
-
 
 
 def cut(subset, edges):
@@ -34,15 +33,16 @@ def cut(subset, edges):
     subset (or the other way round)
     '''
     #cut_edges = []
-    for (i,j) in edges:
+    for (i, j) in edges:
         if i in subset and j not in subset:
-            yield (i,j)
+            yield (i, j)
         elif i not in subset and j in subset:
-            yield (i,j)
+            yield (i, j)
 
 # global variables for decision variables
 x = {}
 t = 0
+
 
 def create_lp(graph):
     '''
@@ -51,20 +51,18 @@ def create_lp(graph):
     '''
     lambda_lp = set_up_model("fekete_lp_2d")
     #lambda_lp.setParam('Cuts', 3)
-    number_of_edges = 0
     n = graph.n
     edges = graph.edges
-    for (p,q) in edges:
-        x[p,q] = lambda_lp.addVar(#obj=graph.euclidean_distance(p,q),
-                name='edge|%s - %s|' % (p,q))
-    t = lambda_lp.addVar(obj=1.0)#, vtype=grb.GRB.INTEGER)
+    for (p, q) in edges:
+        x[p, q] = lambda_lp.addVar(name='edge|%s - %s|' % (p, q))
+    t = lambda_lp.addVar(obj=1.0)
 
     lambda_lp.modelSense = grb.GRB.MINIMIZE
 
     lambda_lp.update()
 
     # correct number of edges
-    lambda_lp.addConstr(quicksum(x[i,j] for (i,j) in edges) == (n-1))
+    lambda_lp.addConstr(quicksum(x[i, j] for (i, j) in edges) == (n - 1))
 
 #    subsets = nonempty_subsets(n)
 #    # connectivity constraints
@@ -74,17 +72,17 @@ def create_lp(graph):
     # connectivity constraint
     connected_components = graph.connected_components
     for cc1 in connected_components:
-        lambda_lp.addConstr(quicksum(x[p,q] for (p,q) in edges if p < q and\
+        lambda_lp.addConstr(quicksum(x[p, q] for (p, q) in edges if p < q and
                          p in cc1 and q not in cc1) +
-                quicksum(x[q,p] for (q,p) in edges if p > q and\
+                quicksum(x[q, p] for (q, p) in edges if p > q and
                          p in cc1 and q not in cc1)
                 >= 1.)
 
     lines = graph.lines
     # bound crossing number
     for line in lines:
-        s = quicksum(x[p,q] for (p,q) in edges if crossing.has_crossing(line,
-            graph.get_line_segment(p,q)))
+        s = quicksum(x[p, q] for (p, q) in edges if crossing.has_crossing(line,
+            graph.get_line_segment(p, q)))
         if s != 0.0:
             lambda_lp.addConstr(s <= t)
     return lambda_lp
@@ -106,15 +104,16 @@ def solve_lp(lambda_lp, graph):
         #for constr in lambda_lp.getConstrs():
         #    format_string += "%s\n" % constr
         print "number of lines = %s" % len(graph.lines)
-        print '%s\nlp model=%s' % (format_string,lambda_lp)
+        print '%s\nlp model=%s' % (format_string, lambda_lp)
         import spanningtree.plotting
         spanningtree.plotting.plot(graph)
         raise StandardError('Model infeasible')
 
+
 def round_and_update_lp(graph, alpha):
     '''
-    find edges that are in the fractional solution, round them up and update the
-    LP model
+    find edges that are in the fractional solution, round them up
+    and update the LP model
 
     returns the selected edges in the fractional solution (of this iteration)
     '''
@@ -123,33 +122,18 @@ def round_and_update_lp(graph, alpha):
     solution = graph.solution
     (max_i, max_j) = (None, None)
     max_val = None
-    #min_dist = 100000000
-    for (i,j) in edges:
+    for (i, j) in edges:
         cc_i = ccs.get_connected_component(i)
         cc_j = ccs.get_connected_component(j)
-        #dist = graph.euclidean_distance(i, j)
-        if cc_i != cc_j and x[i,j].X > max_val:# and dist < min_dist:
-            (max_i, max_j) = (i,j)
-            max_val = x[i,j].X
-            #min_dist = dist
+        if cc_i != cc_j and x[i, j].X > max_val:
+            (max_i, max_j) = (i, j)
+            max_val = x[i, j].X
 
-    x[max_i,max_j].lb = 1.
-    x[max_i,max_j].ub = 1.
-    edges.update(max_i,max_j, False)
+    x[max_i, max_j].lb = 1.
+    x[max_i, max_j].ub = 1.
+    edges.update(max_i, max_j, False)
     solution.update(max_i, max_j, True)
     return
-#    if max_i > max_j:
-#        (max_i, max_j) = (max_j, max_i)
-#    return [(max_i, max_j)]
-    #round_edges = []
-    #for (i,j) in edges:
-    #    if (i,j) not in solution and x[i,j].X >= 1./alpha:
-    #        x[i,j].lb = 1.
-    #        x[i,j].ub = 1.
-    #        if i > j:
-    #            (i,j) = (j,i)
-    #        round_edges.append((i,j))
-    #return round_edges'''
 
 
 def compute_spanning_tree(graph, alpha=2.0):
@@ -159,7 +143,7 @@ def compute_spanning_tree(graph, alpha=2.0):
     iterations = 0
     lp_model = create_lp(graph)
 
-    while len(solution) < n-1:
+    while len(solution) < n - 1:
         graph.compute_connected_components()
         solve_lp(lp_model, graph)
         # printing all variables of LP
@@ -169,16 +153,20 @@ def compute_spanning_tree(graph, alpha=2.0):
         iterations += 1
     return iterations
 
+
 def main():
     # minimal example to find optimal spanning tree
     import numpy as np
-    points = np.array([(2.,2.), (6.,4.), (3., 6.), (5., 7.), (4.25, 5.)])
+    points = np.array([(2., 2.), (6., 4.), (3., 6.), (5., 7.), (4.25, 5.)])
     import spanningtree.highdimgraph.factories as factories
     graph = factories.create_graph(points, 5, 2, 'custom')
     from spanningtree.highdimgraph.lines import HighDimLine
-    l1 = HighDimLine(np.array([(2., 6.), (3., 2.)])) # y = -4x + 14
-    l2 = HighDimLine(np.array([(2., 3.), (6., 5.)])) # y = 0.5x + 2
-    l3 = HighDimLine(np.array([(3., 5.5), (5., 6.5)])) # y = 0.5x + 4
+    # y = -4x + 14
+    l1 = HighDimLine(np.array([(2., 6.), (3., 2.)]))
+    # y = 0.5x + 2
+    l2 = HighDimLine(np.array([(2., 3.), (6., 5.)]))
+    # y = 0.5x + 4
+    l3 = HighDimLine(np.array([(3., 5.5), (5., 6.5)]))
     lines = [l1, l2, l3]
     graph.lines = lines
     graph.preprocess_lines()

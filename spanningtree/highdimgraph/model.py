@@ -12,6 +12,7 @@ from spanningtree.helper.numpy_helpers import partition
 import factories
 import crossing
 
+
 class PointSet:
     def __init__(self, np_points, n, dimension):
         self.n = n
@@ -44,6 +45,7 @@ class PointSet:
         for x in indices_subset:
             assert 0 <= x < self.n
         return self.points[indices_subset]
+
 
 class Edges:
     def __init__(self, n, matrix):
@@ -100,6 +102,7 @@ class Edges:
     def update(self, i, j, new_val):
         self.adj_matrix[i, j] = self.adj_matrix[j, i] = new_val
 
+
 class HighDimGraph:
     def __init__(self, points, edges, n, d):
         assert points.n == n
@@ -116,7 +119,7 @@ class HighDimGraph:
 
         self.lines_registry = {}
         self.line_segments = {}
-        
+
     def get_name(self):
         return self.point_set.get_name()
 
@@ -141,12 +144,10 @@ class HighDimGraph:
                 if neighbor not in visited:
                     queue.append(neighbor)
 
-
     def euclidean_distance(self, i, j):
         p = self.point_set[i]
         q = self.point_set[j]
         return np.linalg.norm(p - q)
-
 
     def merge_cc(self, i, j):
         self.connected_components.merge_by_vertices(i, j)
@@ -155,7 +156,6 @@ class HighDimGraph:
             for q in cc:
                 if p != q:
                     self.edges.update(p, q, False)
-
 
     def compute_connected_component(self, root):
         connected_component = set([root])
@@ -225,7 +225,7 @@ class HighDimGraph:
 
     def create_random_lines(self):
         magic = 10
-        number_of_random_lines = int(magic * math.ceil(math.sqrt(2. * self.n)) )
+        number_of_random_lines = int(magic * math.ceil(math.sqrt(2. * self.n)))
         n = 2 * number_of_random_lines
         max_val = self.point_set.max_val()
         points_for_lines = factories.create_uniform_points(n, self.d, max_val)
@@ -237,11 +237,10 @@ class HighDimGraph:
         self.lines = lines
         return
 
-
     def create_all_lines(self):
         '''
-        compute all possible seperators (lines_registry) on the point set. There maybe
-        duplicates within this set
+        compute all possible seperators (lines_registry) on the point set.
+        There can be duplicates within this set
         '''
         # TODO update implementation for 3D
         lines = []
@@ -302,9 +301,10 @@ class HighDimGraph:
                 tuple(below_points))
 
     def preprocess_lines(self, subset=None):
-        ''' removes lines_registry that have same partitioning of the point set as
-            equivalent ones
-            lines_registry above or below the point set are also removed
+        '''
+        removes lines_registry that have same partitioning of
+        the point set as equivalent ones
+        lines_registry above or below the point set are also removed
         '''
         if subset is None:
             point_range = range(self.n)
@@ -312,7 +312,8 @@ class HighDimGraph:
             point_range = sorted(subset)
         lines_dict = {}
         for line in self.lines:
-            (above, on, below) = self.__partition_points_by_line(line, point_range)
+            (above, on, below) = self.__partition_points_by_line(line,
+                    point_range)
             partition_tuple = (above, on, below)
 #            print partition_tuple
 #            if not partition_tuple:
@@ -322,7 +323,7 @@ class HighDimGraph:
                 # above or below part is empty, skip lineis_above, when
                 # points
                 continue
-            elif lines_dict.has_key(partition_tuple):
+            elif partition_tuple in lines_dict:
                 # skip this line, there is one equivalent line stored
                 continue
             else:
@@ -371,7 +372,8 @@ class HighDimGraph:
 
     def calculate_crossings(self):
         '''
-        for all lines_registry and edges in the solution compute the overall crossings
+        for all lines_registry and edges in the solution
+        compute the overall crossings
         '''
         crossing_number = 0
         for line in self.lines:
@@ -380,7 +382,8 @@ class HighDimGraph:
 
     def maximum_crossing_number(self):
         '''
-        for all lines_registry and edges in the solution compute the maximum crossing number
+        for all lines_registry and edges in the solution
+        compute the maximum crossing number
         '''
         max_crossing_number = 0
         for line in self.lines:
@@ -397,7 +400,7 @@ class HighDimGraph:
 class ConnectedComponents:
     def __init__(self, n):
         self.ccs = list(set([i]) for i in range(n))
-        
+
     def __iter__(self):
         for cc in self.ccs:
             yield cc
@@ -407,7 +410,9 @@ class ConnectedComponents:
             if i in cc:
                 return cc
         else:
-            raise StandardError('can not find vertex=%s in this connected components=%s' % (i, self.ccs))
+            raise StandardError(
+               'can not find vertex=%s in this connected components=%s' %
+                       (i, self.ccs))
 
     def merge(self, cc1, cc2):
         '''
