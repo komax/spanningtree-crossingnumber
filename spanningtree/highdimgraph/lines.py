@@ -6,6 +6,7 @@ Created on Mar 8, 2013
 from spanningtree import np
 from spanningtree.helper.numpy_helpers import partition, np_allclose
 
+
 class HighDimLine:
     def __init__(self, X):
         assert X.shape[0] == 2
@@ -40,7 +41,7 @@ class HighDimLine:
         return y.flatten()
 
     def __str__(self):
-       return 'HighDimLine(theta=\n%s, points=\n%s)' % (self.theta, self.X)
+        return 'HighDimLine(theta=\n%s, points=\n%s)' % (self.theta, self.X)
 
     def __repr__(self):
         return self.__str__()
@@ -59,13 +60,15 @@ class HighDimLine:
         (x, y) = partition(p)
         y_line = self.call(x)
         return (y < y_line).all() and not self.is_on(p)
-    
+
+
 class HighDimLineSegment(HighDimLine):
     def __init__(self, X):
         HighDimLine.__init__(self, X)
 
     def __str__(self):
-       return 'HighDimLineSegment(theta=\n%s, points=\n%s)' % (self.theta, self.X)
+        return 'HighDimLineSegment(theta=\n%s, points=\n%s)' %\
+               (self.theta, self.X)
 
     def is_between(self, x):
         # TODO update this implementation for higher d. Is this still correct?

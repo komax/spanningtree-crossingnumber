@@ -27,4 +27,3 @@ with open(infilename, 'rb') as tspfile:
         elif 'NODE_COORD_SECTION' in line:
             found_data_part = True
             continue
-

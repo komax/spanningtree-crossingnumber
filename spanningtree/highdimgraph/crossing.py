@@ -8,6 +8,7 @@ from spanningtree import np
 
 CACHE_SIZE = 12000000
 
+
 class CrossingRegistry:
     def __init__(self):
         self.entries = 0
@@ -39,14 +40,16 @@ class CrossingRegistry:
             i, j = CrossingRegistry.convert(line, line_seg)
             return self.crossings[(i, j)]
         else:
-            raise StandardError('line=%s and line_seg=%s not in registry' % 
+            raise StandardError('line=%s and line_seg=%s not in registry' %
                     (line, line_seg))
 
 registry = CrossingRegistry()
 
+
 def new_crossing_registry():
     global registry
     registry = CrossingRegistry()
+
 
 def has_crossing(line, line_seg):
     if registry.has_entry(line, line_seg):

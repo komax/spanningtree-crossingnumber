@@ -4,7 +4,6 @@ Created on Feb 5, 2013
 @author: max
 '''
 import math
-import random
 import copy
 from collections import deque
 from spanningtree import np
@@ -24,24 +23,12 @@ class PointSet:
 
     def get_name(self):
         return self.name
-    
+
     def max_val(self):
         return np.max(self.points)
 
     def __getitem__(self, i):
         return self.points[i]
-
-    def has_point(self, p):
-        for point in self.points:
-            if np_allclose(point, p):
-                return True
-        else:
-            return False
-
-    def get_index(self, p):
-        for row in range(0, self.n):
-            if np_allclose(self.points[row], p):
-                return row
 
     def __iter__(self):
         return self.points.__iter__()
@@ -288,23 +275,6 @@ class HighDimGraph:
         pq_lines.append(HighDimLine(np.array([(x1, y1b), (x2, y2u)])))
         return pq_lines
 
-    def generate_lines(self, points):
-        ''' compute all possible seperators (lines_registry) on the point set. There maybe
-            duplicates within this set
-        '''
-        lines = {}
-        for p in points:
-            for q in points:
-                if points.index(p) < points.index(q):
-                    if not lines.has_key((p, q)):
-                        # create all different lines_registry
-                        pq_lines = create_lines(p, q, eps)
-                        lines[p, q] = pq_lines
-        line_set = []
-        for pq_lines in lines.values():
-            line_set = line_set + pq_lines
-        return line_set
-
     def __partition_points_by_line(self, line, point_range):
         ''' partitioning of point set with discriminative function line
             (points above the line as tuples , point on line,
@@ -323,7 +293,7 @@ class HighDimGraph:
             elif line.is_below(p):
                 below_points.append(i)
             else:
-                raise StandardError('can not find point i=%s:p=%s on line=%s' % 
+                raise StandardError('can not find point i=%s:p=%s on line=%s' %
                         (i, p, line))
         above_points.sort()
         lies_on_points.sort()
