@@ -3,9 +3,8 @@ plots all points and the lines in the plane. Using matplotlib
 """
 
 import matplotlib.pyplot as plt
-import math
-from highdimgraph.factories import create_uniform_graph, create_grid_graph
 from helper.numpy_helpers import partition
+
 
 def plot(graph, verbose=False, save_to_file=None, show=True):
     assert save_to_file or show
@@ -16,7 +15,7 @@ def plot(graph, verbose=False, save_to_file=None, show=True):
     '''
     points = graph.point_set.points
     (xs, ys) = partition(points)
-    
+
     plt.figure()
     if verbose:
         # first plot lines
@@ -27,7 +26,7 @@ def plot(graph, verbose=False, save_to_file=None, show=True):
     # then plot solution
     xlines = []
     ylines = []
-    
+
     for (i, j) in graph.solution:
         (x1, y1) = partition(points[i])
         (x2, y2) = partition(points[j])
@@ -42,12 +41,14 @@ def plot(graph, verbose=False, save_to_file=None, show=True):
     # then plot points
     plt.scatter(xs, ys, s=120, zorder=3)
     if save_to_file:
-        filename = save_to_file+'.png'
+        filename = save_to_file + '.png'
         plt.savefig(filename)
-    if show: 
+    if show:
         plt.show()
 
+
 def main():
+    from highdimgraph.factories import create_grid_graph
     graph = create_grid_graph(2 ** 2, 2)
     # graph = create_uniform_graph(2, 2)
     #graph.create_all_lines()
@@ -56,11 +57,10 @@ def main():
     assert graph.lines
     graph.preprocess_lines()
     assert graph.lines
-    import mult_weights_solver as mws
+    import solvers.mult_weights_solver as mws
 
     mws.compute_spanning_tree(graph)
     plot(graph)
 
 if __name__ == '__main__':
     main()
-

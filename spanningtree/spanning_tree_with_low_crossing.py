@@ -15,23 +15,24 @@ import plotting
 from spanningtree import np
 import os
 
+
 def main():
     args = parse_args()
     experiment = prepare_experiment(args)
     experiment.process()
 
 # constants for options
-SOLVER_OPTIONS = [ 'mult_weight', 'sariel_lp', 'cc_lp', 'fekete_lp',
+SOLVER_OPTIONS = ['mult_weight', 'sariel_lp', 'cc_lp', 'fekete_lp',
                   'opt', 'all']
 DATA_DISTRIBUTION_OPTIONS = ['uniform', 'grid']
 LINE_OPTIONS = ['all', 'stabbing', 'random']
+
 
 def parse_args():
     '''
     parse all arguments on the command line and return them
     '''
-    parser = argparse.ArgumentParser(description=
-            """
+    parser = argparse.ArgumentParser(description="""
             run an parameterized experiment to compute
             a spanning tree with low crossing number
             """)
@@ -61,6 +62,7 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+
 def prepare_experiment(args):
     '''
     factory for creation of experiments from arguments
@@ -69,11 +71,11 @@ def prepare_experiment(args):
                              args.generate, args.linesampling, args.mean,
                              args.plot, args.record, args.verbose,
                              args.input)
-    
+
+
 def create_experiment(solver_type, d, n, distribution_type, lines_type, mean,
                       has_plot, save_png, verbose, input_filename):
-            
-    if input_filename == None:
+    if input_filename is None:
         if verbose:
             print "Start generating graph..."
         graph = generate_graph(d, n, distribution_type)
@@ -83,7 +85,7 @@ def create_experiment(solver_type, d, n, distribution_type, lines_type, mean,
         graph = graph_from_file(input_filename)
     if verbose:
         print "Graph has been created."
-    
+
     if solver_type == 'all':
         experiment = SpanningTreeExperiment(SOLVER_OPTIONS[0], graph,
                                             lines_type, has_plot,
@@ -92,15 +94,16 @@ def create_experiment(solver_type, d, n, distribution_type, lines_type, mean,
         experiment = SpanningTreeExperiment(solver_type, graph, lines_type,
                                             has_plot, save_png,
                                             verbose)
-        
+
     if mean > 1:
         experiment = AveragedExperiment(mean, experiment)
-        
+
     if solver_type == 'all':
         return AllSolversExperiment(experiment)
     else:
         return experiment
-    
+
+
 def generate_graph(d, n, distribution_type):
     '''
     generic sampling function for different point sets (dimensions,
@@ -111,7 +114,8 @@ def generate_graph(d, n, distribution_type):
         return factories.create_uniform_graph(n, d)
     elif distribution_type == 'grid':
         return factories.create_grid_graph(n, d)
-    
+
+
 def graph_from_file(input_filename):
     with open(input_filename, 'r') as ifile:
         points = np.loadtxt(ifile)
@@ -120,6 +124,7 @@ def graph_from_file(input_filename):
         base = os.path.basename(input_filename)
         dataname_without_ext = os.path.splitext(base)[0]
         return factories.create_graph(points, n, d, dataname_without_ext)
+
 
 def get_solver(solver_type):
     '''
@@ -137,8 +142,9 @@ def get_solver(solver_type):
     elif solver_type == 'opt':
         return opt_solver.compute_spanning_tree
     else:
-        raise StandardError('Not yet supported this |%s| solver type' % 
+        raise StandardError('Not yet supported this |%s| solver type' %
                 solver_type)
+
 
 def generate_lines(graph, line_type, verbose):
     assert line_type in LINE_OPTIONS
@@ -157,6 +163,7 @@ def generate_lines(graph, line_type, verbose):
     if verbose:
             print "Sampling of lines finished."
     return
+
 
 class SpanningTreeExperiment:
     '''
@@ -180,9 +187,10 @@ class SpanningTreeExperiment:
         self.crossing_number = None
         self.crossings = None
         self.iterations = None
-        
+
     def get_name(self):
-        return "%s_%s_%s" % (self.solver_type, self.graph.get_name(), self.lines_type)
+        return "%s_%s_%s" % (self.solver_type,
+                self.graph.get_name(), self.lines_type)
 
     def update_point_set(self, d, n, distribution_type, lines_type):
         '''
@@ -223,7 +231,8 @@ class SpanningTreeExperiment:
         '''
         if self.verbose:
             print "Start now computing a spanning tree..."
-        # have fresh graph for each new computation (overriding solution and edges)
+        # have fresh graph for each new computation
+        # (overriding solution and edges)
         self.graph = self.graph.copy_graph()
         start = time.time()
         self.iterations = self.solver(self.graph)
@@ -259,7 +268,6 @@ class SpanningTreeExperiment:
         '''
         if plot option is set, plot
         '''
-        
         if self.has_plot or self.save_png:
             if self.verbose:
                 print "Start now plotting..."
@@ -299,16 +307,17 @@ class SpanningTreeExperiment:
         res = self.results()
         return ";".join(res)
 
+
 class AllSolversExperiment:
     def __init__(self, experiment):
         self.experiment = experiment
-        
+
     def update_point_set(self, d, n, distribution_type, lines_type):
         self.experiment.update_point_set(d, n, distribution_type, lines_type)
-        
+
     def update_line_set(self, lines_type):
         self.experiment.update_line_set(lines_type)
-        
+
     def update_solver(self, solver_type):
         self.experiment.update_solver(solver_type)
 
@@ -322,23 +331,24 @@ class AllSolversExperiment:
         for experiment in self:
             experiment.process()
 
+
 class AveragedExperiment:
     def __init__(self, rounds, experiment):
         self.experiment = experiment
         self.rounds = rounds
         self.computed_results = []
-        
+
     def get_name(self):
         return "%s_averaged_%s" % (self.experiment.get_name(), self.rounds)
-        
+
     def update_point_set(self, d, n, distribution_type, lines_type):
         self.computed_results = []
         self.experiment.update_point_set(d, n, distribution_type, lines_type)
-        
+
     def update_line_set(self, lines_type):
         self.computed_results = []
         self.experiment.update_line_set(lines_type)
-        
+
     def update_solver(self, solver_type):
         self.computed_results = []
         self.experiment.update_solver(solver_type)
@@ -354,7 +364,7 @@ class AveragedExperiment:
         return res.tolist()
 
     def print_results(self):
-        (no_points, no_lines, cpu_time, 
+        (no_points, no_lines, cpu_time,
          iterations, crossing_no, avg_crossing_no, crossings) = self.results()
         print "CPU time (in sec) %s" % cpu_time
         print "crossing number=%s" % crossing_no
@@ -364,7 +374,7 @@ class AveragedExperiment:
             print "number of lines=%s" % no_lines
             print "all crossings=%s" % crossings
             print "average crossing number=%s" % avg_crossing_no
-            
+
     def process(self):
         self.run()
         self.print_results()
