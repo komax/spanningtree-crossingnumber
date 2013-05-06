@@ -69,6 +69,7 @@ def main():
     graph.lines = lines
     graph.preprocess_lines()
     compute_spanning_tree(graph)
+    assert graph.is_spanning_tree()
     print "crossing number = %s" % graph.crossing_number()
     import spanningtree.plotting as plotting
     plotting.plot(graph)

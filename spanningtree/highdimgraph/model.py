@@ -174,6 +174,15 @@ class HighDimGraph:
                     remaining_points.remove(cc_p)
         return
 
+    def is_spanning_tree(self):
+        self.compute_connected_components()
+        if not len(self.connected_components) == 1:
+            return False
+        elif not len(self.solution) == (self.n - 1):
+            return False
+        else:
+            return True
+
     def spanning_tree(self, root):
         spanning_tree_edges = set()
         bfs_list = list(enumerate(self.bfs(root)))

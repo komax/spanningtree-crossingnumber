@@ -39,6 +39,10 @@ def cut(subset, edges):
         elif i not in subset and j in subset:
             yield (i, j)
 
+def cut_edges(n, edges):
+    for subset in nonempty_subsets(n):
+        yield [(i,j) for (i,j) in cut(subset, edges)]
+
 # global variables for decision variables
 x = {}
 t = 0
@@ -171,6 +175,7 @@ def main():
     graph.lines = lines
     graph.preprocess_lines()
     compute_spanning_tree(graph)
+    assert graph.is_spanning_tree()
     print "crossing number = %s" % graph.crossing_number()
     import spanningtree.plotting as plotting
     plotting.plot(graph)
