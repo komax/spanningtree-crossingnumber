@@ -144,6 +144,39 @@ class HighDimGraph:
                 if neighbor not in visited:
                     queue.append(neighbor)
 
+    def dfs(self, root):
+        # TODO implement it; only dummy
+        visited = set([root])
+        yield root
+        stack = list(self.solution.adj_nodes(root))
+        print root
+
+        while stack:
+            i = stack.pop()
+            #while i in stack:
+            #    stack.remove(i)
+            visited.add(i)
+            yield i
+            neighbors = self.solution.adj_nodes(i)
+            for neighbor in neighbors:
+                if neighbor not in visited:
+                    stack.append(neighbor)
+            #neighbors.remove(i)
+            #stack.extend(neighbors)
+            print "i=%s, neighbors=%s, stack=%s" % (i,neighbors,stack)
+
+
+    def has_cycle(self):
+        #return False
+        root = 0
+        visited = set([])
+        for vertex in self.dfs(root):
+            if vertex not in visited:
+                visited.add(vertex)
+            else:
+                return True
+        return False
+
     def euclidean_distance(self, i, j):
         p = self.point_set[i]
         q = self.point_set[j]
@@ -175,10 +208,15 @@ class HighDimGraph:
         return
 
     def is_spanning_tree(self):
+        # TODO this predicate function is only partially correct
+        # add dfs search for cycles
         self.compute_connected_components()
         if not len(self.connected_components) == 1:
             return False
         elif not len(self.solution) == (self.n - 1):
+            return False
+        elif self.has_cycle():
+            #print "has cycle"
             return False
         else:
             return True

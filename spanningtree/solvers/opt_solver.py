@@ -63,30 +63,38 @@ subset_edges = None
 is_solution = None
 
 def mycallback(model, where):
+    global is_solution
     if where == grb.GRB.callback.MIPSOL:
         #sol = model.cbGetSolution(model.getVars())
         #print sol
         #if sol[0] + sol[1] > 1.1:
         #    subset = subsets.
         #    model.cbLazy()
+        #print model.cbGetSolution(x[2,3])
+        #print model.cbGetSolution(x[0,1])
+        print model.cbGetSolution(model.getVars())
 
-        if not is_solution():
+        if model.status == grb.GRB.status.INFEASIBLE or\
+                not is_solution(model):
         #if model.status == grb.GRB.status.INFEASIBLE:
             print "model is infeasible"
             has_next = True
             while has_next:
                 try:
                     edges = subset_edges.next()
-                    print edges
+                    #print edges
                     edge_sum = quicksum(x[i,j] for (i,j) in edges)
-                    print edge_sum
-                    print bool(edge_sum >= 1.)
-                    if edge_sum < 1.:
+                    #print edge_sum
+                    #print bool(edge_sum >= 1.)
+                    if True:
+                    #if edge_sum < 1.:
+                        print "added lazy constraint"
                         model.cbLazy(edge_sum >= 1)
+                    else:
+                        print "constraint fulfilled"
                 except StopIteration:
                     has_next = False
 
-            #for edges in subset_edges:
             #    model.cbLazy(quicksum(x[i,j] for (i,j) in edges) >= 1)
     else:
         pass
@@ -105,13 +113,18 @@ def solve_ip(lambda_ip):
 
 def check_ip_solution(graph):
     edges = graph.edges
-    def is_spanning_tree():
+    def is_spanning_tree(model):
+        print "checking spanning_tree"
         for (i,j) in edges:
-            if x[i,j].X == 1:
+            val = model.cbGetSolution(x[i,j])
+            print val
+            if val == 1:
                 graph.solution.update(i, j, True)
         result = graph.is_spanning_tree()
+        print "is_spanningtree=%s" % result
         for (i,j) in edges:
-            if x[i,j].X == 1:
+            val = model.cbGetSolution(x[i,j])
+            if val == 1:
                 graph.solution.update(i, j, False)
         return result
     return is_spanning_tree
@@ -133,8 +146,8 @@ def create_solution(graph):
 def compute_spanning_tree(graph):
     ip_model = create_ip(graph)
     solve_ip(ip_model)
-    assert is_solution()
     create_solution(graph)
+    #assert is_solution()
     return 1
 
 
