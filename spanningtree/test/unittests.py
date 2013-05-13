@@ -177,6 +177,7 @@ class MultWeightsSolvingTestCase(unittest.TestCase):
         self.assertTrue((2, 4) in solution or
                 (3, 4) in solution)
         self.assertTrue((1, 4) in solution)
+        self.assertTrue(self.graph.is_spanning_tree())
 
 
 class ConnectedComponentsTestCase(unittest.TestCase):
@@ -273,6 +274,7 @@ class SarielsLPSolvingTestCase(unittest.TestCase):
         self.assertTrue((2, 4) in solution or
                 (3, 4) in solution)
         self.assertTrue((1, 4) in solution)
+        self.assertTrue(self.graph.is_spanning_tree())
 
 
 class FeketeLPSolvingTestCase(unittest.TestCase):
@@ -294,6 +296,7 @@ class FeketeLPSolvingTestCase(unittest.TestCase):
         self.assertTrue((2, 4) in solution or
                 (3, 4) in solution)
         self.assertTrue((1, 4) in solution)
+        self.assertTrue(self.graph.is_spanning_tree())
 
     def test_subsets(self):
         points_size = 4
@@ -323,6 +326,7 @@ class OptSolverTestCase(unittest.TestCase):
         self.assertTrue((2, 4) in solution or
                 (3, 4) in solution)
         self.assertTrue((1, 4) in solution)
+        self.assertTrue(self.graph.is_spanning_tree())
 
 if __name__ == '__main__':
     unittest.main()
