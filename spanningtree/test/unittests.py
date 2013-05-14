@@ -106,6 +106,45 @@ class PreprocessingLinesTestCase(unittest.TestCase):
         self.assertTrue(l3 in result or l6 in result)
 
 
+class LinePreprocessingConnectedComponents(unittest.TestCase):
+    def setUp(self):
+        # setting up example graph
+        points = np.array([(8.5, 2), (10.5, 3.5), (4., 4.), (5., 5.), (8.5,
+            5.5), (9., 7.), (10.5, 6.5)])
+        graph = create_graph(points, 7, 2, "example")
+        # first connected component
+        graph.solution.update(0, 1, True)
+        graph.edges.update(0, 1, False)
+        # second connected component
+        graph.solution.update(2, 3, True)
+        graph.edges.update(2, 3, False)
+        # third connected component
+        graph.solution.update(4, 5, True)
+        graph.solution.update(5, 6, True)
+        graph.edges.update(4, 5, False)
+        graph.edges.update(5, 6, False)
+        graph.edges.update(4, 6, False)
+        # update information in graph about connected components
+        graph.compute_connected_components()
+        self.graph = graph
+
+    def test_preprocess_on_connected_components(self):
+        # setting up lines
+        l1 = HighDimLine(np.array([(4., 5.), (5., 4.)]))
+        l2 = HighDimLine(np.array([(8.5, 3.5), (9.5, 2.)]))
+        l3 = HighDimLine(np.array([(8.5, 5.5), (10., 6.5)]))
+        lines = [l1, l2, l3]
+        self.graph.lines = lines
+        # TODO implement this method
+        self.graph.preprocess_lines_on_ccs()
+        expected_lines = self.lines
+        self.assertEqual(len(expected_lines), 2)
+        self.assertTrue(l2 in expected_lines)
+        self.assertTrue(l3 in expected_lines)
+
+
+
+
 class GraphTestCase(unittest.TestCase):
     def setUp(self):
         point_set = np.array([[0], [1], [2], [3]])
