@@ -47,6 +47,9 @@ def create_ip(graph):
     #            >= 1)
     global subset_edges
     subset_edges = cut_edges(n, edges)
+    for edges in subset_edges:
+        lambda_ip.addConstr(quicksum(x[i, j] for (i, j) in edges)
+                >= 1)
     global is_solution
     is_solution = check_ip_solution(graph)
 
@@ -72,12 +75,15 @@ def mycallback(model, where):
         #    model.cbLazy()
         #print model.cbGetSolution(x[2,3])
         #print model.cbGetSolution(x[0,1])
+        #print model.cbGet(grb.GRB.callback.MIPNODE_STATUS)
+        print model.cbGet(grb.GRB.callback.MIPSOL_STATUS)
         print model.cbGetSolution(model.getVars())
 
-        if model.status == grb.GRB.status.INFEASIBLE or\
-                not is_solution(model):
+        if not is_solution(model):
+        #if model.status == grb.GRB.status.INFEASIBLE or\
+        #        not is_solution(model):
         #if model.status == grb.GRB.status.INFEASIBLE:
-            print "model is infeasible"
+            print "no spanning tree"
             has_next = True
             while has_next:
                 try:
@@ -103,8 +109,9 @@ def solve_ip(lambda_ip):
     '''
     computes solution in the IP
     '''
-    lambda_ip.params.DualReductions = 0
-    lambda_ip.optimize(mycallback)
+    #lambda_ip.params.DualReductions = 0
+    #lambda_ip.optimize(mycallback)
+    lambda_ip.optimize()
 
     lambda_ip.printStats()
     print lambda_ip.status
@@ -147,7 +154,9 @@ def compute_spanning_tree(graph):
     ip_model = create_ip(graph)
     solve_ip(ip_model)
     create_solution(graph)
+    #print "is_spanning_tree = %s" % is_solution(ip_model)
     #assert is_solution()
+    assert graph.is_spanning_tree()
     return 1
 
 
