@@ -11,7 +11,7 @@ from spanningtree.highdimgraph.crossing import has_crossing
 from spanningtree.helper.numpy_helpers import np_assert_allclose
 from spanningtree.highdimgraph.factories import create_graph
 import spanningtree.highdimgraph as highdimgraph
-import spanningtree.solvers.sariel_lp_solver as slpsolv
+import spanningtree.solvers.hp_lp_solver as hplpsolv
 import spanningtree.solvers.fekete_lp_solver as flpsolv
 import spanningtree.solvers.opt_solver as opt_solver
 import numpy as np
@@ -266,7 +266,8 @@ class SarielsLPSolvingTestCase(unittest.TestCase):
         self.graph.lines = [l1, l2, l3]
 
     def test_solution(self):
-        slpsolv.compute_spanning_tree(self.graph)
+        print self.graph.lines
+        hplpsolv.compute_spanning_tree(self.graph)
         solution = list(self.graph.solution)
         self.assertEqual(len(solution), 4)
         self.assertTrue((2, 3) in solution)

@@ -107,7 +107,7 @@ def compute_spanning_tree(graph):
             p = random.sample(connected_component, 1)[0]
             new_point_set.append(p)
         remaining_points = new_point_set
-        lines = graph.preprocess_lines(remaining_points)
+        graph.preprocess_lines(remaining_points)
         graph.lines = lines
         iterations += 1
     assert len(remaining_points) == 1
