@@ -106,7 +106,7 @@ class PreprocessingLinesTestCase(unittest.TestCase):
         self.assertTrue(l3 in result or l6 in result)
 
 
-class LinePreprocessingConnectedComponents(unittest.TestCase):
+class LinePreprocessingConnectedComponentsTestCase(unittest.TestCase):
     def setUp(self):
         # setting up example graph
         points = np.array([(8.5, 2), (10.5, 3.5), (4., 4.), (5., 5.), (8.5,
@@ -141,8 +141,6 @@ class LinePreprocessingConnectedComponents(unittest.TestCase):
         self.assertEqual(len(expected_lines), 2)
         self.assertTrue(l2 in expected_lines)
         self.assertTrue(l3 in expected_lines)
-
-
 
 
 class GraphTestCase(unittest.TestCase):
@@ -195,6 +193,26 @@ class GraphTestCase(unittest.TestCase):
     def test_cannot_find_connected_component(self):
         self.assertRaises(StandardError,
                 self.graph.connected_components.get_connected_component, 5)
+
+
+class PlanarityTransformationTestCase(unittest.TestCase):
+    def setUp(self):
+        points = np.array([(3., 3.), (4.5, 2.), (8.5, 3.5), (6.5, 6.5)])
+        graph = create_graph(points, 4, 2, "example")
+        graph.solution.update(0, 3, True)
+        # self crossing edges between (0,2) and (1,3)
+        graph.solution.update(0, 2, True)
+        graph.solution.update(1, 3, True)
+        self.graph = graph
+
+    def test_planarity(self):
+        self.assertTrue(self.graph.is_spanning_tree())
+        self.graph.make_planar()
+        self.assertEqual(self.graph.is_spanning_tree())
+        solution = list(self.graph.solution)
+        self.assertTrue((0, 1) in solution)
+        self.assertTrue((2, 3) in solution)
+        self.assertTrue((0, 3) in solution)
 
 
 class MultWeightsSolvingTestCase(unittest.TestCase):
