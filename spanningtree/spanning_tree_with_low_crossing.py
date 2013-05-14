@@ -6,7 +6,7 @@
 import argparse
 import time
 import solvers.mult_weights_solver as mws
-import solvers.sariel_lp_solver as slpsolv
+import solvers.hp_lp_solver as hplpsolv
 import solvers.fekete_lp_solver as flpsolv
 import solvers.opt_solver as opt_solver
 import solvers.connected_components_lp_solver as cclp
@@ -22,7 +22,7 @@ def main():
     experiment.process()
 
 # constants for options
-SOLVER_OPTIONS = ['mult_weight', 'sariel_lp', 'cc_lp', 'fekete_lp',
+SOLVER_OPTIONS = ['mult_weight', 'hp_lp', 'cc_lp', 'fekete_lp',
                   'opt', 'all']
 DATA_DISTRIBUTION_OPTIONS = ['uniform', 'grid']
 LINE_OPTIONS = ['all', 'stabbing', 'random']
@@ -133,8 +133,8 @@ def get_solver(solver_type):
     assert solver_type in SOLVER_OPTIONS
     if solver_type == 'mult_weight':
         return mws.compute_spanning_tree
-    elif solver_type == 'sariel_lp':
-        return slpsolv.compute_spanning_tree
+    elif solver_type == 'hp_lp':
+        return hplpsolv.compute_spanning_tree
     elif solver_type == 'cc_lp':
         return cclp.compute_spanning_tree
     elif solver_type == 'fekete_lp':
