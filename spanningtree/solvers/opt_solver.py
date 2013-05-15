@@ -47,9 +47,9 @@ def create_ip(graph):
     #            >= 1)
     global subset_edges
     subset_edges = cut_edges(n, edges)
-    for edges in subset_edges:
-        lambda_ip.addConstr(quicksum(x[i, j] for (i, j) in edges)
-                >= 1)
+#    for edges in subset_edges:
+#        lambda_ip.addConstr(quicksum(x[i, j] for (i, j) in edges)
+#                >= 1)
     global is_solution
     is_solution = check_ip_solution(graph)
 
@@ -68,40 +68,29 @@ is_solution = None
 def mycallback(model, where):
     global is_solution
     if where == grb.GRB.callback.MIPSOL:
-        #sol = model.cbGetSolution(model.getVars())
-        #print sol
-        #if sol[0] + sol[1] > 1.1:
-        #    subset = subsets.
-        #    model.cbLazy()
-        #print model.cbGetSolution(x[2,3])
-        #print model.cbGetSolution(x[0,1])
-        #print model.cbGet(grb.GRB.callback.MIPNODE_STATUS)
-        print model.cbGet(grb.GRB.callback.MIPSOL_STATUS)
+        #status =  model.get(grb.GRB.STATUS)
+        #print "current status=%s, is optimal=%s" % (status, status ==
+        #        grb.GRB.status.OPTIMAL)
+        print "number of solutions=%s" %\
+            model.cbGet(grb.GRB.callback.MIPSOL_SOLCNT)
+
         print model.cbGetSolution(model.getVars())
 
-        if not is_solution(model):
-        #if model.status == grb.GRB.status.INFEASIBLE or\
-        #        not is_solution(model):
-        #if model.status == grb.GRB.status.INFEASIBLE:
+        if not is_solution(model):# and\
+          #model.cbGet(grb.GRB.callback.MIPSOL_SOLCNT) <= 0:
             print "no spanning tree"
             has_next = True
             while has_next:
                 try:
                     edges = subset_edges.next()
-                    #print edges
                     edge_sum = quicksum(x[i,j] for (i,j) in edges)
-                    #print edge_sum
-                    #print bool(edge_sum >= 1.)
-                    if True:
-                    #if edge_sum < 1.:
-                        print "added lazy constraint"
-                        model.cbLazy(edge_sum >= 1)
-                    else:
-                        print "constraint fulfilled"
+                    print "added lazy constraint"
+                    model.cbLazy(edge_sum >= 1)
                 except StopIteration:
+                    print "added all constraints"
                     has_next = False
-
-            #    model.cbLazy(quicksum(x[i,j] for (i,j) in edges) >= 1)
+        else:
+            print "model is feasible; found a spanningtree"
     else:
         pass
 
@@ -109,12 +98,12 @@ def solve_ip(lambda_ip):
     '''
     computes solution in the IP
     '''
-    #lambda_ip.params.DualReductions = 0
-    #lambda_ip.optimize(mycallback)
-    lambda_ip.optimize()
+    lambda_ip.params.DualReductions = 0
+    lambda_ip.optimize(mycallback)
+    #lambda_ip.optimize()
 
-    lambda_ip.printStats()
-    print lambda_ip.status
+    #lambda_ip.printStats()
+    #print lambda_ip.status
     if lambda_ip.status == grb.GRB.status.OPTIMAL:
         return
 
@@ -156,7 +145,7 @@ def compute_spanning_tree(graph):
     create_solution(graph)
     #print "is_spanning_tree = %s" % is_solution(ip_model)
     #assert is_solution()
-    assert graph.is_spanning_tree()
+    print 'is a spanningtree = %s' % graph.is_spanning_tree()
     return 1
 
 
