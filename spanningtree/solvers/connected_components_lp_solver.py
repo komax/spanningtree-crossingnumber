@@ -31,7 +31,7 @@ def solve_lp(graph):
     gamma_lp.addConstr(quicksum(x[i, j] for (i, j) in edges) == (len_ccs - 1))
 
     # crossing number range:
-    gamma_lp.addConstr(0 <= t <= math.sqrt(len_ccs))
+    #gamma_lp.addConstr(0 <= t <= math.sqrt(len_ccs))
 
     # crossing constraints
     for line in lines:
@@ -86,7 +86,7 @@ def add_best_edge(graph, x):
 
 def compute_spanning_tree(graph):
     #n = graph.n
-    #stored_lines = graph.lines[:]
+    stored_lines = graph.lines[:]
     #remaining_points = range(0,n)
     #lines = graph.lines
     iterations = 0
@@ -98,9 +98,9 @@ def compute_spanning_tree(graph):
         #connected_components = graph.connected_components
         # TODO preprocess line set;
         # include only lines between connected components
-        #lines = graph.preprocess_lines(remaining_points)
+        graph.preprocess_lines_on_ccs()
         iterations += 1
-    #graph.lines = stored_lines
+    graph.lines = stored_lines
     return iterations
 
 
