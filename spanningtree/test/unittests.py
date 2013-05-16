@@ -137,7 +137,7 @@ class LinePreprocessingConnectedComponentsTestCase(unittest.TestCase):
         self.graph.lines = lines
         # TODO implement this method
         self.graph.preprocess_lines_on_ccs()
-        expected_lines = self.lines
+        expected_lines = self.graph.lines
         self.assertEqual(len(expected_lines), 2)
         self.assertTrue(l2 in expected_lines)
         self.assertTrue(l3 in expected_lines)

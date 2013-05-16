@@ -351,9 +351,10 @@ class HighDimGraph:
                 elif line.is_below(p):
                     below_cc.add(cc_id)
                 else:
-                    raise StandardError(
-                        'can not find point i=%s:p=%s on line=%s' %
-                        (i, p, line))
+                    pass
+                    #raise StandardError(
+                    #    'can not find point i=%s:p=%s on line=%s' %
+                    #    (i, p, line))
 
         return (tuple(sorted(above_cc)), tuple(sorted(below_cc)))
 
