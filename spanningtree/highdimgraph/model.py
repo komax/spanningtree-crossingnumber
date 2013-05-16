@@ -343,13 +343,13 @@ class HighDimGraph:
     def __partition_connected_components_by_line(self, line):
         above_cc = set()
         below_cc = set()
-        for cc in self.connected_components:
+        for (cc_id, cc) in enumerate(self.connected_components):
             for i in cc:
                 p = self.point_set[i]
                 if line.is_above(p):
-                    above_cc.add(cc)
+                    above_cc.add(cc_id)
                 elif line.is_below(p):
-                    below_cc.add(cc)
+                    below_cc.add(cc_id)
                 else:
                     raise StandardError(
                         'can not find point i=%s:p=%s on line=%s' %
