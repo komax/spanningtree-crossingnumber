@@ -145,36 +145,32 @@ class HighDimGraph:
                     queue.append(neighbor)
 
     def dfs(self, root):
-        # TODO implement it; only dummy
         visited = set([root])
         yield root
         stack = list(self.solution.adj_nodes(root))
-        print root
 
         while stack:
             i = stack.pop()
-            #while i in stack:
-            #    stack.remove(i)
             visited.add(i)
             yield i
             neighbors = self.solution.adj_nodes(i)
             for neighbor in neighbors:
                 if neighbor not in visited:
                     stack.append(neighbor)
-            #neighbors.remove(i)
-            #stack.extend(neighbors)
-            print "i=%s, neighbors=%s, stack=%s" % (i,neighbors,stack)
 
 
     def has_cycle(self):
-        #return False
-        root = 0
-        visited = set([])
-        for vertex in self.dfs(root):
-            if vertex not in visited:
-                visited.add(vertex)
-            else:
-                return True
+        remaining_points = range(0, self.n)
+        while remaining_points:
+            root = remaining_points.pop()
+            visited = set([])
+            for vertex in self.dfs(root):
+                if vertex not in visited:
+                    visited.add(vertex)
+                    if vertex in remaining_points:
+                        remaining_points.remove(vertex)
+                else:
+                    return True
         return False
 
     def euclidean_distance(self, i, j):
@@ -208,15 +204,12 @@ class HighDimGraph:
         return
 
     def is_spanning_tree(self):
-        # TODO this predicate function is only partially correct
-        # add dfs search for cycles
         self.compute_connected_components()
         if not len(self.connected_components) == 1:
             return False
         elif not len(self.solution) == (self.n - 1):
             return False
         elif self.has_cycle():
-            #print "has cycle"
             return False
         else:
             return True
@@ -302,7 +295,7 @@ class HighDimGraph:
         '''
         for two points p,q compute all four possible separation lines_registry
         '''
-        # TODO update it for high dimensionsindices_subset
+        # TODO update it for high dimensions
         (x1, y1) = partition(p)
         x1 = x1[0]
         (x2, y2) = partition(q)

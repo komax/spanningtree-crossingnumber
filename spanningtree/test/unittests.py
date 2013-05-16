@@ -143,6 +143,53 @@ class LinePreprocessingConnectedComponentsTestCase(unittest.TestCase):
         self.assertTrue(l3 in expected_lines)
 
 
+class DFSTestCase(unittest.TestCase):
+    def setUp(self):
+        point_set = np.array([[0], [1], [2], [3], [4]])
+        self.graph = create_graph(point_set, 5, 1, "foo")
+
+    def test_dfs(self):
+        self.graph.solution.update(0, 1, True)
+        self.graph.solution.update(1, 2, True)
+        self.graph.solution.update(2, 3, True)
+        self.graph.solution.update(1, 4, True)
+        expectation = [0, 1, 2, 3, 4]
+        expectation2 = [0, 1, 4, 2, 3]
+        result = list(self.graph.dfs(0))
+        self.assertTrue(expectation == result or expectation2 == result)
+
+    def test_cycling(self):
+        self.graph.solution.update(0, 1, True)
+        self.graph.solution.update(1, 2, True)
+        self.graph.solution.update(2, 3, True)
+        self.graph.solution.update(0, 3, True)
+        self.assertTrue(self.graph.has_cycle())
+
+    def test_no_cycling(self):
+        self.graph.solution.update(0, 1, True)
+        self.graph.solution.update(1, 2, True)
+        self.graph.solution.update(2, 3, True)
+        self.graph.solution.update(1, 4, True)
+        self.assertFalse(self.graph.has_cycle())
+
+    def test_only_singletons(self):
+        self.assertFalse(self.graph.is_spanning_tree())
+
+    def test_is_spanningtree(self):
+        self.graph.solution.update(0, 1, True)
+        self.graph.solution.update(1, 2, True)
+        self.graph.solution.update(2, 3, True)
+        self.graph.solution.update(1, 4, True)
+        self.assertTrue(self.graph.is_spanning_tree())
+
+    def test_cycling_no_spanningtree(self):
+        self.graph.solution.update(0, 1, True)
+        self.graph.solution.update(1, 2, True)
+        self.graph.solution.update(2, 3, True)
+        self.graph.solution.update(0, 3, True)
+        self.assertFalse(self.graph.is_spanning_tree())
+
+
 class GraphTestCase(unittest.TestCase):
     def setUp(self):
         point_set = np.array([[0], [1], [2], [3]])
