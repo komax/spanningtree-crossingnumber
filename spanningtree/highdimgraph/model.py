@@ -340,6 +340,24 @@ class HighDimGraph:
         return (tuple(above_points), tuple(lies_on_points),
                 tuple(below_points))
 
+    def __partition_connected_components_by_line(self, line):
+        above_cc = set()
+        below_cc = set()
+        for cc in self.connected_components:
+            for i in cc:
+                p = self.point_set[i]
+                if line.is_above(p):
+                    above_cc.add(cc)
+                elif line.is_below(p):
+                    below_cc.add(cc)
+                else:
+                    raise StandardError(
+                        'can not find point i=%s:p=%s on line=%s' %
+                        (i, p, line))
+
+        return (tuple(sorted(above_cc)), tuple(sorted(below_cc)))
+
+
     def preprocess_lines(self, subset=None):
         '''
         removes lines_registry that have same partitioning of
@@ -370,6 +388,19 @@ class HighDimGraph:
                 # new equivalent class, store this line
                 lines_dict[partition_tuple] = line
         self.lines = lines_dict.values()
+
+
+    def preprocess_lines_on_ccs(self):
+        lines_to_remove = list()
+        for line in self.lines:
+            (above_cc, below_cc) = \
+               self.__partition_connected_components_by_line(line)
+            if len(above_cc) == 1 and above_cc[0] in below_cc:
+                lines_to_remove.append(line)
+            elif len(below_cc) == 1 and below_cc[0] in above_cc:
+                lines_to_remove.append(line)
+        for line in lines_to_remove:
+            self.lines.remove(line)
 
     def __get_line(self, i, j):
         if not (i, j) in self.lines_registry:
