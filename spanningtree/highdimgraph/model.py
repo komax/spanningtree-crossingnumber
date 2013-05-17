@@ -242,9 +242,9 @@ class HighDimGraph:
         euc_dist = self.euclidean_distance
 
         old_solution = list(self.solution)
-        for (i, j) in old_solution:
-            for (k, l) in old_solution:
-                if (i, j) != (k, l):
+        for (c1, (i, j)) in enumerate(old_solution):
+            for (c2, (k, l)) in enumerate(old_solution):
+                if c1 < c2 and i != k and j != l:
                     existing_distance = euc_dist(i, j) + euc_dist(k,l)
                     if euc_dist(i, k) + euc_dist(j, l) <\
                       euc_dist(i, l) + euc_dist(j, k):
@@ -259,7 +259,7 @@ class HighDimGraph:
                         print "setting (%s, %s) to false" % (i,j)
                         print "setting (%s, %s) to false" % (k,l)
                         print "setting (%s, %s) to true" % (p,q)
-                        print "setting (%s, %s) to true" % (s,t)
+                        print "setting (%s, %s) to true\n" % (s,t)
                         self.solution.update(i, j, False)
                         self.solution.update(k, l, False)
                         self.solution.update(p, q, True)
