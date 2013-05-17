@@ -236,6 +236,37 @@ class HighDimGraph:
             prev = p
         return spanning_tree_edges
 
+    def make_planar(self):
+        assert self.is_spanning_tree()
+
+        euc_dist = self.euclidean_distance
+
+        old_solution = list(self.solution)
+        for (i, j) in old_solution:
+            for (k, l) in old_solution:
+                if (i, j) != (k, l):
+                    existing_distance = euc_dist(i, j) + euc_dist(k,l)
+                    if euc_dist(i, k) + euc_dist(j, l) <\
+                      euc_dist(i, l) + euc_dist(j, k):
+                        (u, v) = ((i, k), (j, l))
+                    else:
+                        (u, v) = ((i, l), (j, k))
+                    (p, q) = u
+                    (s, t) = v
+                    best_distance = euc_dist(p, q) + euc_dist(s, t)
+                    if best_distance < existing_distance:
+                        # exchange edges
+                        print "setting (%s, %s) to false" % (i,j)
+                        print "setting (%s, %s) to false" % (k,l)
+                        print "setting (%s, %s) to true" % (p,q)
+                        print "setting (%s, %s) to true" % (s,t)
+                        self.solution.update(i, j, False)
+                        self.solution.update(k, l, False)
+                        self.solution.update(p, q, True)
+                        self.solution.update(s, t, True)
+
+
+
     def compute_spanning_tree_on_ccs(self):
         new_solution_edges = set()
         remaining_points = range(self.n)

@@ -255,7 +255,9 @@ class PlanarityTransformationTestCase(unittest.TestCase):
     def test_planarity(self):
         self.assertTrue(self.graph.is_spanning_tree())
         self.graph.make_planar()
-        self.assertEqual(self.graph.is_spanning_tree())
+        for (i, j) in self.graph.solution:
+            print (i,j)
+        self.assertTrue(self.graph.is_spanning_tree())
         solution = list(self.graph.solution)
         self.assertTrue((0, 1) in solution)
         self.assertTrue((2, 3) in solution)
