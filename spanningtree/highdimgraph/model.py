@@ -247,6 +247,7 @@ class HighDimGraph:
         while has_changed:
             old_solution = list(self.solution)
             iterations += 1
+            print "round = %s" % iterations
             has_changed = False
             for (c1, (i, j)) in enumerate(old_solution):
                 for (c2, (k, l)) in enumerate(old_solution):
@@ -263,12 +264,33 @@ class HighDimGraph:
                         if best_distance < existing_distance:
                             has_changed = True
                             # exchange edges
-                            print "setting (%s, %s) to false" % (i,j)
-                            print "setting (%s, %s) to false" % (k,l)
-                            print "setting (%s, %s) to true" % (p,q)
-                            print "setting (%s, %s) to true\n" % (s,t)
+                            #print "setting (%s, %s) to false" % (i,j)
+                            #print "setting (%s, %s) to false" % (k,l)
+                            #print "setting (%s, %s) to true" % (p,q)
+                            #print "setting (%s, %s) to true\n" % (s,t)
                             self.solution.update(i, j, False)
                             self.solution.update(k, l, False)
+                            if self.solution.has_edge(p, q) or\
+                                    self.solution.has_edge(s, t):
+                                if euc_dist(p, s) < euc_dist(p, t):
+                                    p_edge = (p, s)
+                                    p_dist = euc_dist(p, s)
+                                else:
+                                    p_edge = (p, t)
+                                    p_dist = euc_dist(p, t)
+                                if euc_dist(q, s) < euc_dist(q, t):
+                                    q_edge = (q, s)
+                                    q_dist = euc_dist(q, s)
+                                else:
+                                    q_edge = (q, t)
+                                    q_dist = euc_dist(q, t)
+
+                                if p_dist < q_dist:
+                                    (a, b) = p_edge
+                                else:
+                                    (a, b) = q_edge
+                                self.solution.update(a, b, True)
+
                             self.solution.update(p, q, True)
                             self.solution.update(s, t, True)
         return iterations
