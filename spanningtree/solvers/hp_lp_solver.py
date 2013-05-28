@@ -113,7 +113,7 @@ def compute_spanning_tree(graph):
     assert len(remaining_points) == 1
     graph.lines = stored_lines
     graph.compute_spanning_tree_on_ccs()
-    graph.make_planar()
+    #graph.make_planar()
     return iterations
 
 
