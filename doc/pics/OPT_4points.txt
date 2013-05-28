@@ -1,0 +1,15 @@
+$ ./experiment.py -s opt -n 4 -pv -l random
+Start generating graph...
+Graph has been created.
+Sampling of lines started...
+Sampling of lines finished.
+Start now computing a spanning tree...
+Computing a spanning tree finished.
+CPU time (in sec) 0.00982689857483
+crossing number=2
+iterations=1
+number of points=4
+number of lines=7
+all crossings=12
+average crossing number=1.71428571429
+
