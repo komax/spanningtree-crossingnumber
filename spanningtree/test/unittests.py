@@ -256,8 +256,8 @@ class PlanarityTransformationTestCase(unittest.TestCase):
         self.assertTrue(self.graph.is_spanning_tree())
         iterations = self.graph.make_planar()
         self.assertEquals(iterations, 2)
-        for (i, j) in self.graph.solution:
-            print (i,j)
+        #for (i, j) in self.graph.solution:
+        #    print (i,j)
         self.assertTrue(self.graph.is_spanning_tree())
         solution = list(self.graph.solution)
         self.assertTrue((0, 1) in solution)
@@ -373,7 +373,6 @@ class SarielsLPSolvingTestCase(unittest.TestCase):
         self.graph.lines = [l1, l2, l3]
 
     def test_solution(self):
-        print self.graph.lines
         hplpsolv.compute_spanning_tree(self.graph)
         solution = list(self.graph.solution)
         self.assertEqual(len(solution), 4)

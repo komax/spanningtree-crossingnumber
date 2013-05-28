@@ -247,7 +247,7 @@ class HighDimGraph:
         while has_changed:
             old_solution = list(self.solution)
             iterations += 1
-            print "round = %s" % iterations
+            #print "round = %s" % iterations
             has_changed = False
             for (c1, (i, j)) in enumerate(old_solution):
                 for (c2, (k, l)) in enumerate(old_solution):

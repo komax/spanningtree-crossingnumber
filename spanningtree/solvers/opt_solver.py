@@ -6,8 +6,8 @@ currently in planar 2D using Gurobi as standard solver
 import gurobipy as grb
 import spanningtree.highdimgraph.crossing as crossing
 from spanningtree.helper.gurobi_helper import set_up_model
-#from fekete_lp_solver import nonempty_subsets, cut
-from fekete_lp_solver import cut_edges
+from fekete_lp_solver import nonempty_subsets, cut
+#from fekete_lp_solver import cut_edges
 from gurobipy import quicksum
 
 x = {}
@@ -35,23 +35,16 @@ def create_ip(graph):
     lambda_ip.addConstr(quicksum(x[i, j] for (i, j) in edges) == (n - 1))
 
 #    # connectivity constraints
-#    connected_components = graph.connected_components
-#    for cc1 in connected_components:
-#        lambda_ip.addConstr(quicksum(x[p,q] for (p,q) in edges if p < q and\
-#                         p in cc1 and q not in cc1) +
-#                quicksum(x[q,p] for (q,p) in edges if p > q and\
-#                         p in cc1 and q not in cc1)
-#                >= 1.)
-    #for subset in nonempty_subsets(n):
-    #    lambda_ip.addConstr(quicksum(x[i, j] for (i, j) in cut(subset, edges))
-    #            >= 1)
+    for subset in nonempty_subsets(n):
+        lambda_ip.addConstr(quicksum(x[i, j] for (i, j) in cut(subset, edges))
+                >= 1)
     global subset_edges
-    subset_edges = cut_edges(n, edges)
+#    subset_edges = cut_edges(n, edges)
 #    for edges in subset_edges:
 #        lambda_ip.addConstr(quicksum(x[i, j] for (i, j) in edges)
 #                >= 1)
-    global is_solution
-    is_solution = check_ip_solution(graph)
+#    global is_solution
+#    is_solution = check_ip_solution(graph)
 
     lines = graph.lines
     # bound crossing number
@@ -65,6 +58,8 @@ def create_ip(graph):
 subset_edges = None
 is_solution = None
 
+# FIXME not working: lazy constraints are added but not considered while
+# FIXME solving the LP model
 def mycallback(model, where):
     global is_solution
     if where == grb.GRB.callback.MIPSOL:
@@ -98,9 +93,9 @@ def solve_ip(lambda_ip):
     '''
     computes solution in the IP
     '''
-    lambda_ip.params.DualReductions = 0
-    lambda_ip.optimize(mycallback)
-    #lambda_ip.optimize()
+    #lambda_ip.params.DualReductions = 0
+    #lambda_ip.optimize(mycallback)
+    lambda_ip.optimize()
 
     #lambda_ip.printStats()
     #print lambda_ip.status
@@ -132,7 +127,7 @@ def create_solution(graph):
     edges = graph.edges
     solution = graph.solution
     for (i, j) in edges:
-        print x[i,j]
+        #print x[i,j]
         if x[i, j].X == 1.:
             solution.update(i, j, True)
             edges.update(i, j, False)
@@ -145,7 +140,7 @@ def compute_spanning_tree(graph):
     create_solution(graph)
     #print "is_spanning_tree = %s" % is_solution(ip_model)
     #assert is_solution()
-    print 'is a spanningtree = %s' % graph.is_spanning_tree()
+    #print 'is a spanningtree = %s' % graph.is_spanning_tree()
     return 1
 
 
