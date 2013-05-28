@@ -1,0 +1,17 @@
+./experiment.py -i data/tsplib/ulysses16.txt -s opt -rv 
+Reading graph from file data/tsplib/ulysses16.txt...
+Graph has been created.
+Sampling of lines started...
+Sampling of lines finished.
+Start now computing a spanning tree...
+Computing a spanning tree finished.
+CPU time (in sec) 45.7558350563
+crossing number=4
+iterations=1
+number of points=16
+number of lines=122
+all crossings=344
+average crossing number=2.81967213115
+Start now plotting...
+Closed plot.
+
