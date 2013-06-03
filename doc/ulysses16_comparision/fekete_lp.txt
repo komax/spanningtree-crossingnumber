@@ -1,0 +1,17 @@
+% ./experiment.py -i data/tsplib/ulysses16.txt -s fekete_lp -rv  
+Reading graph from file data/tsplib/ulysses16.txt...
+Graph has been created.
+Sampling of lines started...
+Sampling of lines finished.
+Start now computing a spanning tree...
+Computing a spanning tree finished.
+CPU time (in sec) 4.30467510223
+crossing number=4
+iterations=15
+number of points=16
+number of lines=122
+all crossings=356
+average crossing number=2.91803278689
+Start now plotting...
+Closed plot.
+
