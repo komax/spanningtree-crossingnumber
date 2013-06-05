@@ -22,8 +22,13 @@ def main():
     experiment.process()
 
 # constants for options
-SOLVER_OPTIONS = ['mult_weight', 'hp_lp', 'cc_lp', 'fekete_lp',
-                  'opt', 'all']
+SOLVER_OPTIONS = [
+        'hp_lp',
+        'fekete_lp',
+        'cc_lp',
+        'mult_weight',
+                  #'opt',
+         'all']
 DATA_DISTRIBUTION_OPTIONS = ['uniform', 'grid']
 LINE_OPTIONS = ['all', 'stabbing', 'random']
 

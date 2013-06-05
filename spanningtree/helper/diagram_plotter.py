@@ -28,12 +28,12 @@ def plot_chart(filename, csv_files):
         data = np.genfromtxt(csv_file, delimiter=',', skip_header=1)
         my_marker = markers[i]
         #plt.plot(data[:, 0], data[:, 4], my_marker)
-        plt.plot(data[:, 0], data[:, 5], my_marker)
+        plt.plot(data[:, 0], data[:, 2], my_marker)
         #plt.plot(data[:, 0], data[:, 6], my_marker)
     points = np.arange(2, 101)
-    plt.plot(points, np.sqrt(points), 'k--')
+    plt.plot(points, 0.5*points**2, 'k--')
     plt.xlabel('number of points')
-    plt.ylabel('average crossing number')
+    plt.ylabel('CPU time (in sec)')
     plt.savefig(filename)
     plt.show()
 
