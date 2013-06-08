@@ -98,6 +98,10 @@ class CompoundExperiment:
         self.ub = ub
         self.step = step
         self.has_header = has_header
+        if input_filename is None:
+            self.has_input = False
+        else:
+            self.has_input = True
         self.experiment = create_experiment(solver_type, dimensions, lb,
                                             distribution_type,
                                             line_option, mean, has_plot,
@@ -133,7 +137,18 @@ class CompoundExperiment:
             yield self.experiment
 
     def write_data(self):
-        if self.distribution_type == 'grid':
+        if self.has_input:
+            for experiment in self.iter_exp():
+                experiment.run()
+                results = experiment.results()
+                if self.verbose:
+                    print "Computation finished. Writing results to csv..."
+                with open(self.get_path() + experiment.get_name() + '.csv',
+                        'ab') as csvfile:
+                    csv_writer = csv.writer(csvfile)
+                    csv_writer.writerow(results)
+            return
+        elif self.distribution_type == 'grid':
             lb = int(math.sqrt(self.lb))
             ub = int(math.sqrt(self.ub))
         else:
