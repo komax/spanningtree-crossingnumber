@@ -3,6 +3,7 @@ generates a diagram to compare some results (from csv) in a 2D chart
 """
 
 import matplotlib.pyplot as plt
+import pylab
 import numpy as np
 import sys
 
@@ -27,13 +28,17 @@ def plot_chart(filename, csv_files):
     for (i, csv_file) in enumerate(csv_files):
         data = np.genfromtxt(csv_file, delimiter=',', skip_header=1)
         my_marker = markers[i]
-        #plt.plot(data[:, 0], data[:, 4], my_marker)
-        plt.plot(data[:, 0], data[:, 2], my_marker)
+        my_label = algorithm_names[i]
+        plt.plot(data[:, 0], data[:, 4], my_marker, label=my_label)
+        #plt.plot(data[:, 0], data[:, 2], my_marker, label=my_label)
         #plt.plot(data[:, 0], data[:, 6], my_marker)
     points = np.arange(2, 101)
-    plt.plot(points, 0.5*points**2, 'k--')
+    #plt.plot(points, 0.5*points**2, 'k--')
+    plt.plot(points, np.sqrt(points), 'k--', label='$\sqrt{n}$')
     plt.xlabel('number of points')
-    plt.ylabel('CPU time (in sec)')
+    #plt.ylabel('CPU time (in sec)')
+    plt.ylabel('crossing number')
+    pylab.legend(loc=0)
     plt.savefig(filename)
     plt.show()
 
