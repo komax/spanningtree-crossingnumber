@@ -27,7 +27,7 @@ SOLVER_OPTIONS = [
         'fekete_lp',
         'cc_lp',
         'mult_weight',
-                  #'opt',
+        'opt',
          'all']
 DATA_DISTRIBUTION_OPTIONS = ['uniform', 'grid']
 LINE_OPTIONS = ['all', 'stabbing', 'random']
