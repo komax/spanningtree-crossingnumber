@@ -78,7 +78,7 @@ def add_best_edge(graph, x):
 
     graph.merge_cc(max_i, max_j)
     solution.update(max_i, max_j, True)
-    #print (max_val, graph.maximum_crossing_number())
+#    print (max_val, graph.maximum_crossing_number())
     return
 
 
