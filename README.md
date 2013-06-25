@@ -15,25 +15,30 @@ This project is released under the MIT license.
 
 1. Install the above libraries as they are not preinstalled
 
+
     $ sudo apt-get install python-numpy python-matplotlib
+
 
 2. Check if the current Gurobi license is activated. A correct prompt looks
    like this
+
 
     $ gurobi.sh 
     Python 2.7.2 (default, Nov 21 2011, 12:59:35) 
     [GCC 4.2.4 (Ubuntu 4.2.4-1ubuntu4)] on linux2
     Type "help", "copyright", "credits" or "license" for more information.
-   
+
     Gurobi Interactive Shell (linux64), Version 5.1.0
     Copyright (c) 2013, Gurobi Optimization, Inc.
     Type "help()" for help
 
     gurobi> 
 
+
 3. Clone the repository
 
     $ git clone https://github.com/komax/spanningtree-crossingnumber
+
 
 ## Types of Experiments
 Two command line tools were developed:
