@@ -8,7 +8,7 @@ http://arxiv.org/abs/cs/0310034)
 This project is released under the MIT license.
 
 ## Installation/Prerequisites
-* Python 2.7
+* [Python 2.7](http://www.python.org/)
 * [NumPy](http://www.numpy.org/) for efficient computation
 * [matplotlib](http://matplotlib.org/) for plotting
 * [Gurobi](http://www.gurobi.com/) solving LPs
