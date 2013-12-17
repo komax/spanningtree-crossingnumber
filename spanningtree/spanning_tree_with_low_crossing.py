@@ -310,6 +310,11 @@ class SpanningTreeExperiment:
         results = (self.graph.n, no_lines,
                 self.elapsed_time, self.iterations, self.crossing_number,
                 (float(self.crossings) / no_lines), self.crossings)
+        if self.solver_type == 'fekete_lp':
+            str_trails = str(self.trails)
+            results = list(results)
+            results.append(str_trails)
+            results = tuple(results)
         return results
 
     def results_csv(self):
