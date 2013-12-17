@@ -23,11 +23,11 @@ def main():
 
 # constants for options
 SOLVER_OPTIONS = [
-#        'hp_lp',
+        'hp_lp',
         'fekete_lp',
         'cc_lp',
-#        'mult_weight',
-#        'opt',
+        'mult_weight',
+        'opt',
          'all'
 ]
 DATA_DISTRIBUTION_OPTIONS = ['uniform', 'grid']
