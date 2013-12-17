@@ -23,12 +23,13 @@ def main():
 
 # constants for options
 SOLVER_OPTIONS = [
-        'hp_lp',
+#        'hp_lp',
         'fekete_lp',
-        'cc_lp',
-        'mult_weight',
-        'opt',
-         'all']
+        'cc_lp'
+#        'mult_weight',
+#        'opt',
+#         'all'
+]
 DATA_DISTRIBUTION_OPTIONS = ['uniform', 'grid']
 LINE_OPTIONS = ['all', 'stabbing', 'random']
 
@@ -240,7 +241,10 @@ class SpanningTreeExperiment:
         # (overriding solution and edges)
         self.graph = self.graph.copy_graph()
         start = time.time()
-        self.iterations = self.solver(self.graph)
+        if self.solver_type == 'fekete_lp':
+            (self.iterations, self.trails) = self.solver(self.graph)
+        else:
+            self.iterations = self.solver(self.graph)
         end = time.time()
         if self.verbose:
             print "Computing a spanning tree finished."
@@ -268,6 +272,9 @@ class SpanningTreeExperiment:
             print "all crossings=%s" % self.crossings
             avg_crossing_number = float(self.crossings) / no_lines
             print "average crossing number=%s" % avg_crossing_number
+            if self.solver_type == 'fekete_lp':
+                print "(avg) trails of adding heavy weight edge in a cc=%s" %\
+                        self.trails
 
     def plot(self):
         '''
