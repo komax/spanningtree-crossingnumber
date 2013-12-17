@@ -5,6 +5,7 @@ using Gurobi as standard solver
 '''
 
 import gurobipy as grb
+import numpy as np
 import spanningtree.highdimgraph.crossing as crossing
 from spanningtree.helper.gurobi_helper import set_up_model
 from gurobipy import quicksum
@@ -119,16 +120,20 @@ def round_and_update_lp(graph, alpha):
     find edges that are in the fractional solution, round them up
     and update the LP model
 
-    returns the selected edges in the fractional solution (of this iteration)
+    returns the number of trails that failed to add a heavy weight edge
     '''
     edges = graph.edges
     ccs = graph.connected_components
     solution = graph.solution
     (max_i, max_j) = (None, None)
     max_val = None
+    # counter for fails: selecting a heavy weight edge within one cc
+    trails = 0
     for (i, j) in edges:
         cc_i = ccs.get_connected_component(i)
         cc_j = ccs.get_connected_component(j)
+        if cc_i == cc_j:
+            trails += 1
         if cc_i != cc_j and x[i, j].X > max_val:
             (max_i, max_j) = (i, j)
             max_val = x[i, j].X
@@ -137,7 +142,7 @@ def round_and_update_lp(graph, alpha):
     x[max_i, max_j].ub = 1.
     edges.update(max_i, max_j, False)
     solution.update(max_i, max_j, True)
-    return
+    return trails
 
 
 def compute_spanning_tree(graph, alpha=2.0):
@@ -146,6 +151,9 @@ def compute_spanning_tree(graph, alpha=2.0):
 
     iterations = 0
     lp_model = create_lp(graph)
+    
+    # failed trails of adding a heavy weight edge
+    trails = list()
 
     while len(solution) < n - 1:
         graph.compute_connected_components()
@@ -153,9 +161,11 @@ def compute_spanning_tree(graph, alpha=2.0):
         # printing all variables of LP
         #for var in lp_model.getVars():
         #    print var
-        round_and_update_lp(graph, alpha)
+        trail_i = round_and_update_lp(graph, alpha)
+        trails.append(trail_i)
         iterations += 1
-    return iterations
+    meaned_trail = np.mean(trails)
+    return (iterations, meaned_trail)
 
 
 def main():
