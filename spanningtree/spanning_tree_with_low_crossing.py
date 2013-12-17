@@ -25,10 +25,10 @@ def main():
 SOLVER_OPTIONS = [
 #        'hp_lp',
         'fekete_lp',
-        'cc_lp'
+        'cc_lp',
 #        'mult_weight',
 #        'opt',
-#         'all'
+         'all'
 ]
 DATA_DISTRIBUTION_OPTIONS = ['uniform', 'grid']
 LINE_OPTIONS = ['all', 'stabbing', 'random']
