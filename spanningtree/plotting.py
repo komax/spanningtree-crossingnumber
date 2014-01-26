@@ -2,11 +2,13 @@
 plots all points and the lines in the plane. Using matplotlib
 """
 
+import numpy as np
 import matplotlib.pyplot as plt
 from helper.numpy_helpers import partition
 
 
-def plot(graph, verbose=True, save_to_file=None, show=True):
+def plot(graph, verbose=False, save_to_file=None, show=True,
+         plot_lines=False):
     assert save_to_file or show
     assert graph.d == 2
     '''
@@ -15,18 +17,19 @@ def plot(graph, verbose=True, save_to_file=None, show=True):
     '''
     points = graph.point_set.points
     (xs, ys) = partition(points)
+    x_range = np.arange(xs.min(), xs.max(), 0.25)
     y_min, y_max = ys.min(), ys.max()
 
     plt.figure()
-    if verbose:
+    if plot_lines:
         # first plot lines
         l = list(graph.lines)
         assert l
         for line in graph.lines:
             line_x = []
             line_y = []
-            for x in xs:
-                y = line.call(x)
+            for x in x_range:
+                y = line.call([x])
                 if y_min <= y <= y_max:
                     line_x.append(x)
                     line_y.append([y])
