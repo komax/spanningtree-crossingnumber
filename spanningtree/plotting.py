@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from helper.numpy_helpers import partition
 
 
-def plot(graph, verbose=False, save_to_file=None, show=True):
+def plot(graph, verbose=True, save_to_file=None, show=True):
     assert save_to_file or show
     assert graph.d == 2
     '''
@@ -15,6 +15,7 @@ def plot(graph, verbose=False, save_to_file=None, show=True):
     '''
     points = graph.point_set.points
     (xs, ys) = partition(points)
+    y_min, y_max = ys.min(), ys.max()
 
     plt.figure()
     if verbose:
@@ -22,7 +23,14 @@ def plot(graph, verbose=False, save_to_file=None, show=True):
         l = list(graph.lines)
         assert l
         for line in graph.lines:
-            plt.plot(xs, line(xs), 'r', zorder=1)
+            line_x = []
+            line_y = []
+            for x in xs:
+                y = line.call(x)
+                if y_min <= y <= y_max:
+                    line_x.append(x)
+                    line_y.append([y])
+                plt.plot(line_x, line_y, 'r', zorder=1)
     # then plot solution
     xlines = []
     ylines = []
